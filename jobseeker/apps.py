@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 
-class UsermanagementConfig(AppConfig):
+class JobseekerConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'usermanagement'
+    name = 'jobseeker'
