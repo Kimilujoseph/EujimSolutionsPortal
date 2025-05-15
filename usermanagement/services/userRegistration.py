@@ -3,7 +3,7 @@ from ..serializers.userRegistration import UserRegistrationSerializer
 
 class AuthService:
     def __init__(self):
-        self.user_repo = UserRepository()
+        self.user_repo:UserRepository = UserRepository()
 
     def register_user(self,registration_data:dict):
         serializer = UserRegistrationSerializer(data=registration_data)
