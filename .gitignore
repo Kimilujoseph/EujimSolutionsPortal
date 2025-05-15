@@ -24,7 +24,7 @@ staticfiles/
 
 # Environment
 venv/
-env/
+env/1 
 ENV/
 .venv/
 
