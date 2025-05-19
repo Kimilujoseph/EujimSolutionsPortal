@@ -11,3 +11,5 @@ class UserRegistrationSerializer(serializers.Serializer):
         if User.objects.filter(email__iexact=value).exists():
             raise serializers.ValidationError("Email already exists")
         return value.lower()
+
+  

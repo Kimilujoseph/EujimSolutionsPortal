@@ -27,3 +27,16 @@ class UserRepository(BaseRepository[User]):
             setattr(user, key, value)
         user.save()
         return user
+    def verify_user_email(self, verification_code: str) -> bool:
+        try:
+            user = self.model_class.objects.get(
+                verificationCode=verification_code,
+                isVerified=False
+            )
+            user.isVerified = True
+            user.save()
+            return True
+        except self.model_class.DoesNotExist:
+            return False
+
+
