@@ -1,11 +1,11 @@
 from django.shortcuts import render
 from  rest_framework.response import Response
 from rest_framework.views import APIView
-from .services.userRegistration import AuthService
+from ..services.userRegistration import AuthService
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.exceptions import AuthenticationFailed
-from .utils import send_confirmation_email,send_verification_email
+from ..utils import send_confirmation_email,send_verification_email
 from  django.conf import settings
 # Create your views here.
 
