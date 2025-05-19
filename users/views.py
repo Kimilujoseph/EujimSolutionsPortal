@@ -14,20 +14,21 @@ class RegisterView(APIView):
         user = service.register_user(request.data)
         send_verification_email(user,request)
         return Response({"message":"Verification email sent"},status=status.HTTP_201_CREATED)
-       except Exception as e:
-          return Response({"message":"internal server error"},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-       
+       except ValueError as e:
+          return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 
 class VerifyEmail(APIView):
-   def get(self,verify_code,request):
+   def get(self,request,verification_code):
       try:
          service = AuthService()
-         user = service.verify_email(verify_code)
+         user = service.verify_email(verification_code)
          if user:
             return Response({"message":"verification successfull"},status=status.HTTP_200_OK)
          else:
             return Response({"message":"verification failed,Token expired"},status=status.HTTP_404_NOT_FOUND)
       except Exception as e:
+         print(str(e))
          return Response({"message":"internal sever error"},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
