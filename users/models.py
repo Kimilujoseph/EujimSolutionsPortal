@@ -4,6 +4,7 @@ import uuid
 # Create your models here.
 class  User(models.Model):
     ROLE_ENUM = [
+        
         ('employer','Employer'),
         ('jobseeker','JobSeeker'),
         ('superAdmin','SuperAdmin'),
@@ -14,6 +15,7 @@ class  User(models.Model):
     firstName = models.CharField(max_length=45)
     secondName = models.CharField(max_length=45)
     email=models.CharField(max_length=45, unique=True)
+    is_active = models.BooleanField(default=True) 
     password=models.CharField(max_length=255)
     isVerified=models.BooleanField(default=False)
     verificationCode = models.UUIDField(default=uuid.uuid4, editable=False)
