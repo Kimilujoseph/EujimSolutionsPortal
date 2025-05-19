@@ -12,8 +12,8 @@ from  django.conf import settings
 class RegisterView(APIView):
     def post(self,request):
        try:
-         if not request.user_data or request.user_data.get('role') != 'admin':
-            return Response({'error': 'Admin required'}, status=403)
+         if not request.user_data or request.user_data.get('role') not in  ['superAdmin','admin']:
+            return Response({'error': 'Admin priveledges required'}, status=status.HTTP_403_FORBIDDEN)
          service = AuthService()
          user = service.register_user(request.data)
          send_verification_email(user,request)
