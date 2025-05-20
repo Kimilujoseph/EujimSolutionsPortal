@@ -4,4 +4,6 @@ from django.contrib import admin
 
 from .models import Recruiter,RecruiterDoc,RecruiterTracking
 
-admin.site.register(Recruiter,RecruiterDoc,RecruiterTracking)
+admin.site.register(Recruiter)
+admin.site.register(RecruiterDoc)
+admin.site.register(RecruiterTracking)
