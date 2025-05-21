@@ -9,7 +9,7 @@ class User(models.Model):
         ('admin', 'Admin')
     ]
 
-    id = models.AutoField(primary_key=True)
+   
     firstName = models.CharField(max_length=45)
     secondName = models.CharField(max_length=45)
     email = models.CharField(max_length=45, unique=True)

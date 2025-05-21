@@ -8,13 +8,15 @@ class JWTAuthMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
         self.exempt_paths = [
-            '/auth/login/',
-            '/auth/register/',
-            '/auth/verify-email/',
+        '/api/v1/auth/login',
+        '/api/v1/auth/logout',
+        '/api/v1/auth/register/',
+        '/api/v1/auth/verify-email/',
         ]
 
     def __call__(self, request):
         # Skip auth for exempt paths
+        print(request.path)
         if any(request.path.startswith(path) for path in self.exempt_paths):
             return self.get_response(request)
 
