@@ -21,11 +21,11 @@ class UserRepository(BaseRepository[User]):
             # e.message_dict will contain field-specific errors
             role_errors = e.message_dict.get("role", None)
             if role_errors:
-                raise ValueError(f"Invalid role added please check with the admin")
+                raise ValueError("Invalid role added, please check with the admin.")
             raise ValueError("Validation error occurred while creating user.")
-        except IntegrityError as e:
+        except IntegrityError:
             raise ValueError("Email must be unique or required fields are missing.")
-        except Exception as e:
+        except Exception:
             raise ValueError("Something went wrong while creating the user.")
 
     def find_by_email(self, email: str) -> Optional[User]:
@@ -43,6 +43,7 @@ class UserRepository(BaseRepository[User]):
             setattr(user, key, value)
         user.save()
         return user
+
     def verify_user_email(self, verification_code: str) -> bool:
         try:
             user = self.model_class.objects.get(
@@ -52,7 +53,5 @@ class UserRepository(BaseRepository[User]):
             user.isVerified = True
             user.save()
             return True
-        except self.model_class.DoesNotExist :
+        except self.model_class.DoesNotExist:
             return False
-
-
