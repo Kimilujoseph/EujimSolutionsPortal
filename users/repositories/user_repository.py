@@ -1,6 +1,4 @@
 from ..models import User
-from django.core.exceptions import ValidationError
-from django.db import IntegrityError
 from django.contrib.auth.hashers import make_password, check_password
 from .base_repository import BaseRepository
 from typing import Optional
@@ -11,22 +9,8 @@ class UserRepository(BaseRepository[User]):
         super().__init__(User)
 
     def create_user(self, user_data: dict) -> User:
-        try:
-            user_data["password"] = make_password(user_data["password"])
-            user = self.model_class(**user_data)
-            user.full_clean()
-            user.save()
-            return user
-        except ValidationError as e:
-            # e.message_dict will contain field-specific errors
-            role_errors = e.message_dict.get("role", None)
-            if role_errors:
-                raise ValueError(f"Invalid role added please check with the admin")
-            raise ValueError("Validation error occurred while creating user.")
-        except IntegrityError as e:
-            raise ValueError("Email must be unique or required fields are missing.")
-        except Exception as e:
-            raise ValueError("Something went wrong while creating the user.")
+        user_data["password"] = make_password(user_data["password"])
+        return self.model_class.objects.create(**user_data)
 
     def find_by_email(self, email: str) -> Optional[User]:
         return self.model_class.objects.filter(email__iexact=email).first()
@@ -43,16 +27,3 @@ class UserRepository(BaseRepository[User]):
             setattr(user, key, value)
         user.save()
         return user
-    def verify_user_email(self, verification_code: str) -> bool:
-        try:
-            user = self.model_class.objects.get(
-                verificationCode=verification_code,
-                isVerified=False
-            )
-            user.isVerified = True
-            user.save()
-            return True
-        except self.model_class.DoesNotExist :
-            return False
-
-
