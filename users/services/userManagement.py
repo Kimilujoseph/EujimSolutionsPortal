@@ -109,7 +109,10 @@ class UserManagementService:
         try:
             if include_deleted:
                 return self.user_repo.get_all()
-            return self.user_repo.fetch_active_users()
+            users = self.user_repo.fetch_active_users()
+            print(users)
+            return users
+
         except Exception as e:
             return {
                 'status': 'error',

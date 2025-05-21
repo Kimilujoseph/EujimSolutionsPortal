@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from  ..services.userManagement import UserManagementService
-
+from ..serializers.user_serializer import UserSerializer
 class AdminUserDeleteView(APIView):
     def delete(self, request, user_id):
         if not request.user_data or request.user_data.get('role') not in  ['superAdmin','admin']:
@@ -24,7 +24,12 @@ class AdminUserListView(APIView):
             return Response({'error': 'Admin priveledges required'}, status=status.HTTP_403_FORBIDDEN)
         service = UserManagementService()
         users = service.list_users(include_deleted=request.query_params.get('show_deleted', False))
-        return Response(users, status=status.HTTP_200_OK)
+        if isinstance(users, dict) and users.get('status') == 'error':
+            return Response(users, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        serializer = UserSerializer(users, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+        
 
 class AdminUserRestoreView(APIView):
     def post(self, request, user_id):
