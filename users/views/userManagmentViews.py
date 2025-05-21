@@ -20,9 +20,10 @@ class AdminUserDeleteView(APIView):
 
 class AdminUserListView(APIView):
     def get(self, request):
+        if not request.user_data or request.user_data.get('role') not in  ['superAdmin','admin']:
+            return Response({'error': 'Admin priveledges required'}, status=status.HTTP_403_FORBIDDEN)
         service = UserManagementService()
         users = service.list_users(include_deleted=request.query_params.get('show_deleted', False))
-        # Add serialization here
         return Response(users, status=status.HTTP_200_OK)
 
 class AdminUserRestoreView(APIView):
