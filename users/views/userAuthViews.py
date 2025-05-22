@@ -7,6 +7,7 @@ from rest_framework.decorators import api_view
 from rest_framework.exceptions import AuthenticationFailed
 from ..utils import send_confirmation_email,send_verification_email
 from  django.conf import settings
+from ..serializers.user_serializer import UserSerializer
 # Create your views here.
 
 class RegisterView(APIView):
@@ -51,7 +52,7 @@ class LoginView(APIView):
         try:
             service = AuthService()
             user, token = service.login_user(email, password)
-            
+            serializer = UserSerializer(user,many=False)
             response = Response()
             response.set_cookie(
                 key='jwt',
@@ -62,11 +63,7 @@ class LoginView(APIView):
             )
             response.data = {
                 'message': 'Login successful',
-                'user': {
-                    'id': user.id,
-                    'email': user.email,
-                    'role': user.role
-                }
+                'user':serializer.data
             }
             return response
             
