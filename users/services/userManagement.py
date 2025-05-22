@@ -30,23 +30,33 @@ class UserManagementService:
         except Exception:
             raise ValueError("An error occurred while processing the pending status request.")
 
-    def toggle_verification(self, user_id: int) -> Optional[User]:
+    def toggle_verification(self, user_id: int) -> dict:
         try:
             user = self.user_repo.get_by_id(user_id)
             user.isVerified = not user.isVerified
             user.save()
             return user
         except User.DoesNotExist:
-            raise ValueError("User does not exist.")
-        except Exception:
-            raise ValueError("An error occurred while updating verification status.")
+            return {
+                'status': 'error',
+                'message': 'User does not exist.',
+                'code': 404
+            }
+          
+        except Exception as e:
+          return {
+                'status': 'error',
+                'message': 'An unexpected error occurred while deleting the user.',
+                'details': str(e),
+                'code': 500
+            }
 
-    def delete_user(self, user_id: int, deleted_by: User, reason: Optional[str] = None) -> dict:
+    def delete_user(self, user_id: int, deleted_by:dict, reason: Optional[str] = None) -> dict:
         try:
             user = self.user_repo.get_by_id(user_id)
             user.is_deleted = True
             user.is_active = False
-            user.deleted_by = deleted_by.id
+            user.deleted_by_id = deleted_by['id']
             user.deleted_at = timezone.now()
             user.deletion_reason = reason
             user.save()
@@ -55,8 +65,8 @@ class UserManagementService:
                 'status': 'success',
                 'message': f'{user.firstName} successfully deleted.',
                 'data': {
-                    'user_id': user.id,
-                    'deleted_by': deleted_by.email,
+                    'user_id': user.email,
+                    'deleted_by': deleted_by["email"],
                     'deleted_at': user.deleted_at,
                     'deletion_reason': user.deletion_reason,
                 }
@@ -75,7 +85,7 @@ class UserManagementService:
                 'code': 500
             }
 
-    def restore_user(self, user_id: int, restored_by: User) -> dict:
+    def restore_user(self, user_id: int, restored_by:dict) -> dict:
         try:
             user = self.user_repo.get_by_id(user_id)
             user.is_deleted = False
@@ -87,7 +97,7 @@ class UserManagementService:
                 'message': f'User {user.id} successfully restored.',
                 'data': {
                     'user_id': user.id,
-                    'restored_by': restored_by.email,
+                    'restored_by': restored_by["email"],
                     'restored_at': timezone.now()
                 }
             }
@@ -110,7 +120,7 @@ class UserManagementService:
             if include_deleted:
                 return self.user_repo.get_all()
             users = self.user_repo.fetch_active_users()
-            print(users)
+            #print(users)
             return users
 
         except Exception as e:

@@ -1,4 +1,3 @@
-# views/admin.py
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -52,7 +51,7 @@ class AdminToggleSuspendUserView(APIView):
             user = service.toggle_suspension(user_id)
             return Response({
                 'status': 'success',
-                'message': f"User {user.id} suspension status updated.",
+                'message': f"User {user.firstName} suspension status updated.",
                 'is_suspended': user.is_suspended
             }, status=status.HTTP_200_OK)
         except ValueError as ve:
@@ -71,7 +70,7 @@ class AdminTogglePendingStatusView(APIView):
             user = service.toggle_pending_status(user_id)
             return Response({
                 'status': 'success',
-                'message': f"User {user.id} pending status updated.",
+                'message': f"User {user.firstName} pending status updated.",
                 'is_pending': user.is_pending
             }, status=status.HTTP_200_OK)
         except ValueError as ve:
@@ -90,7 +89,7 @@ class AdminToggleVerificationView(APIView):
             user = service.toggle_verification(user_id)
             return Response({
                 'status': 'success',
-                'message': f"User {user.id} verification status updated.",
+                'message': f"User {user.firstName} verification status updated.",
                 'is_verified': user.isVerified
             }, status=status.HTTP_200_OK)
         except ValueError as ve:
