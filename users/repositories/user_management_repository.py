@@ -11,3 +11,6 @@ class UserManagementRepository(BaseRepository[User]):
 
     def fetch_deleted_users(self):
         return self.filter(is_deleted=True)
+    def get_user_with_related(self,user_id):
+        return User.objects.select_related('jobseeker_profile').prefetch_related('recruiters').get(id=user_id)
+

@@ -58,7 +58,7 @@ class LoginView(APIView):
                 key='jwt',
                 value=token,
                 httponly=True,
-                secure=not settings.DEBUG,  # Secure in production
+                secure=not settings.DEBUG,
                 samesite='Lax'
             )
             response.data = {

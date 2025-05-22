@@ -3,16 +3,21 @@ from users.models import User
 from jobseeker.models import JobSeeker
 
 class Recruiter(models.Model):
-    company_name = models.CharField(max_length=45)
-    company_logo = models.CharField(max_length=500, null=True, blank=True)
+    companyName = models.CharField(max_length=45)
+    companyLogo = models.CharField(max_length=500, null=True, blank=True)
     industry = models.CharField(max_length=45, null=True, blank=True)
-    contact_info = models.CharField(max_length=45, null=True, blank=True)
-    company_email = models.EmailField(unique=True)
+    contactInfo = models.CharField(max_length=45, null=True, blank=True)
+    companyEmail = models.EmailField(unique=True)
     description = models.CharField(max_length=45, null=True, blank=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    is_verified = models.BooleanField(null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        db_column='users_id',
+        related_name='recruiters' 
+    )
+    isVerified = models.BooleanField(null=True, blank=True)
+    createdAt = models.DateTimeField(auto_now_add=True)
+    updatedAt = models.DateTimeField(auto_now=True)
 
     class Meta:
         db_table = 'recruiter'

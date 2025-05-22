@@ -96,3 +96,16 @@ class AdminToggleVerificationView(APIView):
             return Response({'error': str(ve)}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class AdminUserDetailView(APIView):
+    def get(self, request, user_id):
+        if not request.user_data or request.user_data.get('role') not in ['admin', 'superAdmin']:
+            return Response({'error': 'Admin privileges required'}, status=status.HTTP_403_FORBIDDEN)
+
+        service = UserManagementService()
+        try:
+            data = service.get_user_with_profile(user_id)
+            return Response(data)
+        except ValueError as e:
+            return Response({'error': str(e)}, status=404)
+     
