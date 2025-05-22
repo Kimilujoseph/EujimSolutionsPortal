@@ -1,6 +1,4 @@
 from ..models import User
-from django.core.exceptions import ValidationError
-from django.db import IntegrityError
 from django.contrib.auth.hashers import make_password, check_password
 from .base_repository import BaseRepository
 from typing import Optional

@@ -1,3 +1,7 @@
 from django.contrib import admin
+from jobseeker.models import JobSeeker, JobSeekerCertification
 
-# Register your models here.
+admin.site.register(JobSeeker)
+admin.site.register(JobSeekerCertification)
+
+

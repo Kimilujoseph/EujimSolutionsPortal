@@ -1,3 +1,4 @@
+
 from django.shortcuts import render
 from  rest_framework.response import Response
 from rest_framework.views import APIView
@@ -9,6 +10,10 @@ from ..utils import send_confirmation_email,send_verification_email
 from  django.conf import settings
 from ..serializers.user_serializer import UserSerializer
 # Create your views here.
+
+from rest_framework import generics
+from ..models import User
+from ..serializers.user_serializer import UserSerializer
 
 class RegisterView(APIView):
     def post(self,request):
