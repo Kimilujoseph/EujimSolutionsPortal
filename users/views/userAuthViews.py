@@ -11,8 +11,8 @@ from  django.conf import settings
 # Create your views here.
 
 from rest_framework import generics
-from .models import User
-from .serializers.user_serializer import UserSerializer
+from ..models import User
+from ..serializers.user_serializer import UserSerializer
 
 class RegisterView(APIView):
     def post(self,request):
