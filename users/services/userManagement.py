@@ -3,6 +3,7 @@ from ..models import User
 from typing import Optional, Union
 from django.utils import timezone
 from django.db import models
+from django.core.exceptions import ObjectDoesNotExist
 
 class UserManagementService:
     def __init__(self):
@@ -130,3 +131,57 @@ class UserManagementService:
                 'details': str(e),
                 'code': 500
             }
+        
+    def get_user_with_profile(self, user_id):
+        try:
+            # Use both select_related and prefetch_related for performance
+            user = self.user_repo.get_user_with_related(user_id)
+
+            data = {
+                'id': user.id,
+                'email': user.email,
+                'first_name': user.firstName,
+                'second_name': user.secondName,
+                'isVerified':user.isVerified,
+                'isActive':user.is_active,
+                'isDeleted':user.is_deleted,
+                'isPending':user.is_pending,
+                'role': user.role,
+                
+            }
+
+            # If jobseeker profile exists
+            if hasattr(user, 'jobseeker_profile'):
+                js = user.jobseeker_profile
+                data['profile_type'] = 'jobseeker'
+                data['profile'] = {
+                    'github_url': js.github_url,
+                    'linkedin_url': js.linkedin_url,
+                    'year_of_joining': js.year_of_joining,
+                    'year_of_completion': js.year_of_completion,
+                    'location': js.location,
+                    'bio_data': js.bioData,
+                    'about': js.about,
+                }
+
+        
+            elif user.recruiters.exists():
+                recruiter = user.recruiters.first()
+                data['profile_type'] = 'recruiter'
+                data['profile'] = {
+                    'company_name': recruiter.companyName,
+                    'industry': recruiter.industry,
+                    'contact_info': recruiter.contactInfo,
+                    'company_email': recruiter.companyEmail,
+                    'description': recruiter.description,
+                    'is_verified': recruiter.isVerified,
+                    'company_logo': recruiter.companyLogo,
+                }
+            else:
+                data['profile_type'] = 'none'
+                data['profile'] = {}
+
+            return data
+
+        except ObjectDoesNotExist:
+            raise ValueError("User not found")

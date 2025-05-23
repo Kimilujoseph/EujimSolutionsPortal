@@ -6,15 +6,20 @@ from users.models import User
 class JobSeeker(models.Model):
     github_url = models.URLField(max_length=255, null=True, blank=True)
     linkedin_url = models.URLField(max_length=255, null=True, blank=True)
-    institution_name = models.CharField(max_length=45, null=True, blank=True)
+    InstitutionName = models.CharField(max_length=45, null=True, blank=True)
     year_of_joining = models.DateField(null=True, blank=True)
     year_of_completion = models.DateField(null=True, blank=True)
     location = models.CharField(max_length=45, null=True, blank=True)
-    bio_data = models.TextField(null=True, blank=True)
+    bioData = models.TextField(null=True, blank=True)
     about = models.TextField(null=True, blank=True)
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='jobseeker_profile')
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    user = models.OneToOneField(
+    User,
+    on_delete=models.CASCADE,
+    related_name='jobseeker_profile',
+    db_column='users_id'
+    )
+    createdAt = models.DateTimeField(auto_now_add=True)
+    updatedAt = models.DateTimeField(auto_now=True)
 
     class Meta:
         db_table = 'job_seeker'
