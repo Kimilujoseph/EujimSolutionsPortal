@@ -3,7 +3,9 @@ from rest_framework.response import Response
 from rest_framework import status
 from  ..services.userManagement import UserManagementService
 from ..serializers.user_serializer import UserSerializer
-from ..utils import send_approval_email,send_disapproval_email
+from ..utils import send_approval_email,send_disapproval_email,send_suspension_email,send_unsuspension_email
+from ..permissions import admin_required
+
 class AdminUserDeleteView(APIView):
     @admin_required
     def delete(self, request, user_id):
@@ -41,20 +43,45 @@ class AdminUserRestoreView(APIView):
     
 class AdminToggleSuspendUserView(APIView):
     @admin_required
-    def post(self, request, user_id):      
+    def post(self, request, user_id):
         service = UserManagementService()
         try:
+            
+            suspension_reason = request.data.get('reason', 'Violation of terms of service')
+            
             user = service.toggle_suspension(user_id)
+            
+            if user.is_suspended:
+                send_suspension_email(
+                    user=user,
+                    request=request,
+                    suspension_reason=suspension_reason
+                )
+                message = f"User {user.firstName} has been suspended."
+            else:
+                send_unsuspension_email(user, request)
+                message = f"User {user.firstName}'s suspension has been lifted."
+    
             return Response({
                 'status': 'success',
-                'message': f"User {user.firstName} suspension status updated.",
+                'message': message,
                 'is_suspended': user.is_suspended
             }, status=status.HTTP_200_OK)
+            
         except ValueError as ve:
-            return Response({'error': str(ve)}, status=status.HTTP_404_NOT_FOUND)
+            return Response({
+                'status': 'error',
+                'message': str(ve),
+                'code': 404
+            }, status=status.HTTP_404_NOT_FOUND)
+            
         except Exception as e:
-            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
+            return Response({
+                'status': 'error',
+                'message': 'Failed to update suspension status',
+                'details': str(e),
+                'code': 500
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class AdminTogglePendingStatusView(APIView):
     @admin_required

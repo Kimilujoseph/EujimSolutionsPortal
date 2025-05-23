@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+      }
+      .container {
+        max-width: 600px;
+        margin: 20px auto;
+        padding: 20px;
+        border: 1px solid #e0e0e0;
+        border-radius: 5px;
+      }
+      .header {
+        background-color: #ffebee;
+        color: #c62828;
+        padding: 15px;
+        border-radius: 5px 5px 0 0;
+      }
+      .content {
+        padding: 20px;
+        background-color: #fff8f8;
+      }
+      .button {
+        display: inline-block;
+        padding: 10px 15px;
+        background-color: #f44336;
+        color: #fff;
+        text-decoration: none;
+        border-radius: 4px;
+        margin-top: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h2>Account Suspension Notice</h2>
+      </div>
+      <div class="content">
+        <p>Hello {{ user.firstName }},</p>
+        <p>
+          We regret to inform you that your account has been temporarily suspended.
+        </p>
+        
+        <p><strong>Reason:</strong><br>
+        {{ suspension_reason }}</p>
+        
+        {% if suspension_end_date %}
+        <p><strong>Suspension Duration:</strong><br>
+        Until {{ suspension_end_date }}</p>
+        {% endif %}
+        
+        <p>During this period, you will not be able to:</p>
+        <ul>
+          <li>Access your account</li>
+          <li>Use platform features</li>
+          <li>Post new content</li>
+        </ul>
+        
+        <a href="{{ appeal_url }}" class="button">Appeal This Decision</a>
+        
+        <p>If you believe this was a mistake, you may submit an appeal 
+        within {{ appeal_days }} days of receiving this notice.</p>
+        
+        <p>For any questions, please contact our support team.</p>
+      </div>
+    </div>
+  </body>
+</html>
