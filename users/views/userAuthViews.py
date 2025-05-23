@@ -28,7 +28,21 @@ class RegisterView(APIView):
           return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
-
+class RegisterEmployerView(APIView):
+    def post(self,request):
+        try:
+            data  = request.data.copy();
+            data["isVerified"] = False
+            data["is_pending"] = False
+            data["role"] = "employer"
+            service = AuthService()
+            user = service.register_user(data)
+            send_verification_email(user,request)
+            return Response({"message":"Verification email sent"},status=status.HTTP_201_CREATED)
+        except ValueError as e:
+           return Response({"error":str(e)},status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+           return Response({"message":"internal server errorr"},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class VerifyEmail(APIView):
    def get(self,request,verification_code):
