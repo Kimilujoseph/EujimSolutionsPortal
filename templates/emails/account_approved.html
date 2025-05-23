@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+      }
+      .container {
+        max-width: 600px;
+        margin: 20px auto;
+        padding: 20px;
+        border: 1px solid #e0e0e0;
+        border-radius: 5px;
+      }
+      .header {
+        background-color: #d0f0c0;
+        color: #2c662d;
+        padding: 15px;
+        border-radius: 5px 5px 0 0;
+      }
+      .content {
+        padding: 20px;
+        background-color: #f8fff8;
+      }
+      .button {
+        display: inline-block;
+        padding: 10px 15px;
+        background-color: #4caf50;
+        color: #fff;
+        text-decoration: none;
+        border-radius: 4px;
+        margin-top: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h2>Account Approved</h2>
+      </div>
+      <div class="content">
+        <p>Hello {{ user.firstName }},</p>
+        <p>
+          We are excited to inform you that your account has been successfully
+          approved!
+        </p>
+        <p>
+          You can now log in and start using all the features available to you.
+        </p>
+        <a href="{{ login_url }}" class="button">Login Now</a>
+        <p>If you have any questions, feel free to contact our support team.</p>
+        <p>Welcome aboard!</p>
+      </div>
+    </div>
+  </body>
+</html>

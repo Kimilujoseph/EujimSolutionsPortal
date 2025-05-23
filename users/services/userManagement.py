@@ -145,6 +145,7 @@ class UserManagementService:
                 'isVerified':user.isVerified,
                 'isActive':user.is_active,
                 'isDeleted':user.is_deleted,
+                'isPending':user.is_pending,
                 'role': user.role,
                 
             }

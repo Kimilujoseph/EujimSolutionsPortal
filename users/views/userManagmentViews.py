@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from  ..services.userManagement import UserManagementService
 from ..serializers.user_serializer import UserSerializer
+from ..utils import send_approval_email,send_disapproval_email
 class AdminUserDeleteView(APIView):
     def delete(self, request, user_id):
         if not request.user_data or request.user_data.get('role') not in  ['superAdmin','admin']:
@@ -66,8 +67,13 @@ class AdminTogglePendingStatusView(APIView):
             return Response({'error': 'Admin privileges required'}, status=status.HTTP_403_FORBIDDEN)
 
         service = UserManagementService()
+
         try:
             user = service.toggle_pending_status(user_id)
+            if user.is_pending is False:
+                send_approval_email(user,request)
+            else:
+                send_disapproval_email(user,request)
             return Response({
                 'status': 'success',
                 'message': f"User {user.firstName} pending status updated.",
