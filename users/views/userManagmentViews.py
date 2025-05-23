@@ -3,10 +3,11 @@ from rest_framework.response import Response
 from rest_framework import status
 from  ..services.userManagement import UserManagementService
 from ..serializers.user_serializer import UserSerializer
+from ..permissions import admin_required
+
 class AdminUserDeleteView(APIView):
+    @admin_required
     def delete(self, request, user_id):
-        if not request.user_data or request.user_data.get('role') not in  ['superAdmin','admin']:
-            return Response({'error': 'Admin priveledges required'}, status=status.HTTP_403_FORBIDDEN)
         service = UserManagementService()
         result = service.delete_user(
             user_id=user_id,
@@ -18,9 +19,8 @@ class AdminUserDeleteView(APIView):
     
 
 class AdminUserListView(APIView):
+    @admin_required
     def get(self, request):
-        if not request.user_data or request.user_data.get('role') not in  ['superAdmin','admin']:
-            return Response({'error': 'Admin priveledges required'}, status=status.HTTP_403_FORBIDDEN)
         service = UserManagementService()
         users = service.list_users(include_deleted=request.query_params.get('show_deleted', False))
         if isinstance(users, dict) and users.get('status') == 'error':
@@ -31,9 +31,8 @@ class AdminUserListView(APIView):
         
 
 class AdminUserRestoreView(APIView):
+    @admin_required
     def post(self, request, user_id):
-        if not request.user_data or request.user_data.get('role') not in  ['superAdmin','admin']:
-            return Response({'error': 'Admin priveledges required'}, status=status.HTTP_403_FORBIDDEN)
         service = UserManagementService()
         result = service.restore_user(
             user_id=user_id,
@@ -42,10 +41,8 @@ class AdminUserRestoreView(APIView):
         return Response(result, status=status.HTTP_200_OK)
     
 class AdminToggleSuspendUserView(APIView):
-    def post(self, request, user_id):
-        if not request.user_data or request.user_data.get('role') not in ['admin', 'superAdmin']:
-            return Response({'error': 'Admin privileges required'}, status=status.HTTP_403_FORBIDDEN)
-        
+    @admin_required
+    def post(self, request, user_id):      
         service = UserManagementService()
         try:
             user = service.toggle_suspension(user_id)
@@ -61,10 +58,8 @@ class AdminToggleSuspendUserView(APIView):
 
 
 class AdminTogglePendingStatusView(APIView):
+    @admin_required
     def post(self, request, user_id):
-        if not request.user_data or request.user_data.get('role') not in ['admin', 'superAdmin']:
-            return Response({'error': 'Admin privileges required'}, status=status.HTTP_403_FORBIDDEN)
-
         service = UserManagementService()
         try:
             user = service.toggle_pending_status(user_id)
@@ -80,10 +75,8 @@ class AdminTogglePendingStatusView(APIView):
 
 
 class AdminToggleVerificationView(APIView):
+    @admin_required
     def post(self, request, user_id):
-        if not request.user_data or request.user_data.get('role') not in ['admin', 'superAdmin']:
-            return Response({'error': 'Admin privileges required'}, status=status.HTTP_403_FORBIDDEN)
-
         service = UserManagementService()
         try:
             user = service.toggle_verification(user_id)

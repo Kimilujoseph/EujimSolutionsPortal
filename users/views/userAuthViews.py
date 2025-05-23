@@ -7,13 +7,13 @@ from rest_framework.decorators import api_view
 from rest_framework.exceptions import AuthenticationFailed
 from ..utils import send_confirmation_email,send_verification_email
 from  django.conf import settings
+from ..permissions import admin_required
 # Create your views here.
 
 class RegisterView(APIView):
+    @admin_required
     def post(self,request):
        try:
-         if not request.user_data or request.user_data.get('role') not in  ['superAdmin','admin']:
-            return Response({'error': 'Admin priveledges required'}, status=status.HTTP_403_FORBIDDEN)
          service = AuthService()
          user = service.register_user(request.data)
          send_verification_email(user,request)
