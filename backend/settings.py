@@ -22,10 +22,10 @@ ALLOWED_HOSTS = []
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.getenv('DB_NAME'),
-        'USER': os.getenv('DB_USER'),
-        'PASSWORD': os.getenv('DB_PASSWORD'),
-        'HOST': os.getenv('DB_HOST'),
+        'NAME': ('eujimsolution'),
+        'USER': ('root'),
+        'PASSWORD': (''),
+        'HOST': ('127.0.0.1'),
         'PORT': '3306',
     }
 }
@@ -162,6 +162,7 @@ FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:3000')  # For links i
 DEFAULT_SUSPENSION_DAYS = 7  # Default suspension duration if not specified
 APPEAL_WINDOW_DAYS = 7 
 
+AUTH_USER_MODEL = 'users.User'
 
 # settings.py
 JWT_CONFIG = {

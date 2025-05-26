@@ -1,7 +1,8 @@
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models
 import uuid
 
-class User(models.Model):
+class User(AbstractBaseUser, PermissionsMixin):
     ROLE_ENUM = [
         ('employer', 'Employer'),
         ('jobseeker', 'JobSeeker'),
@@ -12,7 +13,7 @@ class User(models.Model):
     id = models.AutoField(primary_key=True)
     firstName = models.CharField(max_length=45)
     secondName = models.CharField(max_length=45)
-    email = models.CharField(max_length=45, unique=True)
+    email = models.EmailField(unique=True)
     is_active = models.BooleanField(default=True)
     is_deleted = models.BooleanField(default=False)
     is_suspended = models.BooleanField(default=True)
@@ -43,8 +44,12 @@ class User(models.Model):
         related_name='restored_users'
     )
 
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['firstName', 'secondName']
+
+    def __str__(self):
+        return self.email
+
     class Meta:
         db_table = "users"
         managed = True
-    def __str__(self):
-        return self.email

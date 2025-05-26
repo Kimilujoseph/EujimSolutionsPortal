@@ -9,6 +9,7 @@ class UserRegistrationSerializer(serializers.Serializer):
     role = serializers.CharField()
 
     def validate_email(self, value):
+        
         if User.objects.filter(email__iexact=value).exists():
             raise serializers.ValidationError("Email already exists")
         return value.lower()
