@@ -2,7 +2,7 @@
 from ..repository.skill_repository import SkillRepository,SkillSetRepository
 from django.core.exceptions import ObjectDoesNotExist
 from ..repository.jobseeker_repository import JobSeekerRepository
-
+from ..permissions import admin_required
 class ProfileService:
     def __init__(self):
         self.jobseeker_repo = JobSeekerRepository()
