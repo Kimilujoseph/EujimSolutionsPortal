@@ -1,5 +1,6 @@
 from django.db import models
 from jobseeker.models import JobSeeker
+from django.conf import settings
 
 class Skill(models.Model):
     skill_name = models.CharField(max_length=45)
@@ -16,7 +17,12 @@ class SkillSet(models.Model):
         ('midlevel', 'Midlevel'),
         ('proffessional', 'Professional'),
     ]
-
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='skill_sets',
+        db_column='userId'
+    )
     job_seeker = models.ForeignKey(JobSeeker, on_delete=models.CASCADE, null=True, blank=True)
     skill = models.ForeignKey(Skill, on_delete=models.CASCADE, null=True, blank=True)
     proffeciency_level = models.CharField(max_length=20, choices=PROFICIENCY_CHOICES, null=True, blank=True)
