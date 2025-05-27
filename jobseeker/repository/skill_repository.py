@@ -1,5 +1,5 @@
 from .base_repository import JobSeekerBaseRepository
-from ...skills.models import Skill, SkillSet
+from skills.models import Skill, SkillSet
 
 class SkillRepository(JobSeekerBaseRepository[Skill]):
     def __init__(self):

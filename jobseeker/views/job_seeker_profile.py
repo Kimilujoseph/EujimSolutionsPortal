@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from ..permissions import jobseeker_required, check_user_status
 from ..services.profile_service import ProfileService
 from ..serializer.jobSeekerSerializer import JobSeekerProfileSerializer
-from ..serializer.skillSerializer import SkillSetSerializer,SkillSerializer
+from ..serializer.skillSerializer import SkillSetSerializer, SkillSerializer
 
 
 class JobSeekerProfileView(APIView):
@@ -33,13 +33,16 @@ class JobSeekerProfileView(APIView):
             return Response({'error': 'Internal server error'}, 
                           status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    @check_user_status
-   
+
+class JobSeekerCreateOrUpdateProfile(APIView):
+
+    @jobseeker_required
     def post(self, request):
-        """Create or update jobseeker profile"""
+       
         try:
+            user_id = request.user_data.get('id')
             service = ProfileService()
-            profile = service.create_or_update_profile(request.user.id, request.data)
+            profile = service.create_or_update_profile(user_id, request.data)
             return Response(
                 JobSeekerProfileSerializer(profile).data, 
                 status=status.HTTP_201_CREATED
@@ -53,7 +56,6 @@ class JobSeekerSkillsView(APIView):
     permission_classes = [IsAuthenticated]
     
     @check_user_status
-    
     def get(self, request):
         """Get all skills for jobseeker"""
         try:
@@ -68,8 +70,11 @@ class JobSeekerSkillsView(APIView):
             return Response({'error': str(e)}, 
                           status=status.HTTP_400_BAD_REQUEST)
 
+
+class JobSeekerUpdateSkill(APIView):
+    permission_classes = [IsAuthenticated]
+    
     @check_user_status
-   
     def post(self, request):
         """Add skill to jobseeker profile"""
         try:

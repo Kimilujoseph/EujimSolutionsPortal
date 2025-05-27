@@ -21,7 +21,7 @@ class JobSeeker(models.Model):
     class Meta:
         db_table = 'job_seeker'
         managed = False
-    class JobSeekerCertification(models.Model):
+class JobSeekerCertification(models.Model):
         user = models.ForeignKey(
             settings.AUTH_USER_MODEL,
             on_delete=models.CASCADE,

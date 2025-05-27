@@ -1,7 +1,7 @@
 from django.db import models
 from typing import Type,Generic,TypeVar
 from ..models import JobSeeker, JobSeekerCertification, Education
-from ...skills.models import Skill,SkillSet
+from skills.models import Skill,SkillSet
 
 T = TypeVar('T', bound=models.Model)
 

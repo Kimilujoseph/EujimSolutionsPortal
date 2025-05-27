@@ -1,45 +1,43 @@
 from rest_framework.exceptions import PermissionDenied
 from functools import wraps
-from django.http import HttpRequest
 
 def check_user_status(view_func):
     @wraps(view_func)
     def _wrapped_view(request, *args, **kwargs):
-        user = request.user
+        user_data = getattr(request, 'user_data', None)
         
-        # Check if user is authenticated
-        if not user.is_authenticated:
+        if not user_data:
             raise PermissionDenied("Authentication required")
             
-        # Check account suspension status
-        if getattr(user, 'is_suspended', False):
-            raise PermissionDenied("Account suspended. Please contact support.")
-            
-        # Check deletion status
-        if getattr(user, 'is_deleted', False):
+        # Check if account is deleted
+        if user_data.get('is_deleted', False):
             raise PermissionDenied("Account deleted. Contact support for recovery.")
             
-        # Check pending status for certain roles
-        if getattr(user, 'is_pending', False) and user.role in ['employer', 'jobseeker']:
+        # Check if account is suspended
+        if user_data.get('is_suspended', False):
+            raise PermissionDenied("Account suspended. Please contact support.")
+            
+        # Check if account is pending approval
+        if user_data.get('is_pending', False) and user_data.get('role') in ['employer', 'jobseeker']:
             raise PermissionDenied("Account pending approval. Please wait for activation.")
             
-        # Check verification status for non-admins
-        if not getattr(user, 'isVerified', False) and user.role not in ['superAdmin', 'admin']:
+        # Check if account is verified (for non-admins)
+        if not user_data.get('isVerified', False) and user_data.get('role') not in ['superAdmin', 'admin']:
             raise PermissionDenied("Account not verified. Please verify your email.")
             
-        # Check active status
-        if not getattr(user, 'is_active', True):
+        # Check if account is active
+        if not user_data.get('is_active', True):
             raise PermissionDenied("Account inactive")
             
         return view_func(request, *args, **kwargs)
     return _wrapped_view
 
 
-# Role-based permission decorators
 def admin_required(view_func):
     @wraps(view_func)
     def _wrapped_view(request, *args, **kwargs):
-        if not request.user.is_authenticated or request.user.role not in ['admin', 'superAdmin']:
+        user_data = getattr(request, 'user_data', None)
+        if not user_data or user_data.get('role') not in ['admin', 'superAdmin']:
             raise PermissionDenied("Admin privileges required")
         return view_func(request, *args, **kwargs)
     return _wrapped_view
@@ -47,7 +45,8 @@ def admin_required(view_func):
 def superadmin_required(view_func):
     @wraps(view_func)
     def _wrapped_view(request, *args, **kwargs):
-        if not request.user.is_authenticated or request.user.role != 'superAdmin':
+        user_data = getattr(request, 'user_data', None)
+        if not user_data or user_data.get('role') != 'superAdmin':
             raise PermissionDenied("SuperAdmin privileges required")
         return view_func(request, *args, **kwargs)
     return _wrapped_view
@@ -55,7 +54,8 @@ def superadmin_required(view_func):
 def employer_required(view_func):
     @wraps(view_func)
     def _wrapped_view(request, *args, **kwargs):
-        if not request.user.is_authenticated or request.user.role != 'employer':
+        user_data = getattr(request, 'user_data', None)
+        if not user_data or user_data.get('role') != 'employer':
             raise PermissionDenied("Employer account required")
         return view_func(request, *args, **kwargs)
     return _wrapped_view
@@ -63,7 +63,37 @@ def employer_required(view_func):
 def jobseeker_required(view_func):
     @wraps(view_func)
     def _wrapped_view(request, *args, **kwargs):
-        if not request.user.is_authenticated or request.user.role != 'jobseeker':
+        user_data = getattr(request, 'user_data', None)
+        if not user_data or user_data.get('role') != 'jobseeker':
             raise PermissionDenied("Jobseeker account required")
+        return view_func(request, *args, **kwargs)
+    return _wrapped_view
+
+
+# Additional specialized decorators
+def active_account_required(view_func):
+    @wraps(view_func)
+    def _wrapped_view(request, *args, **kwargs):
+        user_data = getattr(request, 'user_data', None)
+        if not user_data or not user_data.get('is_active', True):
+            raise PermissionDenied("Active account required")
+        return view_func(request, *args, **kwargs)
+    return _wrapped_view
+
+def verified_email_required(view_func):
+    @wraps(view_func)
+    def _wrapped_view(request, *args, **kwargs):
+        user_data = getattr(request, 'user_data', None)
+        if not user_data or not user_data.get('isVerified', False):
+            raise PermissionDenied("Verified email required")
+        return view_func(request, *args, **kwargs)
+    return _wrapped_view
+
+def not_suspended(view_func):
+    @wraps(view_func)
+    def _wrapped_view(request, *args, **kwargs):
+        user_data = getattr(request, 'user_data', None)
+        if not user_data or user_data.get('is_suspended', False):
+            raise PermissionDenied("Account is suspended")
         return view_func(request, *args, **kwargs)
     return _wrapped_view

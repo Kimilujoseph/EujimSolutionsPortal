@@ -30,8 +30,14 @@ class AuthService:
         payload = {
             'id': user.id,
             'email': user.email,
+            'firstName': user.firstName,
+            'secondName': user.secondName,
             'role': user.role,
-            'verified':user.isVerified,
+            'isVerified': bool(user.isVerified),
+            'is_active': bool(user.is_active),
+            'is_deleted': bool(user.is_deleted),
+            'is_pending': bool(user.is_pending),
+            'is_suspended': bool(user.is_suspended),
             'exp': datetime.now(timezone.utc) + timedelta(days=1),
             'iat': datetime.now(timezone.utc)
         }
