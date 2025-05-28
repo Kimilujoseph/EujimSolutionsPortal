@@ -12,13 +12,19 @@ class JobSeekerProfileView(APIView):
   
     
     @check_user_status
-    def get(self, request):
+    def get(self, request,user_id=None):
         try:
             service = ProfileService()
-            user_id = request.user_data.get('id')
-            profile = service.get_jobseeker_profile(user_id)
-            skills = service.get_jobseeker_skills(user_id)
-            
+            target_user_id = user_id if user_id is not None else request.user_data.get('id')     
+            profile = service.get_jobseeker_profile(target_user_id)
+            skills = service.get_jobseeker_skills(target_user_id)
+            if not  target_user_id:
+                return Response({'error': 'User ID is required'}, 
+                              status=status.HTTP_400_BAD_REQUEST)
+            target_user_id = int(target_user_id)  
+            profile = service.get_jobseeker_profile(target_user_id)
+            skills = service.get_jobseeker_skills(target_user_id)
+
             profile_serializer = JobSeekerProfileSerializer(profile)
             skills_serializer = SkillSetSerializer(skills, many=True)
             

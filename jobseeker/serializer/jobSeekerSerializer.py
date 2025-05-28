@@ -2,14 +2,21 @@ from  rest_framework import serializers
 from ..models import JobSeeker
 
 class JobSeekerProfileSerializer(serializers.ModelSerializer):
-    email = serializers.EmailField(source='user.email', read_only=True)  # Add email field explicitly
-    users_id = serializers.IntegerField(source='user.id', read_only=True)  # Map user.id to users_id
-
+    email = serializers.EmailField(source='user.email', read_only=True) 
+    users_id = serializers.IntegerField(source='user.id', read_only=True)
+    firstName = serializers.CharField(source='user.firstName', read_only=True)
+    secondName = serializers.CharField(source='user.secondName', read_only=True)
+    is_active = serializers.BooleanField(source='user.is_active', read_only=True)
+ 
+    
     class Meta:
         model = JobSeeker
         fields = [
             'id',
             'users_id',
+            'firstName',
+            'secondName',
+            'is_active',
             'email', 
             'location',
             'bioData',
