@@ -39,6 +39,7 @@ class JobSeekerCertification(models.Model):
             managed = False
 
 
+
 class Education(models.Model):
     DEGREE_CHOICES = [
         ('high_school', 'High School'),
