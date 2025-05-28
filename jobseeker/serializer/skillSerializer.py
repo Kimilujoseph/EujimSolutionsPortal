@@ -4,7 +4,7 @@ from skills.models import Skill,SkillSet
 class SkillSerializer(serializers.ModelSerializer):
     class Meta:
         model = Skill
-        fields = ['id', 'skill_name', 'description']
+        fields = ['id', 'skillName', 'description']
         read_only_fields = ['id']
 
 
@@ -16,7 +16,7 @@ class SkillSetSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'skill',
-            'proficiency_level',
+            'proffeciency_level',
             'createdAt',
             'updatedAt'
         ]

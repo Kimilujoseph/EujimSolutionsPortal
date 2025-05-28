@@ -23,7 +23,6 @@ class SkillSet(models.Model):
         related_name='skill_sets',
         db_column='userId'
     )
-    job_seeker = models.ForeignKey(JobSeeker, on_delete=models.CASCADE, null=True, blank=True)
     skill = models.ForeignKey(Skill, on_delete=models.CASCADE, null=True, blank=True)
     proffeciency_level = models.CharField(max_length=20, choices=PROFICIENCY_CHOICES, null=True, blank=True)
     createdAt = models.DateTimeField(auto_now_add=True)

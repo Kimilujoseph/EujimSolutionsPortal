@@ -18,16 +18,16 @@ class ProfileService:
             profile_data['user_id'] = user_id
             return self.jobseeker_repo.create(**profile_data)
 
-    def add_skill_to_profile(self,user_id: int, skill_data: dict):
-        # Check if skill exists or create new
+    def add_skill_to_profile(self, user_id: int, skill_data: dict):
+    # Check if skill exists or create new
         skill, created = self.skill_repo.get_or_create(
-            skill_name=skill_data['skill_name'],
+            skillName=skill_data['skill_name'], 
             defaults={'description': skill_data.get('description', '')}
         )
         
-        # Add to jobseeker's skillset
-        return self.skillset_repo.create(
-            userId=user_id,
+
+        return self.skillset_repo.createSkillSet(
+            user_id=user_id,
             skill_id=skill.id,
             proffeciency_level=skill_data.get('proffeciency_level', 'beginner')
         )

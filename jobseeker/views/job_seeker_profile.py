@@ -85,7 +85,7 @@ class JobSeekerSkillsView(APIView):
 
 
 class JobSeekerUpdateSkill(APIView):
-    permission_classes = [IsAuthenticated]
+   
     
     @check_user_status
     def post(self, request):
@@ -97,10 +97,13 @@ class JobSeekerUpdateSkill(APIView):
                     {'error': f'Required fields: {", ".join(required_fields)}'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
+            user_id = request.user_data.get('id')
+            if not user_id:
+                return Response({'error': 'User ID is required'}, 
+                              status=status.HTTP_400_BAD_REQUEST)
                 
             service = ProfileService()
-            profile = service.get_jobseeker_profile(request.user.id)
-            skill = service.add_skill_to_profile(profile.id, request.data)
+            skill = service.add_skill_to_profile(user_id, request.data)
             
             return Response(
                 SkillSetSerializer(skill).data,
@@ -110,6 +113,7 @@ class JobSeekerUpdateSkill(APIView):
             return Response({'error': str(e)}, 
                           status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
+            print(f"Error adding skill: {e}")
             return Response({'error': 'Internal server error'}, 
                           status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
