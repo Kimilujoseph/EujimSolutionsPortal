@@ -11,5 +11,5 @@ class SkillSetRepository(JobSeekerBaseRepository[SkillSet]):
         super().__init__(SkillSet)
 
 
-def get_skills_for_jobseeker(self, jobseeker_id: int):
-        return self.filter(userId=jobseeker_id).select_related('skill')  
+    def get_skills_for_jobseeker(self, jobseeker_id: int):
+        return self.filter(user_id=jobseeker_id).select_related('skill')  

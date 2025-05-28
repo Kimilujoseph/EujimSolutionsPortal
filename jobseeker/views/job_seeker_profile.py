@@ -9,15 +9,15 @@ from ..serializer.skillSerializer import SkillSetSerializer, SkillSerializer
 
 
 class JobSeekerProfileView(APIView):
-    permission_classes = [IsAuthenticated]
+  
     
     @check_user_status
     def get(self, request):
-        """Get jobseeker profile with skills"""
         try:
             service = ProfileService()
-            profile = service.get_jobseeker_profile(request.user.id)
-            skills = service.get_jobseeker_skills(profile.id)
+            user_id = request.user_data.get('id')
+            profile = service.get_jobseeker_profile(user_id)
+            skills = service.get_jobseeker_skills(user_id)
             
             profile_serializer = JobSeekerProfileSerializer(profile)
             skills_serializer = SkillSetSerializer(skills, many=True)
@@ -30,6 +30,7 @@ class JobSeekerProfileView(APIView):
         except ValueError as e:
             return Response({'error': str(e)}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
+            print('Error fetching jobseeker profile:', e)
             return Response({'error': 'Internal server error'}, 
                           status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 

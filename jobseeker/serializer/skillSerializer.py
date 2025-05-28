@@ -17,10 +17,10 @@ class SkillSetSerializer(serializers.ModelSerializer):
             'id',
             'skill',
             'proficiency_level',
-            'created_at',
-            'updated_at'
+            'createdAt',
+            'updatedAt'
         ]
-        read_only_fields = ['id', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'createdAt', 'updatedAt']
     
     def create(self, validated_data):
         skill_data = validated_data.pop('skill')

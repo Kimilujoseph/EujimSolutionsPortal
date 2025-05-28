@@ -3,7 +3,7 @@ from django.urls import path
 from ..views.job_seeker_profile import (JobSeekerProfileView,JobSeekerCreateOrUpdateProfile,JobSeekerSkillsView,SkillListView,JobSeekerUpdateSkill)
 
 urlpatterns = [
-    path('profile/', JobSeekerProfileView.as_view(), name='jobseeker-profile'),
+    path('profile', JobSeekerProfileView.as_view(), name='jobseeker-profile'),
     path('profile/create-or-update', JobSeekerCreateOrUpdateProfile.as_view(), name='jobseeker-create-or-update'),
     path('profile/skills/', JobSeekerSkillsView.as_view(), name='jobseeker-skills'),
     path('profile/skills/add/', JobSeekerUpdateSkill.as_view(), name='jobseeker-add-skill'),
