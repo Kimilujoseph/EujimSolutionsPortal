@@ -15,7 +15,7 @@ class ProfileService:
         if jobseeker:
             return self.jobseeker_repo.update(jobseeker, **profile_data)
         else:
-            profile_data['users_id'] = user_id
+            profile_data['user_id'] = user_id
             return self.jobseeker_repo.create(**profile_data)
 
     def add_skill_to_profile(self,user_id: int, skill_data: dict):

@@ -2,36 +2,39 @@ from  rest_framework import serializers
 from ..models import JobSeeker
 
 class JobSeekerProfileSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(source='user.email', read_only=True)  # Add email field explicitly
+    users_id = serializers.IntegerField(source='user.id', read_only=True)  # Map user.id to users_id
+
     class Meta:
         model = JobSeeker
         fields = [
             'id',
-            'user_id',
-            'first_name',
-            'last_name',
-            'phone_number',
-            'address',
-            'city',
-            'country',
-            'postal_code',
-            'date_of_birth',
-            'gender',
-            'bio',
-            'profile_picture',
-            'resume',
-            'created_at',
-            'updated_at'
+            'users_id',
+            'email', 
+            'location',
+            'bioData',
+            'about',
+            'linkedin_url',
+            'github_url',
+            'createdAt',
+            'updatedAt'
         ]
-        read_only_fields = ['id', 'user_id', 'created_at', 'updated_at']
+        read_only_fields = [
+            'id',
+            'users_id',
+            'email',  # Make email read-only
+            'createdAt',
+            'updatedAt'
+        ]
         extra_kwargs = {
-            'date_of_birth': {'required': False},
-            'profile_picture': {'required': False},
-            'resume': {'required': False}
+            'location': {'required': False},
+            'bioData': {'required': False},
+            'about': {'required': False},
+            'linkedin_url': {'required': False},
+            'github_url': {'required': False}
         }
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        # Add user email if needed
-        if hasattr(instance.user, 'email'):
-            representation['email'] = instance.user.email
+        # Remove duplicate fields if any
         return representation
