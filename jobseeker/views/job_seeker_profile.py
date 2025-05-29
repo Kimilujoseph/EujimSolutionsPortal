@@ -4,8 +4,10 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from ..permissions import jobseeker_required, check_user_status
 from ..services.profile_service import ProfileService
+from ..services.education_service import EducationService
 from ..serializer.jobSeekerSerializer import JobSeekerProfileSerializer
 from ..serializer.skillSerializer import SkillSetSerializer, SkillSerializer
+from ..serializer.education_serializer import EducationSerializer
 
 
 class JobSeekerProfileView(APIView):
@@ -15,9 +17,11 @@ class JobSeekerProfileView(APIView):
     def get(self, request,user_id=None):
         try:
             service = ProfileService()
+            educationService = EducationService()
             target_user_id = user_id if user_id is not None else request.user_data.get('id')     
             profile = service.get_jobseeker_profile(target_user_id)
             skills = service.get_jobseeker_skills(target_user_id)
+            educations = educationService.get_user_educations(target_user_id)
             if not  target_user_id:
                 return Response({'error': 'User ID is required'}, 
                               status=status.HTTP_400_BAD_REQUEST)
@@ -26,11 +30,15 @@ class JobSeekerProfileView(APIView):
             skills = service.get_jobseeker_skills(target_user_id)
 
             profile_serializer = JobSeekerProfileSerializer(profile)
+           
             skills_serializer = SkillSetSerializer(skills, many=True)
-            
+
+            educations_serializer = EducationSerializer(educations, many=True)
+
             return Response({
                 'profile': profile_serializer.data,
-                'skills': skills_serializer.data
+                'skills': skills_serializer.data,
+                'educations': educations_serializer.data
             }, status=status.HTTP_200_OK)
             
         except ValueError as e:
