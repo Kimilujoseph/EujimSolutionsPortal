@@ -83,7 +83,7 @@ def send_suspension_email(user, request, suspension_reason=None):
         'user': user,
         'suspension_reason': suspension_reason or "Violation of terms of service",
         'suspension_date': timezone.now().strftime("%B %d, %Y"),
-        'support_email': settings.SUPPORT_EMAIL,
+        'support_email': settings.EMAIL_HOST_USER,
         'site_url': settings.FRONTEND_URL
     }
 
@@ -93,7 +93,7 @@ def send_suspension_email(user, request, suspension_reason=None):
     email = EmailMultiAlternatives(
         subject=f"Account Suspension Notice - {settings.SITE_NAME}",
         body=text_content,
-        from_email=settings.DEFAULT_FROM_EMAIL,
+        from_email=settings.EMAIL_HOST_USER,
         to=[user.email]
     )
     email.attach_alternative(html_content, "text/html")
@@ -114,7 +114,7 @@ def send_unsuspension_email(user, request):
     email = EmailMultiAlternatives(
         subject=f"Account Reinstated - {settings.SITE_NAME}",
         body=text_content,
-        from_email=settings.DEFAULT_FROM_EMAIL,
+        from_email=settings.EMAIL_HOST_USER,
         to=[user.email]
     )
     email.attach_alternative(html_content, "text/html")

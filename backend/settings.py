@@ -161,7 +161,11 @@ SITE_NAME = os.getenv('SITE_NAME', 'Your Application Name')  # Used in email sub
 FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:3000')  # For links in emails
 DEFAULT_SUSPENSION_DAYS = 7  # Default suspension duration if not specified
 APPEAL_WINDOW_DAYS = 7 
-
+EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.yourdomain.com')  # SMTP server
+EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))  # SMTP port
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True').lower() in ('true', '1', 't')  # Use TLS if set
 AUTH_USER_MODEL = 'users.User'
 
 # settings.py

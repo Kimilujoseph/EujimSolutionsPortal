@@ -1,5 +1,6 @@
 import re
 from rest_framework import serializers
+from django.contrib.auth.hashers import make_password
 from ..models import User
 class UserRegistrationSerializer(serializers.Serializer):
     firstName = serializers.CharField(max_length=45)
@@ -35,3 +36,7 @@ class UserRegistrationSerializer(serializers.Serializer):
                 "one number, and one special character."
             )
         return value
+
+    def create(self, validated_data):
+        validated_data['password'] = make_password(validated_data['password'])
+        return User.objects.create(**validated_data)
