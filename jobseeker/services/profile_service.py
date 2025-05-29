@@ -2,6 +2,8 @@
 from ..repository.skill_repository import SkillRepository,SkillSetRepository
 from django.core.exceptions import ObjectDoesNotExist
 from ..repository.jobseeker_repository import JobSeekerRepository
+from ..repository.educationRepository import EducationRepository
+from  django.core.exceptions import ValidationError
 from ..permissions import admin_required
 class ProfileService:
     def __init__(self):

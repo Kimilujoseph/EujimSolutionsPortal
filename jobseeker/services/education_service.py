@@ -7,6 +7,7 @@ class EducationService:
 
     def create_education(self, user_id: int, education_data: dict):
         education_data['user_id'] = user_id
+        print(f"Creating education for user {user_id} with data: {education_data}")
         return self.education_repo.create(**education_data)
 
     def update_education(self, education_id: int, user_id: int, update_data: dict):

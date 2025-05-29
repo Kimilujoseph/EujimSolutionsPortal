@@ -55,7 +55,7 @@ class Education(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='educations',
-        db_column='userId'
+        db_column='user_id'
     )
     institution_name = models.CharField(max_length=100)
     qualification = models.CharField(max_length=100)
@@ -65,8 +65,7 @@ class Education(models.Model):
     end_year = models.PositiveIntegerField(null=True, blank=True)  # Null if still studying
     is_current = models.BooleanField(default=False)
     description = models.TextField(null=True, blank=True)
-    school_logo = models.ImageField(
-        upload_to='education_logos/',
+    school_logo = models.TextField(
         null=True,
         blank=True,
         max_length=255

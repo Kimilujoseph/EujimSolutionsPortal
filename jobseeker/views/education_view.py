@@ -13,14 +13,20 @@ class EducationView(APIView):
         serializer = EducationSerializer(educations, many=True)
         return Response(serializer.data)
 
+class EducationCreateView(APIView):
     def post(self, request):
         service = EducationService()
         user_id = request.user_data.get('id')
+        serializer = EducationSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
         try:
-            education = service.create_education(user_id, request.data)
-            serializer = EducationSerializer(education)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            education = service.create_education(user_id, serializer.validated_data)
+            response_serializer = EducationSerializer(education)
+            return Response(response_serializer.data, status=status.HTTP_201_CREATED)
         except Exception as e:
+            print(f"Error creating education: {e}")
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 class EducationDetailView(APIView):
