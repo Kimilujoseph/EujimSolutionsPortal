@@ -4,6 +4,7 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from ..permissions import jobseeker_required, check_user_status
 from ..services.profile_service import ProfileService
+from ..services.analyticsService import AnalyticsService
 from ..services.education_service import EducationService
 from ..serializer.jobSeekerSerializer import JobSeekerProfileSerializer
 from ..serializer.skillSerializer import SkillSetSerializer, SkillSerializer
@@ -127,7 +128,7 @@ class JobSeekerUpdateSkill(APIView):
 
 
 class SkillListView(APIView):
-    permission_classes = [IsAuthenticated]
+  
     
     @check_user_status
     def get(self, request):
@@ -142,3 +143,19 @@ class SkillListView(APIView):
         except Exception as e:
             return Response({'error': str(e)}, 
                           status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class JobSeekerAnalyticsView(APIView):
+    @check_user_status
+    def get(self, request):
+        user_id = request.user_data.get('id') or request.query_params.get('user_id')
+        if not user_id:
+            return Response({'error': 'User ID is required'}, 
+                          status=status.HTTP_400_BAD_REQUEST)
+        try:
+            user_id = int(user_id) 
+            analytics = AnalyticsService.get_jobseeker_analytics(user_id)
+            return Response(analytics)
+        except ValueError:
+            return Response({'error': 'Invalid User ID'}, 
+                          status=status.HTTP_400_BAD_REQUEST)
+        
