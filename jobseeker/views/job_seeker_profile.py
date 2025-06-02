@@ -154,8 +154,13 @@ class JobSeekerAnalyticsView(APIView):
         try:
             user_id = int(user_id) 
             analytics = AnalyticsService.get_jobseeker_analytics(user_id)
+            print(f"Analytics for user {user_id}: {analytics}")
             return Response(analytics)
         except ValueError:
             return Response({'error': 'Invalid User ID'}, 
                           status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            print(f"Error fetching analytics: {e}")
+            return Response({'error': 'Internal server error'}, 
+                          status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         

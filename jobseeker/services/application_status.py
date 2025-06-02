@@ -6,9 +6,9 @@ def get_applications_status_stats(job_seeker_id: int):
 
   
     status_counts = {
-        'applied': 0,
-        'interview': 0,
-        'offer': 0,
+        'hired': 0,
+        'interviewed': 0,
+        'shortlisted': 0,
         'rejected': 0
     }
 
