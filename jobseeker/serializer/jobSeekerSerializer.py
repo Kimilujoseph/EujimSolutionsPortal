@@ -1,5 +1,5 @@
 from  rest_framework import serializers
-from ..models import JobSeeker
+from ..models import JobSeeker,JobSeekerCertification
 
 class JobSeekerProfileSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(source='user.email', read_only=True) 
@@ -45,3 +45,29 @@ class JobSeekerProfileSerializer(serializers.ModelSerializer):
         representation = super().to_representation(instance)
         # Remove duplicate fields if any
         return representation
+
+class CertificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = JobSeekerCertification
+        fields = ['id', 'issuer', 'upload_path', 'awarded_date', 'description']
+        extra_kwargs = {
+            'upload_path': {'required': False},
+            'awarded_date': {'required': False}
+        }
+
+class JobSeekerUpdateSerializer(serializers.ModelSerializer):
+    certifications = CertificationSerializer(many=True, required=False, read_only=True)
+    
+    class Meta:
+        model = JobSeeker
+        fields = [
+            'github_url', 'linkedin_url', 'location', 
+            'bioData', 'about', 'certifications'
+        ]
+        extra_kwargs = {
+            'github_url': {'required': False},
+            'linkedin_url': {'required': False},
+            'location': {'required': False},
+            'bioData': {'required': False},
+            'about': {'required': False}
+        }

@@ -22,21 +22,37 @@ class JobSeeker(models.Model):
         db_table = 'job_seeker'
         managed = False
 class JobSeekerCertification(models.Model):
-        user = models.ForeignKey(
-            settings.AUTH_USER_MODEL,
-            on_delete=models.CASCADE,
-            related_name='certifications'
-        )
-        issuer = models.CharField(max_length=45, null=True, blank=True)
-        upload_path = models.CharField(max_length=500, null=True, blank=True)
-        awarded_date = models.DateField(null=True, blank=True)
-        description = models.TextField(null=True, blank=True)
-        created_at = models.DateTimeField(auto_now_add=True)
-        updated_at = models.DateTimeField(auto_now=True)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='certifications',
+        db_column='userId'  # Match exact DB column name
+    )
+    issuer = models.CharField(max_length=45, null=True, blank=True)
+    upload_path = models.CharField(
+        max_length=500, 
+        null=True, 
+        blank=True,
+        db_column='uploadPath'  # Match DB column
+    )
+    awarded_date = models.DateField(
+        null=True, 
+        blank=True,
+        db_column='awardedDate'  # Match DB column
+    )
+    description = models.TextField(null=True, blank=True)
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        db_column='createdAt'  # Match DB column
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        db_column='updatedAt'  # Match DB column
+    )
 
-        class Meta:
-            db_table = 'jobseeker_certification'
-            managed = False
+    class Meta:
+        db_table = 'jobseeker_certification'
+        managed = False
 
 
 

@@ -5,15 +5,16 @@ from rest_framework.permissions import IsAuthenticated
 from ..permissions import jobseeker_required, check_user_status
 from ..services.profile_service import ProfileService
 from ..services.education_service import EducationService
-from ..serializer.jobSeekerSerializer import JobSeekerProfileSerializer
+from ..services.certification_service import CertificationService
+from ..serializer.jobSeekerSerializer import JobSeekerProfileSerializer,JobSeekerUpdateSerializer, CertificationSerializer
 from ..serializer.skillSerializer import SkillSetSerializer, SkillSerializer
 from ..serializer.education_serializer import EducationSerializer
+from django.core.exceptions import ValidationError
 
 
 class JobSeekerProfileView(APIView):
-  
     
-    @check_user_status
+    @jobseeker_required
     def get(self, request,user_id=None):
         try:
             service = ProfileService()
@@ -74,8 +75,7 @@ class JobSeekerCreateOrUpdateProfile(APIView):
 
 
 class JobSeekerSkillsView(APIView):
-    permission_classes = [IsAuthenticated]
-    
+
     @check_user_status
     def get(self, request):
         """Get all skills for jobseeker"""
@@ -93,8 +93,7 @@ class JobSeekerSkillsView(APIView):
 
 
 class JobSeekerUpdateSkill(APIView):
-   
-    
+       
     @check_user_status
     def post(self, request):
         """Add skill to jobseeker profile"""
@@ -127,7 +126,6 @@ class JobSeekerUpdateSkill(APIView):
 
 
 class SkillListView(APIView):
-    permission_classes = [IsAuthenticated]
     
     @check_user_status
     def get(self, request):
@@ -142,3 +140,45 @@ class SkillListView(APIView):
         except Exception as e:
             return Response({'error': str(e)}, 
                           status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class CertificationAPIView(APIView):
+    def post(self, request, *args, **kwargs):
+        print("Current user:", request.user_data)  # Debugging
+        
+        serializer = CertificationSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            certification = CertificationService.add_certification(
+                user_id=request.user_data.get('id'),  # Pass raw user ID directly
+                certification_data=serializer.validated_data
+            )
+            return Response(
+                CertificationSerializer(certification).data,
+                status=status.HTTP_201_CREATED
+            )
+        except ValidationError as e:
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            print(f"Error creating certification: {e}")
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+    def delete(self, request, certification_id, *args, **kwargs):
+        try:
+            CertificationService.delete_certification(
+                user=request.user_data.get('id'),  # Pass raw user ID
+                certification_id=certification_id
+            )
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except ValidationError as e:
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_404_NOT_FOUND
+            )
