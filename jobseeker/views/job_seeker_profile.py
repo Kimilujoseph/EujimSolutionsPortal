@@ -184,7 +184,7 @@ class JobSeekerDeleteSkill(APIView):
                 {'error': 'Skill not found'},
                 status=status.HTTP_404_NOT_FOUND
             )
-        except ValidationError as e:
+        except Exception as e:
             return Response(
                 {'error': str(e)},
                 status=status.HTTP_400_BAD_REQUEST
