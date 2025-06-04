@@ -5,6 +5,21 @@ from django.db import transaction
 
 class CertificationService:
     @staticmethod
+    def get_user_certifications(user_id):
+        return JobSeekerCertification.objects.filter(user_id=user_id).order_by('-created_at')
+
+    @staticmethod
+    def get_certification_detail(user_id, certification_id):
+        certification = JobSeekerCertification.objects.filter(
+            user_id=user_id,
+            id=certification_id
+        ).first()
+        
+        if not certification:
+            raise ValidationError("Certification not found or doesn't belong to user")
+        return certification
+        
+    @staticmethod
     def add_certification(user_id, certification_data):
         try:
     

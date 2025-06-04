@@ -141,7 +141,49 @@ class SkillListView(APIView):
             return Response({'error': str(e)}, 
                           status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-class CertificationAPIView(APIView):
+class CertificationListAPIView(APIView):
+    @jobseeker_required
+    def get(self, request):
+        try:
+            user_id = request.user_data.get('id')
+            certifications = CertificationService.get_user_certifications(user_id)
+            return Response(
+                CertificationSerializer(certifications, many=True).data,
+                status=status.HTTP_200_OK
+            )
+        except Exception as e:
+            print(f"Error fetching certifications: {e}")
+            return Response(
+                {'error': 'Failed to fetch certifications'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+class CertificationDetailAPIView(APIView):
+    @jobseeker_required
+    def get(self, request, certification_id):
+        try:
+            user_id = request.user_data.get('id')
+            certification = CertificationService.get_certification_detail(
+                user_id=user_id,
+                certification_id=certification_id
+            )
+            return Response(
+                CertificationSerializer(certification).data,
+                status=status.HTTP_200_OK
+            )
+        except ValidationError as e:
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            print(f"Error fetching certification: {e}")
+            return Response(
+                {'error': 'Failed to fetch certification'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+class CertificationAddAPIView(APIView):
     def post(self, request, *args, **kwargs):
         print("Current user:", request.user_data)  # Debugging
         
@@ -170,13 +212,14 @@ class CertificationAPIView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
+class CertificationDeleteAPIView(APIView):
     def delete(self, request, certification_id, *args, **kwargs):
         try:
             CertificationService.delete_certification(
-                user=request.user_data.get('id'),  # Pass raw user ID
+                user_id=request.user_data.get('id'),  # Pass raw user ID
                 certification_id=certification_id
             )
-            return Response(status=status.HTTP_204_NO_CONTENT)
+            return Response({'response':"Deleted succesfully"},status=status.HTTP_204_NO_CONTENT)
         except ValidationError as e:
             return Response(
                 {'error': str(e)},
