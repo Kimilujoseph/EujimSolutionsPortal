@@ -163,4 +163,35 @@ class JobSeekerAnalyticsView(APIView):
             print(f"Error fetching analytics: {e}")
             return Response({'error': 'Internal server error'}, 
                           status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class JobSeekerDeleteSkill(APIView):
+    @check_user_status
+    def delete(self, request, skill_id):
+        
+        try:
+            service = ProfileService()
+            success = service.delete_skill_from_profile(
+                user_id=request.user_data.get('id'),
+                skill_id=skill_id
+            )
+            
+            if success:
+                return Response(
+                    {'message': 'Skill removed successfully'},
+                    status=status.HTTP_204_NO_CONTENT
+                )
+            return Response(
+                {'error': 'Skill not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except ValidationError as e:
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            return Response(
+                {'error': 'Internal server error'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
         

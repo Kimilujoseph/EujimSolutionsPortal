@@ -45,3 +45,16 @@ class ProfileService:
 
     def get_jobseeker_skills(self, jobseeker_id: int):
         return self.skillset_repo.get_skills_for_jobseeker(jobseeker_id)
+    
+    def delete_skill_from_profile(self,user_id:int,skill_id:int):
+        try:
+            deleted_count = self.skillset_repo.delete_skill_for_user(
+                user_id=user_id,
+                skill_id=skill_id
+            )
+
+            if deleted_count == 0:
+                raise ValidationError("Skill not found or does not belong to the user")
+            return True
+        except Exception as e:
+            raise ValidationError(f"Failed to delete skill: {str(e)}")

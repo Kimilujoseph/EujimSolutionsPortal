@@ -34,6 +34,12 @@ class SkillSetRepository(JobSeekerBaseRepository[SkillSet]):
             proffeciency_level=proffeciency_level
     )
 
+    def delete_skill_for_user(self,user_id:int,skill_id:int)->int:
+        return SkillSet.objects.filter(
+            jobseeker_id = user_id,
+            skill_id = skill_id
+        ).delete()[0]
+
 
 class SkillDistributionSet(JobSeekerBaseRepository[SkillSet]):
     def __init__(self):
