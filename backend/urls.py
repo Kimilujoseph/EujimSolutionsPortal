@@ -7,4 +7,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/v1',include("users.urls.api")),
     path('api/v1', include("jobseeker.urls.api")),
+    path('api/v1',include("recruiter.urls.api"))
 ]
