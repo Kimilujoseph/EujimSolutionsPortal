@@ -2,7 +2,7 @@
 venv/
 .venv/
 ENV/
-env/
+.env/
 .env
 
 # Python cache and build files
