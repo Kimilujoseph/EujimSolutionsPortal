@@ -296,6 +296,43 @@ LOCK TABLES `django_session` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `education_qualifications`
+--
+
+DROP TABLE IF EXISTS `education_qualifications`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `education_qualifications` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `user_id` int NOT NULL,
+  `institution_name` varchar(100) NOT NULL,
+  `qualification` varchar(100) NOT NULL,
+  `degree` varchar(20) NOT NULL,
+  `field_of_study` varchar(100) NOT NULL,
+  `start_year` int unsigned NOT NULL,
+  `end_year` int unsigned DEFAULT NULL,
+  `is_current` tinyint(1) NOT NULL DEFAULT '0',
+  `description` longtext,
+  `school_logo` varchar(255) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `education_qualifications_user_id` (`user_id`),
+  CONSTRAINT `education_qualifications_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `education_qualifications`
+--
+
+LOCK TABLES `education_qualifications` WRITE;
+/*!40000 ALTER TABLE `education_qualifications` DISABLE KEYS */;
+INSERT INTO `education_qualifications` VALUES (4,13,'University of Nairobi','Bachelor of Science','bachelor','Artificial Intelligence',2022,2018,0,'Specialized in Artificial Intelligence and Machine Learning','https://example.com/logos/university-tech.png','2025-05-29 07:15:59','2025-05-29 07:15:59'),(5,13,'University of Nairobi','Bachelor of Science','bachelor','Artificial Intelligence',2018,2022,0,'Specialized in Artificial Intelligence and Machine Learning','https://example.com/logos/university-tech.png','2025-05-30 09:16:28','2025-05-30 09:16:28'),(7,13,'Egerton University','Bachelor of Science','diploma','Software Engineering',2018,2022,0,'Specialized in Artificial Intelligence and Machine Learning','','2025-05-30 09:42:26','2025-05-30 09:42:26');
+/*!40000 ALTER TABLE `education_qualifications` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `employer_admission_requests`
 --
 
@@ -338,9 +375,6 @@ CREATE TABLE `job_seeker` (
   `id` int NOT NULL AUTO_INCREMENT,
   `github_url` varchar(255) DEFAULT NULL,
   `linkedin_url` varchar(255) DEFAULT NULL,
-  `InstitutionName` varchar(45) DEFAULT NULL,
-  `year_of_joining` date DEFAULT NULL,
-  `year_of_completion` date DEFAULT NULL,
   `location` varchar(45) DEFAULT NULL,
   `bioData` text,
   `about` text,
@@ -351,7 +385,7 @@ CREATE TABLE `job_seeker` (
   UNIQUE KEY `id_UNIQUE` (`id`),
   KEY `fk_job_seeker_users1_idx` (`users_id`),
   CONSTRAINT `fk_job_seeker_users1` FOREIGN KEY (`users_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=big5;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=big5;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -360,6 +394,7 @@ CREATE TABLE `job_seeker` (
 
 LOCK TABLES `job_seeker` WRITE;
 /*!40000 ALTER TABLE `job_seeker` DISABLE KEYS */;
+INSERT INTO `job_seeker` VALUES (1,'https://github.com/user7','https://linkedin.com/in/user7','Nairobi, Kenya','Backend developer with 3+ years of experience in Node.js, MongoDB, and REST APIs.','I am a backend developer passionate about building scalable and reliable systems. I enjoy working with startups and small businesses to create meaningful software solutions.',7,'2025-05-25 14:05:04','2025-05-25 14:05:04'),(2,'https://linkedin.com/in/user20',' https://linkedin.com/in/user20','Arusha,Tanzania','backend developer with 3+ years of experience in Node.js, MongoDB, and REST APIs. | I am a backend developer passionate about building scalable and reliable systems. I enjoy working with startups and small businesses to create meaningful software solutions.',NULL,13,'2025-05-28 05:31:51','2025-05-30 11:53:20');
 /*!40000 ALTER TABLE `job_seeker` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -372,7 +407,7 @@ DROP TABLE IF EXISTS `jobseeker_certification`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `jobseeker_certification` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `job_seeker_id` int NOT NULL,
+  `userId` int NOT NULL,
   `issuer` varchar(45) DEFAULT NULL,
   `uploadPath` varchar(500) DEFAULT NULL,
   `awardedDate` date DEFAULT NULL,
@@ -381,8 +416,8 @@ CREATE TABLE `jobseeker_certification` (
   `description` text,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
-  KEY `fk_jobseeker_certification_1_idx` (`job_seeker_id`),
-  CONSTRAINT `fk_jobseeker_certification_1` FOREIGN KEY (`job_seeker_id`) REFERENCES `job_seeker` (`id`) ON DELETE CASCADE
+  KEY `fk_jobSeeker_certification_user` (`userId`),
+  CONSTRAINT `fk_jobSeeker_certification_user` FOREIGN KEY (`userId`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=big5;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -409,17 +444,17 @@ CREATE TABLE `recruiter` (
   `industry` varchar(45) DEFAULT NULL,
   `contactInfo` varchar(45) DEFAULT NULL,
   `companyEmail` varchar(45) NOT NULL,
-  `description` varchar(45) DEFAULT NULL,
   `createdAt` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updatedAt` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `users_id` int NOT NULL,
   `isVerified` tinyint DEFAULT NULL,
+  `description` varchar(500) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
   UNIQUE KEY `companyEmail_UNIQUE` (`companyEmail`),
   KEY `fk_recruiter_1_idx` (`users_id`),
   CONSTRAINT `fk_recruiter_1` FOREIGN KEY (`users_id`) REFERENCES `users` (`id`) ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=big5;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=big5;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -428,6 +463,7 @@ CREATE TABLE `recruiter` (
 
 LOCK TABLES `recruiter` WRITE;
 /*!40000 ALTER TABLE `recruiter` DISABLE KEYS */;
+INSERT INTO `recruiter` VALUES (1,'Tech Innovations Inc','https://example.com/logos/tech-innovations.png','Information Technology','+1234567890','hr@techinnovations.com','2025-05-31 11:07:34','2025-05-31 11:07:34',14,1,'Leading tech company specializing in AI solutions'),(2,'solutech technologies inc','https://example.com/logos/tech-solutions.png','Information Technology','+1234567891','hr@techsolutions.com','2025-05-31 11:13:01','2025-05-31 11:13:01',15,1,'Leading tech company specializing in AI solutions');
 /*!40000 ALTER TABLE `recruiter` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -483,9 +519,9 @@ CREATE TABLE `recruiter_tracking` (
   UNIQUE KEY `id_UNIQUE` (`id`),
   KEY `fk_recruiter_tracking_1_idx` (`job_seeker_id`),
   KEY `fk_recruiter_tracking_2_idx` (`recruiter_id`),
-  CONSTRAINT `fk_recruiter_tracking_1` FOREIGN KEY (`job_seeker_id`) REFERENCES `job_seeker` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_recruiter_tracking_2` FOREIGN KEY (`recruiter_id`) REFERENCES `recruiter` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=big5;
+  CONSTRAINT `fk_recruiter_tracking_2` FOREIGN KEY (`recruiter_id`) REFERENCES `recruiter` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_recruiter_tracking_jobseeker_user` FOREIGN KEY (`job_seeker_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=big5;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -494,6 +530,7 @@ CREATE TABLE `recruiter_tracking` (
 
 LOCK TABLES `recruiter_tracking` WRITE;
 /*!40000 ALTER TABLE `recruiter_tracking` DISABLE KEYS */;
+INSERT INTO `recruiter_tracking` VALUES (1,1,13,'shortlisted','Highly qualified candidate with strong technical skills','2025-05-31 11:08:32','2025-05-31 11:08:32'),(2,1,13,'interviewed','Highly qualified candidate with strong technical skills','2025-05-31 11:09:02','2025-05-31 11:09:02'),(4,2,13,'interviewed','Highly qualified candidate with strong technical skills','2025-05-31 11:14:48','2025-05-31 11:14:48');
 /*!40000 ALTER TABLE `recruiter_tracking` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -506,18 +543,18 @@ DROP TABLE IF EXISTS `skillSet`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `skillSet` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `job_seeker_id` int DEFAULT NULL,
   `skill_id` int DEFAULT NULL,
   `proffeciency_level` enum('begginner','intermediate','midlevel','proffessional') DEFAULT NULL,
   `createdAt` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updatedAt` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `userId` int NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
-  KEY `fk_skillSet_1_idx` (`job_seeker_id`),
   KEY `fk_skillSet_2_idx` (`skill_id`),
-  CONSTRAINT `fk_skillSet_1` FOREIGN KEY (`job_seeker_id`) REFERENCES `job_seeker` (`id`) ON DELETE CASCADE,
+  KEY `fk_jobSeeker_skills_user` (`userId`),
+  CONSTRAINT `fk_jobSeeker_skills_user` FOREIGN KEY (`userId`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_skillSet_2` FOREIGN KEY (`skill_id`) REFERENCES `skills` (`id`) ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=big5;
+) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=big5;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -526,6 +563,7 @@ CREATE TABLE `skillSet` (
 
 LOCK TABLES `skillSet` WRITE;
 /*!40000 ALTER TABLE `skillSet` DISABLE KEYS */;
+INSERT INTO `skillSet` VALUES (7,1,'proffessional','2025-05-25 14:14:47','2025-05-27 08:39:44',7),(8,2,'midlevel','2025-05-25 14:14:47','2025-05-27 08:39:44',7),(9,3,'intermediate','2025-05-25 14:14:47','2025-05-27 08:39:44',7),(10,10,'begginner','2025-05-28 08:42:26','2025-05-28 08:42:26',13),(11,10,'begginner','2025-05-28 08:47:18','2025-05-28 08:47:18',13),(12,10,'intermediate','2025-05-30 04:46:14','2025-05-30 04:46:14',13),(13,12,'intermediate','2025-05-30 05:05:20','2025-05-30 05:05:20',13),(14,1,'intermediate','2025-05-30 05:08:39','2025-05-30 05:08:39',13),(15,8,'midlevel','2025-05-30 05:45:38','2025-05-30 05:45:38',13),(16,14,'begginner','2025-05-30 05:46:05','2025-05-30 05:46:05',13),(17,9,'begginner','2025-05-30 05:48:58','2025-05-30 05:48:58',13),(18,15,'begginner','2025-05-30 05:50:35','2025-05-30 05:50:35',13);
 /*!40000 ALTER TABLE `skillSet` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -542,7 +580,7 @@ CREATE TABLE `skills` (
   `description` text,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=big5;
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=big5;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -551,6 +589,7 @@ CREATE TABLE `skills` (
 
 LOCK TABLES `skills` WRITE;
 /*!40000 ALTER TABLE `skills` DISABLE KEYS */;
+INSERT INTO `skills` VALUES (1,'Node.js','A JavaScript runtime built on Chrome\'s V8 engine for building fast and scalable server-side applications.'),(2,'MongoDB','A NoSQL database known for its flexibility and JSON-like documents.'),(3,'Express.js','A minimal and flexible Node.js web application framework.'),(4,'Docker','A platform for developing, shipping, and running applications in containers.'),(5,'Git','A distributed version control system for tracking changes in source code.'),(6,'PostgreSQL','A powerful, open-source relational database system.'),(7,'Redis','An in-memory key-value store used as a database, cache, and message broker.'),(8,'GraphQL','A query language for APIs and a runtime for executing those queries.'),(9,'TypeScript','A typed superset of JavaScript that compiles to plain JavaScript.'),(10,'REST API','A software architectural style for designing networked applications using stateless communication.'),(11,'react development',''),(12,'Mongo DB',''),(13,'SASS/SCSS',''),(14,'Express',''),(15,'AWS','');
 /*!40000 ALTER TABLE `skills` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -587,7 +626,7 @@ CREATE TABLE `users` (
   KEY `users_restored_by_id_502fb5c0_fk_users_id` (`restored_by_id`),
   CONSTRAINT `users_deleted_by_id_d342c553_fk_users_id` FOREIGN KEY (`deleted_by_id`) REFERENCES `users` (`id`),
   CONSTRAINT `users_restored_by_id_502fb5c0_fk_users_id` FOREIGN KEY (`restored_by_id`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=big5;
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=big5;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -596,7 +635,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (2,'Ancellotti','Nathaniel','natahaniel23@gmail.com','pbkdf2_sha256$600000$6yauDLNsryDOk8SKmJi139$tM3wSrrHpKR3xEFkmI4aM6ji98iE6a4OfYZznUNwyDQ=',0,'f9f8cb6ad7804ba5918e5a7d529c7891',NULL,'2025-05-15 13:59:12','2025-05-15 13:59:12',1,NULL,NULL,NULL,0,1,1,NULL),(3,'Ancellotti','Nathaniel','kimotho@gmail.com','pbkdf2_sha256$600000$XOP5RAEInQ9O9B1Zvjh0Jh$56YIHPdzosyjBzB35lImJlCeMudhx520GYKc8susa1w=',0,'7601bed3f1f64e8cb22efd77d735094c',NULL,'2025-05-15 14:08:12','2025-05-15 14:08:12',1,NULL,NULL,NULL,0,1,1,NULL),(4,'Ancellotti','Nathaniel','kimot34ho@gmail.com','pbkdf2_sha256$600000$pcheaVHjSQ9nDwSWeCrrQg$/37bccexjU077ez5YmzmNWMiYpFnDn83llGHe/Hq6XI=',0,'5c1b5d2995b646c8ab2bf3bbae95a00c',NULL,'2025-05-15 14:14:15','2025-05-15 14:14:15',1,NULL,NULL,NULL,0,1,1,NULL),(5,'TImothy','Kimilu','kimilu@gmail.com','pbkdf2_sha256$600000$d9JvxtKNOWO1PAQr1aec03$SKNcv0sywIbDnGgfIlb9894GEgIuK4KmdAex/WdheBk=',1,'b45ade46fe2a4bb09e89d31099c0df35','superAdmin','2025-05-19 05:37:49','2025-05-19 05:58:36',1,NULL,NULL,NULL,0,1,1,NULL),(6,'Ancelloti','Kimilu','ancelloti@gmail.com','pbkdf2_sha256$600000$zjbCdjxz7VCJ5rBtoWfysl$cRJnHnOzfAWZpZPEkktv5f9S0UvUGG0WA4Xytgdf3Lg=',1,'2df2933fba6640a4b8c9bb28e904cb98','jobseeker','2025-05-19 17:11:07','2025-05-19 17:12:44',1,NULL,NULL,NULL,0,1,1,NULL),(7,'Ancelloti','Kariuki','kariuki@gmail.com','pbkdf2_sha256$600000$oYBQWODjwCon7nSYDWGCxu$EqmN1tS2TgISqwfSdPNAb5d4wUgTcR4BcM0lxbuHucw=',0,'4f71c27f3b9e41d98353a2f6f6b97e69','jobseeker','2025-05-19 17:13:27','2025-05-21 10:35:28',1,'2025-05-21 13:00:58.476333',5,NULL,0,1,1,NULL);
+INSERT INTO `users` VALUES (2,'Ancellotti','Nathaniel','natahaniel23@gmail.com','pbkdf2_sha256$600000$6yauDLNsryDOk8SKmJi139$tM3wSrrHpKR3xEFkmI4aM6ji98iE6a4OfYZznUNwyDQ=',1,'f9f8cb6ad7804ba5918e5a7d529c7891',NULL,'2025-05-15 13:59:12','2025-05-25 08:03:59',0,'2025-05-25 11:03:58.894956',5,NULL,1,1,0,NULL),(3,'Ancellotti','Nathaniel','kimotho@gmail.com','pbkdf2_sha256$600000$XOP5RAEInQ9O9B1Zvjh0Jh$56YIHPdzosyjBzB35lImJlCeMudhx520GYKc8susa1w=',0,'7601bed3f1f64e8cb22efd77d735094c',NULL,'2025-05-15 14:08:12','2025-05-25 08:08:30',1,NULL,NULL,NULL,0,1,0,NULL),(4,'Ancellotti','Nathaniel','kimot34ho@gmail.com','pbkdf2_sha256$600000$pcheaVHjSQ9nDwSWeCrrQg$/37bccexjU077ez5YmzmNWMiYpFnDn83llGHe/Hq6XI=',1,'5c1b5d2995b646c8ab2bf3bbae95a00c',NULL,'2025-05-15 14:14:15','2025-05-25 10:06:24',1,NULL,NULL,NULL,0,1,0,NULL),(5,'TImothy','Kimilu','kimilu@gmail.com','pbkdf2_sha256$600000$d9JvxtKNOWO1PAQr1aec03$SKNcv0sywIbDnGgfIlb9894GEgIuK4KmdAex/WdheBk=',1,'b45ade46fe2a4bb09e89d31099c0df35','superAdmin','2025-05-19 05:37:49','2025-05-22 08:14:06',1,NULL,NULL,NULL,0,1,0,NULL),(6,'Ancelloti','Kimilu','ancelloti@gmail.com','pbkdf2_sha256$600000$zjbCdjxz7VCJ5rBtoWfysl$cRJnHnOzfAWZpZPEkktv5f9S0UvUGG0WA4Xytgdf3Lg=',1,'2df2933fba6640a4b8c9bb28e904cb98','jobseeker','2025-05-19 17:11:07','2025-05-25 07:47:24',1,NULL,NULL,NULL,0,1,0,NULL),(7,'Ancelloti','Kariuki','kariuki@gmail.com','pbkdf2_sha256$600000$oYBQWODjwCon7nSYDWGCxu$EqmN1tS2TgISqwfSdPNAb5d4wUgTcR4BcM0lxbuHucw=',1,'4f71c27f3b9e41d98353a2f6f6b97e69','jobseeker','2025-05-19 17:13:27','2025-05-25 07:52:29',1,'2025-05-21 13:00:58.476333',5,NULL,0,1,0,NULL),(8,'Ancelloti','Nderitu','muchoki@gmail.com','pbkdf2_sha256$600000$SypS9t9KknF4exUcJPHSl3$V6OA+4tVyv6zR7ROWsxpsrVZRuVNn+Z6/GTXM1WE3ic=',1,'80d028a87a09464c925860f14a648583','employer','2025-05-22 07:17:51','2025-05-25 07:41:26',0,'2025-05-25 10:41:25.572640',5,NULL,1,1,1,NULL),(9,'Claive','Ndegwa','muchoki145@gmail.com','pbkdf2_sha256$600000$lRw72gRuyUdg9s5ycPZiMQ$q5jCxy1ufbFclEaeJYSw+/umUs8hBfYcUrrLoz4/SBE=',1,'aeab2dbd79804fe08953db0f466b0c37','employer','2025-05-23 04:39:20','2025-05-25 07:42:00',0,'2025-05-25 10:42:00.417123',5,NULL,1,0,0,NULL),(10,'Ancelloti','Nderitu','muchoki34@gmail.com','pbkdf2_sha256$600000$08NRaWyFPzSVDaqTmURiAY$2/9msfNQKOPXX8s9GywFZDyansp5uBCW9mZHCTnnXVg=',1,'28dc5cd2e8804eddaa0b8b57236f3d10','employer','2025-05-23 08:22:40','2025-05-25 08:04:45',1,NULL,NULL,NULL,0,1,0,NULL),(11,'Faith','Museo','museo@gmail.com','pbkdf2_sha256$600000$PnxhpqtMAOYEljFjmDD9zM$LMfLV4kk4DSoq35Ol7rsD+jIZrnqBi+lV0Um2r4FfYU=',1,'99b1de8b6db243ce9648af8334dd6b6f','employer','2025-05-25 09:32:08','2025-05-25 09:32:49',1,NULL,NULL,NULL,0,1,0,NULL),(12,'Kinoti','Abraham','kinoti@gmail.com','pbkdf2_sha256$600000$JFPlQAkr4y5WsF5QZXsBU1$eUV+IK4BhbZjQud2qQpupV9tz/Zg+CqHbA6/s7yKT4o=',1,'22a2ce31c96243008655dbf3922b3342','jobseeker','2025-05-25 09:53:08','2025-05-25 10:06:47',1,NULL,NULL,NULL,0,1,0,NULL),(13,'Princes Antony','Nderitu','mbugua@gmail.com','pbkdf2_sha256$600000$M0XZ3au52haV9fLjMf5ewM$m9yyiOq2N+UsW8+udfphhwb/8LDGEHuU+8ja4SuAzPM=',1,'bd32e50685484f738e9589522e9f3da2','jobseeker','2025-05-28 04:36:55','2025-05-28 07:55:32',1,NULL,NULL,NULL,0,0,0,NULL),(14,'Michelle','Atieno','atieno@gmail.com','pbkdf2_sha256$600000$Db6bbmjR5Ux8GqIh6zY5v7$eUq9UgsfvhtStUX3SyKT9HmaeduTsm20rXlqQtXyrNU=',1,'bd45413ea3244f6cbe3ed3b6a82e8c28','employer','2025-05-31 07:59:38','2025-05-31 08:00:23',1,NULL,NULL,NULL,0,1,0,NULL),(15,'Wafula','Antony','wafula@gmail.com','pbkdf2_sha256$600000$FAnkregP62pGgEZM9YTuhM$AbleFjvVvKpIFecBttJsq65lb1wv5UQxyMZ98Retnwc=',1,'1b47cfc14aee438c988ef513a05544cf','employer','2025-05-31 08:10:33','2025-05-31 08:11:21',1,NULL,NULL,NULL,0,1,0,NULL);
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -609,4 +648,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-05-22  9:50:50
+-- Dump completed on 2025-06-04 11:49:02

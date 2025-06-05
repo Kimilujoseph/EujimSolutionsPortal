@@ -157,8 +157,6 @@ class UserManagementService:
                 data['profile'] = {
                     'github_url': js.github_url,
                     'linkedin_url': js.linkedin_url,
-                    'year_of_joining': js.year_of_joining,
-                    'year_of_completion': js.year_of_completion,
                     'location': js.location,
                     'bio_data': js.bioData,
                     'about': js.about,
