@@ -19,12 +19,19 @@ class RecruiterRegistrationView(APIView):
     def post(self, request):
         service = RecruiterService()
         try:
-            recruiter = service.register_recruiter(request.user.id, request.data)
+            user_id = request.user_data.get('id')
+            if not user_id:
+                return Response(
+                    {'error': 'User ID not found in request data'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            recruiter = service.register_recruiter(user_id, request.data)
             return Response(
                 {'message': 'Registration successful, upload documents for verification'},
                 status=status.HTTP_201_CREATED
             )
         except ValidationError as e:
+            print(f"Validation error during recruiter registration: {e}")
             return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
 
 class RecruiterProfileView(APIView):

@@ -6,10 +6,10 @@ from users.models import User
 class Recruiter(models.Model):
     companyName = models.CharField(max_length=45)
     companyLogo = models.CharField(max_length=500, null=True, blank=True)
-    industry = models.CharField(max_length=45, null=True, blank=True)
-    contactInfo = models.CharField(max_length=45, null=True, blank=True)
+    industry = models.CharField(max_length=250, null=True, blank=True)
+    contactInfo = models.CharField(max_length=250, null=True, blank=True)
     companyEmail = models.EmailField(unique=True)
-    description = models.CharField(max_length=45, null=True, blank=True)
+    description = models.CharField(max_length=500, null=True, blank=True)
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,

@@ -6,7 +6,7 @@ from functools import wraps
 def recruiter_required(view_func):
     @wraps(view_func)
     def wrapped_view(self, request, *args, **kwargs):
-        if not request.user_data or request.user_data.get('role') not in ['recruiter']:
+        if not request.user_data or request.user_data.get('role') not in ['employer']:
             return Response({'error': 'Recruiter privileges required'}, status=status.HTTP_403_FORBIDDEN)
         return view_func(self, request, *args, **kwargs)
     return wrapped_view
@@ -14,7 +14,7 @@ def recruiter_required(view_func):
 def recruiter_or_admin_required(view_func):
     @wraps(view_func)
     def wrapped_view(self, request, *args, **kwargs):
-        if not request.user_data or request.user_data.get('role') not in ['recruiter', 'superAdmin', 'admin']:
+        if not request.user_data or request.user_data.get('role') not in ['employer', 'superAdmin', 'admin']:
             return Response({'error': 'Recruiter or admin privileges required'}, status=status.HTTP_403_FORBIDDEN)
         return view_func(self, request, *args, **kwargs)
     return wrapped_view
@@ -28,7 +28,7 @@ def check_recruiter_status(view_func):
             return Response({'error': 'Authentication required'}, status=status.HTTP_401_UNAUTHORIZED)
             
         # For recruiter-specific routes, verify role first
-        if user_data.get('role') != 'recruiter':
+        if user_data.get('role') != 'employer':
             return Response({'error': 'Recruiter privileges required'}, status=status.HTTP_403_FORBIDDEN)
             
         # Check account suspension status
@@ -41,10 +41,7 @@ def check_recruiter_status(view_func):
             return Response({'error': 'User account not verified. Please verify your email.'}, 
                           status=status.HTTP_403_FORBIDDEN)
             
-        # Additional recruiter-specific verification
-        if not user_data.get('recruiter_profile', {}).get('isVerified', False):
-            return Response({'error': 'Recruiter profile not verified. Please complete verification.'}, 
-                          status=status.HTTP_403_FORBIDDEN)
+     
             
         # Check active status
         if not user_data.get('is_active', True):
