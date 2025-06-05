@@ -13,6 +13,19 @@ class RecruiterRepository(BaseRepository[Recruiter]):
 
     def get_recruiter_with_docs(self, recruiter_id: int) -> Recruiter:
         return self.model_class.objects.prefetch_related('recruiterdoc_set').get(id=recruiter_id)
+    def get_recruiter_with_profile(self, user_id: int) -> Recruiter:
+        return self.model_class.objects \
+        .select_related('user') \
+        .only(
+            'companyName', 
+            'companyEmail',
+            'user__email',      
+            'user__firstName', 
+            'user__secondName'  
+        ) \
+        .filter(user_id=user_id) \
+        .first()
+
 
 class RecruiterDocRepository(BaseRepository[RecruiterDoc]):
     def __init__(self):

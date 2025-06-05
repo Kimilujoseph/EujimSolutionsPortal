@@ -31,7 +31,6 @@ class RecruiterRegistrationView(APIView):
                 status=status.HTTP_201_CREATED
             )
         except ValidationError as e:
-            print(f"Validation error during recruiter registration: {e}")
             return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
 
 class RecruiterProfileView(APIView):
@@ -41,18 +40,28 @@ class RecruiterProfileView(APIView):
     def get(self, request):
         service = RecruiterService()
         try:
-            recruiter = service.get_recruiter_profile(request.user.id)
+            user_id = request.user_data.get('id')
+            if not user_id:
+                return Response(
+                    {'error': 'User ID not found in request data'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            recruiter = service.get_recruiter_profile(user_id)
             if not recruiter:
                 return Response(
                     {'error': 'Recruiter profile not found'},
                     status=status.HTTP_404_NOT_FOUND
                 )
-            return Response(RecruiterProfileSerializer(recruiter).data)
+            
+            serializer = RecruiterProfileSerializer(recruiter)
+            return Response(serializer.data)  # No duplicate status parameter
         except Exception as e:
+            print(f"Error retrieving recruiter profile: {str(e)}")
             return Response(
                 {'error': str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
     @recruiter_required
     def put(self, request):
         service = RecruiterService()

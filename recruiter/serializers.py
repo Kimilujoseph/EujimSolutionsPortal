@@ -1,6 +1,7 @@
 # serializers.py
 from rest_framework import serializers
 from .models import Recruiter, RecruiterDoc, RecruiterTracking
+from users.models import User
 
 class RecruiterRegistrationSerializer(serializers.ModelSerializer):
     class Meta:
@@ -10,13 +11,31 @@ class RecruiterRegistrationSerializer(serializers.ModelSerializer):
             'companyEmail': {'required': True},
             'companyName': {'required': True}
         }
+class UserProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User 
+        fields = ['email', 'firstName', 'secondName']
+        read_only_fields = fields
 
 class RecruiterProfileSerializer(serializers.ModelSerializer):
+    user = UserProfileSerializer()  
+    
     class Meta:
         model = Recruiter
-        fields = '__all__'
+        fields = [
+            'id',
+            'companyName',
+            'companyLogo',
+            'industry',
+            'contactInfo',
+            'companyEmail',
+            'description',
+            'isVerified',
+            'createdAt',
+            'updatedAt',
+            'user' 
+        ]
         read_only_fields = ['user', 'isVerified', 'createdAt', 'updatedAt']
-
 class RecruiterDocSerializer(serializers.ModelSerializer):
     class Meta:
         model = RecruiterDoc

@@ -31,7 +31,7 @@ class RecruiterService:
         print(f"Creating recruiter profile for user_id: {user_id} with data: {serializer.validated_data}")
         return self.recruiter_repo.create(user_id=user_id, **serializer.validated_data)
     def get_recruiter_profile(self, user_id: int) -> Optional[Recruiter]:
-        return self.recruiter_repo.get_by_user_id(user_id)
+        return self.recruiter_repo.get_recruiter_with_profile(user_id)
 
     def update_recruiter_profile(self, user_id: int, data: Dict[str, Any]) -> Recruiter:
         recruiter = self.recruiter_repo.get_by_user_id(user_id)
