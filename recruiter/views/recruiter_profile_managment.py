@@ -5,17 +5,17 @@ from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from ..services.recruiter_services import (
     RecruiterService,
-    RecruiterDocService,
-    RecruiterTrackingService
 )
 from ..serializers import (
-    RecruiterRegistrationSerializer,
     RecruiterProfileSerializer,
     RecruiterDocSerializer,
     RecruiterTrackingSerializer
 )
+from ..permission import recruiter_required,recruiter_or_admin_required,check_recruiter_status
 
 class RecruiterRegistrationView(APIView):
+    @recruiter_required
+    @check_recruiter_status
     def post(self, request):
         service = RecruiterService()
         try:
@@ -28,6 +28,9 @@ class RecruiterRegistrationView(APIView):
             return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
 
 class RecruiterProfileView(APIView):
+    @recruiter_required
+    @check_recruiter_status
+    @recruiter_or_admin_required
     def get(self, request):
         service = RecruiterService()
         try:
@@ -43,7 +46,7 @@ class RecruiterProfileView(APIView):
                 {'error': str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-
+    @recruiter_required
     def put(self, request):
         service = RecruiterService()
         try:
@@ -56,7 +59,7 @@ class RecruiterProfileView(APIView):
                 {'error': str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-
+    @recruiter_required
     def delete(self, request):
         service = RecruiterService()
         try:
