@@ -69,6 +69,14 @@ class RecruiterDocSerializer(serializers.ModelSerializer):
         }
         read_only_fields = ['recruiter', 'status', 'createdAt', 'updatedAt']
 
+class RecruiterDocVerificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RecruiterDoc
+        fields = ['status'] 
+        extra_kwargs = {
+            'status': {'required': True}
+        }
+
 class RecruiterTrackingSerializer(serializers.ModelSerializer):
     class Meta:
         model = RecruiterTracking

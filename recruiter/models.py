@@ -30,7 +30,14 @@ class RecruiterDoc(models.Model):
         ('pending', 'Pending'),
         ('approved', 'Approved'),
     ]
-
+    verifiedBy = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='verified_docs'
+    )
+    verifiedAt = models.DateTimeField(null=True, blank=True)
     recruiter = models.ForeignKey(Recruiter, on_delete=models.CASCADE)
     doc_type = models.CharField(max_length=45, null=True, blank=True)
     upload_path = models.FileField(upload_to='recruiter_docs/%Y/%m/%d/')

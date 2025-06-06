@@ -51,7 +51,15 @@ class RecruiterDocService:
 
     def get_document(self, doc_id: int) -> Optional[RecruiterDoc]:
         return self.doc_repo.get_by_id(doc_id)
-
+    def document_verification(self, doc_id: int, data: Dict[str, Any]) ->Optional[RecruiterDoc]:
+        allowed_fields = {'status', 'verifiedBy', 'verifiedAt'}  # Only these fields can be updated
+        filtered_data = {k: v for k, v in data.items() if k in allowed_fields}
+        
+        doc = self.doc_repo.get_by_id(doc_id)
+        if not doc:
+            raise ValidationError({'error': 'Document not found'})
+        return self.doc_repo.update(instance=doc, **filtered_data)
+    
     def update_document(self, doc_id: int, data: Dict[str, Any]) -> RecruiterDoc:
         doc = self.doc_repo.get_by_id(doc_id)
         if not doc:

@@ -10,15 +10,14 @@ from ..services.recruiter_doc_service import (
 from django.conf import settings
 from ..services.recruiter_services import ( RecruiterService)
 from ..serializers import (
-    RecruiterRegistrationSerializer,
-    RecruiterProfileSerializer,
     RecruiterDocSerializer,
-    RecruiterTrackingSerializer
+    RecruiterDocVerificationSerializer
 )
 
 from ..permission import recruiter_required, recruiter_or_admin_required, check_recruiter_status
 from django.http import FileResponse, Http404
 from django.utils.encoding import smart_str
+from django.utils.timezone import now
 import os
   
 class RecruiterDocView(APIView):
@@ -176,6 +175,44 @@ class RecruiterDocDowload(APIView):
                 {'error': 'File not found'},
                 status=status.HTTP_404_NOT_FOUND
             )
+        except Exception as e:
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+class RecruiterDocVerificationView(APIView):
+    def put(self, request, doc_id):
+        service = RecruiterDocService()
+        try:
+            # Check if user is admin
+            if not request.user_data.get('role') in ['admin', 'superAdmin']:
+                return Response(
+                    {'error': 'Admin privileges required'},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+            
+            # Validate only status update is allowed
+            serializer = RecruiterDocVerificationSerializer(data=request.data)
+            if not serializer.is_valid():
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            
+            if not isinstance(serializer.validated_data,dict):
+                return Response(
+                    {'error': 'Status must be a string'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            verification_data = {
+                'status': serializer.validated_data['status'],
+                'verifiedBy': request.user_data.get('id'),
+                'verifiedAt': now()
+            }
+            
+            # Update document
+            doc = service.update_document(doc_id, verification_data)
+            return Response(RecruiterDocSerializer(doc).data)
+            
+        except ValidationError as e:
+            return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response(
                 {'error': str(e)},
