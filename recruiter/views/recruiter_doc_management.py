@@ -90,7 +90,7 @@ class RecruiterDocView(APIView):
     def post(self, request):
         service = RecruiterDocService()
         try:
-            user_id = request.user_data.get('id');
+            user_id = request.user_data.get('id')
             recruiter = RecruiterService().get_recruiter_profile(user_id)
             if not recruiter:
                 return Response(
@@ -103,7 +103,16 @@ class RecruiterDocView(APIView):
                     {'error': 'Recruiter ID not found'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-            doc = service.create_document(recruiter_id, request.data)
+            if not request.content_type.startswith('multipart/form-data'):
+                return Response(
+                    {'error': 'Content-Type must be multipart/form-data'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            data = request.data.copy()
+            data['recruiter_id'] = recruiter_id
+            
+            doc = service.create_document(recruiter_id, data)
             return Response(
                 RecruiterDocSerializer(doc).data,
                 status=status.HTTP_201_CREATED

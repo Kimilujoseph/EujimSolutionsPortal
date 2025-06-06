@@ -33,13 +33,13 @@ class RecruiterDoc(models.Model):
 
     recruiter = models.ForeignKey(Recruiter, on_delete=models.CASCADE)
     doc_type = models.CharField(max_length=45, null=True, blank=True)
-    upload_path = models.CharField(max_length=500, null=True, blank=True)
+    upload_path = models.FileField(upload_to='recruiter_docs/%Y/%m/%d/')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending', null=True, blank=True)
     createdAt = models.DateTimeField(auto_now_add=True)
     updatedAt = models.DateTimeField(auto_now=True)
 
     class Meta:
-        db_table = 'reccruiter_doc'
+        db_table = 'recruiter_doc'
         managed = False
 
 

@@ -21,10 +21,23 @@ class RecruiterDocService:
     def create_document(self, recruiter_id: int, data: Dict[str, Any]) -> RecruiterDoc:
         serializer = RecruiterDocSerializer(data=data)
         if not serializer.is_valid():
+            print(serializer.errors)
             raise ValidationError(serializer.errors)
-        if not isinstance(serializer.validated_data,dict):
-            raise ValidationError({'error': 'Invalid data format'})
-        return self.doc_repo.create(recruiter_id=recruiter_id, **serializer.validated_data)
+        
+        try:
+            if not isinstance(serializer.validated_data, dict):
+                raise ValidationError({'error': 'Invalid data format'})
+            return self.doc_repo.create(
+                recruiter_id=recruiter_id,
+                **serializer.validated_data
+            )
+        except Exception as e:
+            if isinstance(serializer.validated_data, dict) and 'upload_path' in serializer.validated_data:
+                try:
+                    serializer.validated_data['upload_path'].delete(save=False)
+                except:
+                    pass
+            raise ValidationError({'error': f'Document upload failed: {str(e)}'})
 
     def get_documents(self, recruiter_id: int) -> models.QuerySet:
         return self.doc_repo.get_by_recruiter(recruiter_id)
