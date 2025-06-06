@@ -40,7 +40,14 @@ class RecruiterDocService:
             raise ValidationError({'error': f'Document upload failed: {str(e)}'})
 
     def get_documents(self, recruiter_id: int) -> models.QuerySet:
-        return self.doc_repo.get_by_recruiter(recruiter_id)
+            return self.doc_repo.get_by_recruiter(recruiter_id).select_related('recruiter').only(
+                'id',
+                'doc_type',
+                'upload_path',
+                'status',
+                'createdAt',
+                'recruiter__id'
+            )
 
     def get_document(self, doc_id: int) -> Optional[RecruiterDoc]:
         return self.doc_repo.get_by_id(doc_id)
@@ -62,4 +69,5 @@ class RecruiterDocService:
         if not doc:
             raise ValidationError({'error': 'Document not found'})
         self.doc_repo.delete(instance=doc)
+
 

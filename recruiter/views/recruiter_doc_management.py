@@ -3,9 +3,11 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
+from django.core.cache import cache
 from ..services.recruiter_doc_service import (
     RecruiterDocService,
 )
+from django.conf import settings
 from ..services.recruiter_services import ( RecruiterService)
 from ..serializers import (
     RecruiterRegistrationSerializer,
@@ -15,7 +17,9 @@ from ..serializers import (
 )
 
 from ..permission import recruiter_required, recruiter_or_admin_required, check_recruiter_status
-
+from django.http import FileResponse, Http404
+from django.utils.encoding import smart_str
+import os
 
 class RecruiterDocDetailView(APIView):
     def get(self, request, doc_id):
@@ -63,31 +67,58 @@ class RecruiterDocDetailView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
+  
 class RecruiterDocView(APIView):
-    def get(self, request):
-        service = RecruiterDocService()
-        try:
-            recruiter = RecruiterService().get_recruiter_profile(request.user.id)
-            if not recruiter:
-                return Response(
-                    {'error': 'Recruiter profile not found'},
-                    status=status.HTTP_404_NOT_FOUND
-                )
-            recruiter_id = getattr(recruiter, 'id', None)
-            if not recruiter_id:
-                return Response(
-                    {'error': 'Recruiter ID not found'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-            docs = service.get_documents(recruiter_id)
-            return Response(RecruiterDocSerializer(docs, many=True).data)
-        except Exception as e:
+  def get(self, request):
+    service = RecruiterDocService()
+    try:
+        user_id = request.user_data.get('id')
+        if not user_id:
             return Response(
-                {'error': str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                {'error': 'User ID not found'},
+                status=status.HTTP_400_BAD_REQUEST
             )
+        
+        # Create cache key
+        cache_key = f'recruiter_docs_{user_id}'
+        
+        # Try to get from cache first
+        cached_docs = cache.get(cache_key)
+        if cached_docs and not settings.DEBUG:  # Skip cache in debug mode
+            return Response(cached_docs)
+        
+        # Not in cache or debug mode - fetch from DB
+        recruiter = RecruiterService().get_recruiter_profile(user_id)
+        if not recruiter:
+            return Response(
+                {'error': 'Recruiter profile not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        recruiter_id = getattr(recruiter, 'id', None)
+        if recruiter_id is None:
+            return Response(
+                {'error': 'Recruiter ID not found'},
+                status=status.HTTP_400_BAD_REQUEST
+            )        
+        docs = service.get_documents(recruiter_id)
+        if not docs:
+            return Response(
+                {'message': 'No documents found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        serializer = RecruiterDocSerializer(docs, many=True,context={'request': request})
+        
+        # Cache for 1 hour (3600 seconds)
+        cache.set(cache_key, serializer.data, timeout=3600)
+        
+        return Response(serializer.data)
+    except Exception as e:
+        return Response(
+            {'error': str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 
-    def post(self, request):
+  def post(self, request):
         service = RecruiterDocService()
         try:
             user_id = request.user_data.get('id')
@@ -119,6 +150,51 @@ class RecruiterDocView(APIView):
             )
         except ValidationError as e:
             return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+class RecruiterDocDowload(APIView):
+      def get(self, request, doc_id):
+        service = RecruiterDocService()
+        if not doc_id:
+            return Response(
+                {'error': 'Document ID is required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        try:
+            cache_key = f'document_{doc_id}_download'
+            cached_file_path = cache.get(cache_key)
+
+            if cached_file_path and os.path.exists(cached_file_path):
+                response = FileResponse(open(cached_file_path, 'rb'), as_attachment=True)
+                response['Content-Disposition'] = f'attachment; filename="{smart_str(os.path.basename(cached_file_path))}"'
+                return response
+
+           
+            doc = service.get_document(doc_id)
+            if not doc or not doc.upload_path:
+                return Response(
+                    {'error': 'Document not found or no file associated'},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+
+            file_path = doc.upload_path.path 
+            if not os.path.exists(file_path):
+                raise Http404('File not found')
+            cache.set(cache_key, file_path, timeout=3600) 
+
+        
+            response = FileResponse(open(file_path, 'rb'), as_attachment=True)
+            response['Content-Disposition'] = f'attachment; filename="{smart_str(os.path.basename(file_path))}"'
+            return response
+        except Http404:
+            return Response(
+                {'error': 'File not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
         except Exception as e:
             return Response(
                 {'error': str(e)},

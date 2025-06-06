@@ -39,6 +39,7 @@ class RecruiterProfileSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['user', 'isVerified', 'createdAt', 'updatedAt']
 class RecruiterDocSerializer(serializers.ModelSerializer):
+    download_url = serializers.SerializerMethodField()
     upload_path = serializers.FileField(
         validators=[
             FileExtensionValidator(allowed_extensions=['pdf','png', 'jpg']),
@@ -53,9 +54,16 @@ class RecruiterDocSerializer(serializers.ModelSerializer):
                 f'File too large. Size should not exceed 5 MB'
             )
         return value
+    def get_download_url(self, obj):
+        request = self.context.get('request')
+        if obj.upload_path:
+            if request is not None and obj.upload_path:
+                return request.build_absolute_uri(obj.upload_path.url)
+            return None
+        return None
     class Meta:
         model = RecruiterDoc
-        fields = ['doc_type', 'upload_path']
+        fields = ['doc_type', 'upload_path','download_url', 'status', 'recruiter', 'createdAt', 'updatedAt']
         extra_kwargs = {
             'upload_path': {'required': True}
         }
