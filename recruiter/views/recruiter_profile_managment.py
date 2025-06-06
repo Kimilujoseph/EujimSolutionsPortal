@@ -8,8 +8,7 @@ from ..services.recruiter_services import (
 )
 from ..serializers import (
     RecruiterProfileSerializer,
-    RecruiterDocSerializer,
-    RecruiterTrackingSerializer
+   
 )
 from ..permission import recruiter_required,recruiter_or_admin_required,check_recruiter_status
 
@@ -54,7 +53,7 @@ class RecruiterProfileView(APIView):
                 )
             
             serializer = RecruiterProfileSerializer(recruiter)
-            return Response(serializer.data)  # No duplicate status parameter
+            return Response(serializer.data) 
         except Exception as e:
             print(f"Error retrieving recruiter profile: {str(e)}")
             return Response(
@@ -66,7 +65,18 @@ class RecruiterProfileView(APIView):
     def put(self, request):
         service = RecruiterService()
         try:
-            recruiter = service.update_recruiter_profile(request.user.id, request.data)
+            user_id = request.user_data.get('id')
+            if not user_id:
+                return Response(
+                    {'error': 'User ID not found in request data'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            if not request.data:
+                return Response(
+                    {'error': 'No data provided for update'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            recruiter = service.update_recruiter_profile(user_id, request.data)
             return Response(RecruiterProfileSerializer(recruiter).data)
         except ValidationError as e:
             return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)

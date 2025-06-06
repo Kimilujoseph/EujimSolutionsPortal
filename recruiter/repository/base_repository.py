@@ -1,6 +1,6 @@
 # repositories/base_repository.py
 from django.db import models
-from typing import Type, Generic, TypeVar
+from typing import Type, Generic, TypeVar, Optional
 
 T = TypeVar('T', bound=models.Model)
 
@@ -8,7 +8,7 @@ class BaseRepository(Generic[T]):
     def __init__(self, model_class: Type[T]):
         self.model_class = model_class
 
-    def get_by_id(self, id: int) -> T:
+    def get_by_id(self, id: int) -> Optional[T]:
         try:
             return self.model_class.objects.get(pk=id)
         except self.model_class.DoesNotExist:

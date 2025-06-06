@@ -1,19 +1,19 @@
 # repositories/recruiter_repository.py
 from .base_repository import BaseRepository
 from ..models import Recruiter, RecruiterDoc, RecruiterTracking
-from typing import Type
+from typing import Type, Optional
 from django.db import models
 
 class RecruiterRepository(BaseRepository[Recruiter]):
     def __init__(self):
         super().__init__(Recruiter)
 
-    def get_by_user_id(self, user_id: int) -> Recruiter:
+    def get_by_user_id(self, user_id: int) -> Optional[Recruiter]:
         return self.filter(user_id=user_id).first()
 
     def get_recruiter_with_docs(self, recruiter_id: int) -> Recruiter:
         return self.model_class.objects.prefetch_related('recruiterdoc_set').get(id=recruiter_id)
-    def get_recruiter_with_profile(self, user_id: int) -> Recruiter:
+    def get_recruiter_with_profile(self, user_id: int) -> Optional[Recruiter]:
         return self.model_class.objects \
         .select_related('user') \
         .only(
@@ -47,7 +47,7 @@ class RecruiterTrackingRepository(BaseRepository[RecruiterTracking]):
     def get_by_job_seeker(self, job_seeker_id: int) -> models.QuerySet:
         return self.filter(job_seeker_id=job_seeker_id)
 
-    def update_status(self, tracking: RecruiterTracking, status: str, notes: str = None) -> RecruiterTracking:
+    def update_status(self, tracking: RecruiterTracking, status: str, notes: Optional[str] = None) -> Optional[RecruiterTracking]:
         update_data = {'status': status}
         if notes is not None:
             update_data['notes'] = notes
