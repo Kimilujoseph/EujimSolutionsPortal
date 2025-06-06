@@ -20,53 +20,6 @@ from ..permission import recruiter_required, recruiter_or_admin_required, check_
 from django.http import FileResponse, Http404
 from django.utils.encoding import smart_str
 import os
-
-class RecruiterDocDetailView(APIView):
-    def get(self, request, doc_id):
-        service = RecruiterDocService()
-        try:
-            doc = service.get_document(doc_id)
-            if not doc:
-                return Response(
-                    {'error': 'Document not found'},
-                    status=status.HTTP_404_NOT_FOUND
-                )
-            return Response(RecruiterDocSerializer(doc).data)
-        except Exception as e:
-            return Response(
-                {'error': str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
-
-    def put(self, request, doc_id):
-        service = RecruiterDocService()
-        try:
-            doc = service.update_document(doc_id, request.data)
-            return Response(RecruiterDocSerializer(doc).data)
-        except ValidationError as e:
-            return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            return Response(
-                {'error': str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
-
-    def delete(self, request, doc_id):
-        service = RecruiterDocService()
-        try:
-            service.delete_document(doc_id)
-            return Response(
-                {'message': 'Document deleted successfully'},
-                status=status.HTTP_204_NO_CONTENT
-            )
-        except ValidationError as e:
-            return Response(e.detail, status=status.HTTP_404_NOT_FOUND)
-        except Exception as e:
-            return Response(
-                {'error': str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
-
   
 class RecruiterDocView(APIView):
   def get(self, request):
@@ -79,10 +32,9 @@ class RecruiterDocView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        # Create cache key
+       
         cache_key = f'recruiter_docs_{user_id}'
-        
-        # Try to get from cache first
+   
         cached_docs = cache.get(cache_key)
         if cached_docs and not settings.DEBUG:  # Skip cache in debug mode
             return Response(cached_docs)
@@ -155,6 +107,35 @@ class RecruiterDocView(APIView):
                 {'error': str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+  def put(self, request, doc_id):
+        service = RecruiterDocService()
+        try:
+            doc = service.update_document(doc_id, request.data)
+            return Response(RecruiterDocSerializer(doc).data)
+        except ValidationError as e:
+            return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+  def delete(self, request, doc_id):
+        service = RecruiterDocService()
+        try:
+            service.delete_document(doc_id)
+            return Response(
+                {'message': 'Document deleted successfully'},
+                status=status.HTTP_204_NO_CONTENT
+            )
+        except ValidationError as e:
+            return Response(e.detail, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
 
 class RecruiterDocDowload(APIView):
       def get(self, request, doc_id):
