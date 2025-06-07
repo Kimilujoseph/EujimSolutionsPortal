@@ -41,7 +41,7 @@ class RecruiterTrackingService:
         return self.tracking_repo.get_by_recruiter(recruiter_id)
 
     def get_tracking(self, tracking_id: int) -> Optional[RecruiterTracking]:
-        return self.tracking_repo.get_by_id(tracking_id)
+        return self.tracking_repo.get_tracking_by_id(tracking_id)
 
     def update_tracking(self, tracking_id: int, data: Dict[str, Any]) -> RecruiterTracking:
         tracking = self.tracking_repo.get_by_id(tracking_id)

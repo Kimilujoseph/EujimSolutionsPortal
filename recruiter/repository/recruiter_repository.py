@@ -51,6 +51,12 @@ class RecruiterTrackingRepository(BaseRepository[RecruiterTracking]):
 
     def get_by_job_seeker(self, job_seeker_id: int) -> models.QuerySet:
         return self.filter(job_seeker_id=job_seeker_id)
+    def get_tracking_by_id(self, tracking_id: int) -> Optional[RecruiterTracking]:
+        return self.model_class.objects.filter(id=tracking_id)\
+        .select_related(
+            'recruiter',
+            'job_seeker'
+        ).first()
 
     def update_status(self, tracking: RecruiterTracking, status: str, notes: Optional[str] = None) -> Optional[RecruiterTracking]:
         update_data = {'status': status}
