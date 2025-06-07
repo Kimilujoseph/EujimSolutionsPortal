@@ -36,10 +36,10 @@ class RecruiterProfileView(APIView):
     @recruiter_required
     @check_recruiter_status
     @recruiter_or_admin_required
-    def get(self, request):
+    def get(self, request,user_id):
         service = RecruiterService()
         try:
-            user_id = request.user_data.get('id')
+            user_id = request.user_data.get('id') or user_id
             if not user_id:
                 return Response(
                     {'error': 'User ID not found in request data'},

@@ -21,10 +21,10 @@ from django.utils.timezone import now
 import os
   
 class RecruiterDocView(APIView):
-  def get(self, request):
+  def get(self, request,user_id):
     service = RecruiterDocService()
     try:
-        user_id = request.user_data.get('id')
+        user_id = request.user_data.get('id') or user_id
         if not user_id:
             return Response(
                 {'error': 'User ID not found'},
