@@ -6,3 +6,5 @@ class RecruiterRegistrationSerializer(serializers.ModelSerializer):
         model = Recruiter
         fields = ['companyName', 'companyEmail', 'industry', 'contactInfo', 'description']
         extra_kwargs = {'companyEmail': {'required': True}}
+
+

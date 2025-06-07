@@ -5,7 +5,8 @@ from ..repository.recruiter_repository import (
     RecruiterTrackingRepository
 )
 from ..serializers import (
-    RecruiterTrackingSerializer
+    RecruiterTrackingSerializer,
+    RecruiterTrackingUpdateSerializer
 )
 from django.db import models
 from rest_framework.exceptions import ValidationError
@@ -44,16 +45,27 @@ class RecruiterTrackingService:
         return self.tracking_repo.get_tracking_by_id(tracking_id)
 
     def update_tracking(self, tracking_id: int, data: Dict[str, Any]) -> RecruiterTracking:
-        tracking = self.tracking_repo.get_by_id(tracking_id)
-        if not tracking:
+       tracking = self.tracking_repo.get_by_id(tracking_id)
+       if not tracking:
             raise ValidationError({'error': 'Tracking record not found'})
+       serializer = RecruiterTrackingUpdateSerializer(
+            instance=tracking, 
+            data=data, 
+            partial=True
+        )
         
-        serializer = RecruiterTrackingSerializer(instance=tracking, data=data, partial=True)
-        if not serializer.is_valid():
+       if not serializer.is_valid():
             raise ValidationError(serializer.errors)
-        if not isinstance(serializer.validated_data,dict):
-            raise ValidationError({'error':'incorrect data format passed '})
-        return self.tracking_repo.update(instance=tracking, **serializer.validated_data)
+    
+       try:
+            if not isinstance(serializer.validated_data,dict):
+                raise ValidationError({'error':'invalid data received'})
+            return self.tracking_repo.update(
+                instance=tracking,
+                **serializer.validated_data
+            )
+       except Exception as e:
+            raise ValidationError({'error': f'Update failed: {str(e)}'})
 
     def delete_tracking(self, tracking_id: int) -> None:
         tracking = self.tracking_repo.get_by_id(tracking_id)

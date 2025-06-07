@@ -103,3 +103,12 @@ class RecruiterTrackingSerializer(serializers.ModelSerializer):
             'updatedAt'
         ]
         read_only_fields = fields
+    
+class RecruiterTrackingUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RecruiterTracking
+        fields = ['status', 'notes']
+        extra_kwargs = {
+            'status': {'required': False},
+            'notes': {'required': False}
+        }
