@@ -25,14 +25,15 @@ class JobSeekerCertification(models.Model):
         user = models.ForeignKey(
             settings.AUTH_USER_MODEL,
             on_delete=models.CASCADE,
+            db_column='userId',
             related_name='certifications'
         )
         issuer = models.CharField(max_length=45, null=True, blank=True)
         upload_path = models.CharField(max_length=500, null=True, blank=True)
         awarded_date = models.DateField(null=True, blank=True)
         description = models.TextField(null=True, blank=True)
-        created_at = models.DateTimeField(auto_now_add=True)
-        updated_at = models.DateTimeField(auto_now=True)
+        createdAt = models.DateTimeField(auto_now_add=True)
+        updatedAt = models.DateTimeField(auto_now=True)
 
         class Meta:
             db_table = 'jobseeker_certification'
