@@ -17,13 +17,27 @@ class RecruiterTrackingService:
         self.tracking_repo = RecruiterTrackingRepository()
         self.recruiter_repo = RecruiterRepository()
 
-    def create_tracking(self, recruiter_id: int, data: Dict[str, Any]) -> RecruiterTracking:
+    def create_tracking(self, user_id: int, data: Dict[str, Any]) -> RecruiterTracking:
         serializer = RecruiterTrackingSerializer(data=data)
+        recruiter = self.recruiter_repo.get_by_user_id(user_id);
+        if not recruiter:
+            raise ValidationError({'error':'recruiter profile not found'})
+        recruiter_id = getattr(recruiter,'id',None)
+        if not recruiter_id:
+            raise ValidationError({"error":"recruter not found"})
         if not serializer.is_valid():
             raise ValidationError(serializer.errors)
+        if not isinstance(serializer.validated_data,dict):
+            raise ValidationError({'error':'incorrect data format passed'})
         return self.tracking_repo.create(recruiter_id=recruiter_id, **serializer.validated_data)
 
-    def get_trackings(self, recruiter_id: int) -> models.QuerySet:
+    def get_trackings(self, user_id: int) -> models.QuerySet:
+        recruiter = self.recruiter_repo.get_by_user_id(user_id)
+        if not recruiter:
+            raise ValidationError({'error': 'Recruiter profile not found'})
+        recruiter_id = getattr(recruiter, 'id', None)
+        if not recruiter_id and not isinstance(recruiter_id, int):
+            raise ValidationError({"error": "Recruiter not found"})
         return self.tracking_repo.get_by_recruiter(recruiter_id)
 
     def get_tracking(self, tracking_id: int) -> Optional[RecruiterTracking]:
@@ -37,7 +51,8 @@ class RecruiterTrackingService:
         serializer = RecruiterTrackingSerializer(instance=tracking, data=data, partial=True)
         if not serializer.is_valid():
             raise ValidationError(serializer.errors)
-        
+        if not isinstance(serializer.validated_data,dict):
+            raise ValidationError({'error':'incorrect data format passed '})
         return self.tracking_repo.update(instance=tracking, **serializer.validated_data)
 
     def delete_tracking(self, tracking_id: int) -> None:

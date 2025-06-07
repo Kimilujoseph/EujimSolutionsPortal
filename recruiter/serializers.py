@@ -77,8 +77,29 @@ class RecruiterDocVerificationSerializer(serializers.ModelSerializer):
             'status': {'required': True}
         }
 
+class RecruiterSerializer(serializers.ModelSerializer):
+   # email = serializers.EmailField(source='user.email')
+   # name = serializers.CharField(source='user.firstName', read_only=True)
+
+    class Meta:
+        model = Recruiter
+        fields = ['id', 'companyName', 'companyEmail', 'contactInfo']
+
 class RecruiterTrackingSerializer(serializers.ModelSerializer):
+    recruiter = RecruiterSerializer()
+    job_seeker = UserProfileSerializer()
+    status_display = serializers.CharField(source='get_status_display', read_only=True)
+
     class Meta:
         model = RecruiterTracking
-        fields = '__all__'
-        read_only_fields = ['recruiter', 'createdAt', 'updatedAt']
+        fields = [
+            'id',
+            'recruiter',
+            'job_seeker',
+            'status',
+            'status_display',
+            'notes',
+            'createdAt',
+            'updatedAt'
+        ]
+        read_only_fields = fields

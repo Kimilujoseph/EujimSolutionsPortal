@@ -42,7 +42,12 @@ class RecruiterTrackingRepository(BaseRepository[RecruiterTracking]):
         super().__init__(RecruiterTracking)
 
     def get_by_recruiter(self, recruiter_id: int) -> models.QuerySet:
-        return self.filter(recruiter_id=recruiter_id)
+       return self.model_class.objects.filter(recruiter_id=recruiter_id)\
+        .select_related(
+            'recruiter',
+            'job_seeker'    
+        )\
+        .order_by('-createdAt')
 
     def get_by_job_seeker(self, job_seeker_id: int) -> models.QuerySet:
         return self.filter(job_seeker_id=job_seeker_id)
