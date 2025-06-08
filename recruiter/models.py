@@ -22,7 +22,7 @@ class Recruiter(models.Model):
 
     class Meta:
         db_table = 'recruiter'
-        managed = False
+        managed = True
 
 
 class RecruiterDoc(models.Model):
@@ -47,7 +47,7 @@ class RecruiterDoc(models.Model):
 
     class Meta:
         db_table = 'recruiter_doc'
-        managed = False
+        managed = True
 
 
 class RecruiterTracking(models.Model):
@@ -67,5 +67,5 @@ class RecruiterTracking(models.Model):
 
     class Meta:
         db_table = 'recruiter_tracking'
-        managed = False
+        managed = True
 

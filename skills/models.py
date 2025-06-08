@@ -9,7 +9,7 @@ class Skill(models.Model):
 
     class Meta:
         db_table = 'skills'
-        managed = False
+        managed = True
 
 class SkillSet(models.Model):
     PROFICIENCY_CHOICES = [
@@ -31,5 +31,5 @@ class SkillSet(models.Model):
 
     class Meta:
         db_table = 'skillSet'
-        managed = False
+        managed = True
 
