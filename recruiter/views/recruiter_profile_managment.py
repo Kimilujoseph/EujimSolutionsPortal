@@ -33,13 +33,15 @@ class RecruiterRegistrationView(APIView):
             return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
 
 class RecruiterProfileView(APIView):
-    @recruiter_required
-    @check_recruiter_status
     @recruiter_or_admin_required
     def get(self, request,user_id):
         service = RecruiterService()
         try:
-            user_id = request.user_data.get('id') or user_id
+            role = request.user_data.get('role')
+            if role == 'admin' or 'superAdmin':
+                user_id = user_id
+            else:
+                user_id = request.user_data.get('id')
             if not user_id:
                 return Response(
                     {'error': 'User ID not found in request data'},
@@ -61,11 +63,15 @@ class RecruiterProfileView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-    @recruiter_required
-    def put(self, request):
+    @recruiter_or_admin_required
+    def put(self, request,user_id):
         service = RecruiterService()
         try:
-            user_id = request.user_data.get('id')
+            role = request.user_data.get('role')
+            if role == 'admin' or 'superAdmin':
+                user_id = user_id
+            else:
+                user_id = request.user_data.get('id')
             if not user_id:
                 return Response(
                     {'error': 'User ID not found in request data'},
@@ -76,7 +82,7 @@ class RecruiterProfileView(APIView):
                     {'error': 'No data provided for update'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-            recruiter = service.update_recruiter_profile(user_id, request.data)
+            recruiter = service.update_recruiter_profile(user_id, request.data,role)
             return Response(RecruiterProfileSerializer(recruiter).data)
         except ValidationError as e:
             return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)

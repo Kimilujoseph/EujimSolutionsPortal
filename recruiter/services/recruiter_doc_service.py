@@ -34,6 +34,8 @@ class RecruiterDocService:
         except Exception as e:
             if isinstance(serializer.validated_data, dict) and 'upload_path' in serializer.validated_data:
                 try:
+                    if isinstance(serializer.validated_data,dict):
+                        raise ValidationError({'error':f'wrong data format provided'})
                     serializer.validated_data['upload_path'].delete(save=False)
                 except:
                     pass

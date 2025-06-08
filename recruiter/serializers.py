@@ -20,7 +20,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
 class RecruiterProfileSerializer(serializers.ModelSerializer):
-    user = UserProfileSerializer()  
+    user = UserProfileSerializer(read_only=True)
     
     class Meta:
         model = Recruiter
@@ -35,9 +35,18 @@ class RecruiterProfileSerializer(serializers.ModelSerializer):
             'isVerified',
             'createdAt',
             'updatedAt',
-            'user' 
+            'user'
         ]
-        read_only_fields = ['user', 'isVerified', 'createdAt', 'updatedAt']
+        read_only_fields = ['user', 'createdAt', 'updatedAt']
+
+    def __init__(self, *args, **kwargs):
+        self.role = kwargs.pop('role', None)
+        super().__init__(*args, **kwargs)
+        
+        # Correct way to set field attributes
+        if self.role not in ['admin', 'superAdmin']:
+            self.fields['isVerified'].read_only = True
+
 class RecruiterDocSerializer(serializers.ModelSerializer):
     download_url = serializers.SerializerMethodField()
     upload_path = serializers.FileField(

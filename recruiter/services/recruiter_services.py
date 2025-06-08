@@ -25,14 +25,15 @@ class RecruiterService:
             raise ValidationError({'error': 'Validated data is not a valid dictionary'})
         return self.recruiter_repo.create(user_id=user_id,**serializer.validated_data)
     def get_recruiter_profile(self, user_id: int) -> Optional[Recruiter]:
+        print(user_id)
         return self.recruiter_repo.get_recruiter_with_profile(user_id)
 
-    def update_recruiter_profile(self, user_id: int, data: Dict[str, Any]) -> Recruiter:
+    def update_recruiter_profile(self, user_id: int, data: Dict[str, Any],role:str) -> Recruiter:
         recruiter = self.recruiter_repo.get_by_user_id(user_id)
         if not recruiter:
             raise ValidationError({'error': 'Recruiter profile not found'})
         
-        serializer = RecruiterProfileSerializer(instance=recruiter, data=data, partial=True)
+        serializer = RecruiterProfileSerializer(instance=recruiter, data=data,partial=True,role=role)
         if not serializer.is_valid():
             raise ValidationError(serializer.errors)
         
@@ -40,7 +41,7 @@ class RecruiterService:
         if not isinstance(validated_data, dict):
             raise ValidationError({'error': 'Validated data is not a valid dictionary'})
         return self.recruiter_repo.update(instance=recruiter, **validated_data)
-
+    
     def delete_recruiter_profile(self, user_id: int) -> None:
         recruiter = self.recruiter_repo.get_by_user_id(user_id)
         if not recruiter:
