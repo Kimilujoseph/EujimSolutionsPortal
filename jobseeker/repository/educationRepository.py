@@ -2,7 +2,7 @@
 from typing import Optional, Dict
 from ..models import Education
 from .base_repository import JobSeekerBaseRepository
-
+from django.db.models import Count
 class EducationRepository(JobSeekerBaseRepository[Education]):
     def __init__(self):
         super().__init__(Education)
@@ -15,3 +15,7 @@ class EducationRepository(JobSeekerBaseRepository[Education]):
         if education:
             return self.update(education, **update_data)
         return None
+
+    def get_education_distribution(self, user_id: int):
+        educations = self.get_educations_by_user(user_id).values('degree')
+        return list(educations.annotate(count=Count('degree')).order_by('-count'))

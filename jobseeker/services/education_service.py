@@ -22,3 +22,12 @@ class EducationService:
 
     def get_user_educations(self, user_id: int):
         return self.education_repo.get_educations_by_user(user_id)
+    def get_education_distribution(self, user_id: int):
+        try:
+            return self.education_repo.get_education_distribution(user_id)
+        except ValidationError as e:
+            print(f"Validation error: {e}")
+            return []
+        except Exception as e:
+            print(f"An error occurred while fetching education distribution: {e}")
+            return []

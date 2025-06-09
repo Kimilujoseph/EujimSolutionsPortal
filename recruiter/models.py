@@ -6,10 +6,10 @@ from users.models import User
 class Recruiter(models.Model):
     companyName = models.CharField(max_length=45)
     companyLogo = models.CharField(max_length=500, null=True, blank=True)
-    industry = models.CharField(max_length=45, null=True, blank=True)
-    contactInfo = models.CharField(max_length=45, null=True, blank=True)
+    industry = models.CharField(max_length=250, null=True, blank=True)
+    contactInfo = models.CharField(max_length=250, null=True, blank=True)
     companyEmail = models.EmailField(unique=True)
-    description = models.CharField(max_length=45, null=True, blank=True)
+    description = models.CharField(max_length=500, null=True, blank=True)
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -22,7 +22,7 @@ class Recruiter(models.Model):
 
     class Meta:
         db_table = 'recruiter'
-        managed = False
+        managed = True
 
 
 class RecruiterDoc(models.Model):
@@ -30,17 +30,24 @@ class RecruiterDoc(models.Model):
         ('pending', 'Pending'),
         ('approved', 'Approved'),
     ]
-
+    verifiedBy = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='verified_docs'
+    )
+    verifiedAt = models.DateTimeField(null=True, blank=True)
     recruiter = models.ForeignKey(Recruiter, on_delete=models.CASCADE)
     doc_type = models.CharField(max_length=45, null=True, blank=True)
-    upload_path = models.CharField(max_length=500, null=True, blank=True)
+    upload_path = models.FileField(upload_to='recruiter_docs/%Y/%m/%d/')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending', null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    createdAt = models.DateTimeField(auto_now_add=True)
+    updatedAt = models.DateTimeField(auto_now=True)
 
     class Meta:
-        db_table = 'reccruiter_doc'
-        managed = False
+        db_table = 'recruiter_doc'
+        managed = True
 
 
 class RecruiterTracking(models.Model):
@@ -52,13 +59,13 @@ class RecruiterTracking(models.Model):
     ]
 
     recruiter = models.ForeignKey(Recruiter, on_delete=models.CASCADE)
-    job_seeker = models.ForeignKey(User, on_delete=models.CASCADE)
+    job_seeker = models.ForeignKey(User, on_delete=models.CASCADE, related_name='tracking_records')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='shortlisted', null=True, blank=True)
     notes = models.TextField(null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    createdAt = models.DateTimeField(auto_now_add=True)
+    updatedAt = models.DateTimeField(auto_now=True)
 
     class Meta:
         db_table = 'recruiter_tracking'
-        managed = False
+        managed = True
 

@@ -1,7 +1,7 @@
 from django.db import models
 from users.models import User
 from django.conf import settings
-#Create models here
+
 
 class JobSeeker(models.Model):
     github_url = models.URLField(max_length=255, null=True, blank=True)
@@ -50,9 +50,9 @@ class JobSeekerCertification(models.Model):
         db_column='updatedAt'  # Match DB column
     )
 
-    class Meta:
-        db_table = 'jobseeker_certification'
-        managed = False
+        class Meta:
+            db_table = 'jobseeker_certification'
+            managed = True
 
 
 
@@ -78,7 +78,7 @@ class Education(models.Model):
     degree = models.CharField(max_length=20, choices=DEGREE_CHOICES)
     field_of_study = models.CharField(max_length=100)
     start_year = models.PositiveIntegerField()
-    end_year = models.PositiveIntegerField(null=True, blank=True)  # Null if still studying
+    end_year = models.PositiveIntegerField(null=True, blank=True)  
     is_current = models.BooleanField(default=False)
     description = models.TextField(null=True, blank=True)
     school_logo = models.TextField(
@@ -91,7 +91,7 @@ class Education(models.Model):
 
     class Meta:
         db_table = 'education_qualifications'
-        managed = False  # Set to False since you're working with an existing database
+        managed = True
         ordering = ['-end_year', '-start_year']
 
     def __str__(self):

@@ -169,6 +169,8 @@ FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:3000')  # For links i
 DEFAULT_SUSPENSION_DAYS = 7  # Default suspension duration if not specified
 APPEAL_WINDOW_DAYS = 7 
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # settings.py
 JWT_CONFIG = {

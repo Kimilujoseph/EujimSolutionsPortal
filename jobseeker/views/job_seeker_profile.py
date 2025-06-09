@@ -4,6 +4,7 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from ..permissions import jobseeker_required, check_user_status
 from ..services.profile_service import ProfileService
+from ..services.analyticsService import AnalyticsService
 from ..services.education_service import EducationService
 from ..services.certification_service import CertificationService
 from ..serializer.jobSeekerSerializer import JobSeekerProfileSerializer,JobSeekerUpdateSerializer, CertificationSerializer
@@ -140,6 +141,58 @@ class SkillListView(APIView):
         except Exception as e:
             return Response({'error': str(e)}, 
                           status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class JobSeekerAnalyticsView(APIView):
+    @check_user_status
+    def get(self, request):
+        user_id = request.user_data.get('id') or request.query_params.get('user_id')
+        if not user_id:
+            return Response({'error': 'User ID is required'}, 
+                          status=status.HTTP_400_BAD_REQUEST)
+        try:
+            user_id = int(user_id) 
+            analytics = AnalyticsService.get_jobseeker_analytics(user_id)
+            print(f"Analytics for user {user_id}: {analytics}")
+            return Response(analytics)
+        except ValueError:
+            return Response({'error': 'Invalid User ID'}, 
+                          status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            print(f"Error fetching analytics: {e}")
+            return Response({'error': 'Internal server error'}, 
+                          status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class JobSeekerDeleteSkill(APIView):
+    @check_user_status
+    def delete(self, request, skill_id):
+        
+        try:
+            service = ProfileService()
+            success = service.delete_skill_from_profile(
+                user_id=request.user_data.get('id'),
+                skill_id=skill_id
+            )
+            
+            if success:
+                return Response(
+                    {'message': 'Skill removed successfully'},
+                    status=status.HTTP_204_NO_CONTENT
+                )
+            return Response(
+                {'error': 'Skill not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            return Response(
+                {'error': 'Internal server error'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+        
 
 class CertificationListAPIView(APIView):
     @jobseeker_required

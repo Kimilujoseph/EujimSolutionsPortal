@@ -1,5 +1,10 @@
 from django.db import models
 import uuid
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from recruiter.models import Recruiter
+    from jobseeker.models import JobSeeker
 
 class User(models.Model):
     ROLE_ENUM = [
@@ -42,6 +47,9 @@ class User(models.Model):
         on_delete=models.SET_NULL,
         related_name='restored_users'
     )
+    if TYPE_CHECKING:
+        jobseeker_profile: 'JobSeeker'
+        recruiters: models.QuerySet['Recruiter']
 
     class Meta:
         db_table = "users"

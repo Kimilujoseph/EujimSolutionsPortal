@@ -1,5 +1,6 @@
 from django.db import models
 from jobseeker.models import JobSeeker
+from users.models import User
 from django.conf import settings
 
 class Skill(models.Model):
@@ -8,7 +9,7 @@ class Skill(models.Model):
 
     class Meta:
         db_table = 'skills'
-        managed = False
+        managed = True
 
 class SkillSet(models.Model):
     PROFICIENCY_CHOICES = [
@@ -18,7 +19,7 @@ class SkillSet(models.Model):
         ('proffessional', 'Professional'),
     ]
     user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
+        User,
         on_delete=models.CASCADE,
         related_name='skill_sets',
         db_column='userId'
@@ -30,5 +31,5 @@ class SkillSet(models.Model):
 
     class Meta:
         db_table = 'skillSet'
-        managed = False
+        managed = True
 
