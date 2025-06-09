@@ -3,7 +3,7 @@ from pathlib import Path
 import os
 from dotenv import load_dotenv
 load_dotenv()
-from decouple import config
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -16,16 +16,17 @@ SECRET_KEY = 'django-insecure-m6$!-cp09yb#wf&rup4yuzfs41e*hh@lq@$f*sj)$x6%(bdvnn
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+#AUTH_USER_MODEL = 'users.User'
 
 ALLOWED_HOSTS = []
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': ('eujimsolution'),
-        'USER': ('root'),
-        'PASSWORD': (''),
-        'HOST': ('127.0.0.1'),
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'HOST': os.getenv('DB_HOST'),
         'PORT': '3306',
     }
 }
@@ -160,7 +161,7 @@ TEMPLATES = [
 
 
 # Email settings for development
-
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'noreply@yourdomain.com')  # Default sender address
 SUPPORT_EMAIL = os.getenv('SUPPORT_EMAIL','DEFAULT_FROM_EMAIL')
 SERVER_EMAIL = os.getenv('SERVER_EMAIL', DEFAULT_FROM_EMAIL)
@@ -168,12 +169,15 @@ SITE_NAME = os.getenv('SITE_NAME', 'Your Application Name')  # Used in email sub
 FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:3000')  # For links in emails
 DEFAULT_SUSPENSION_DAYS = 7  # Default suspension duration if not specified
 APPEAL_WINDOW_DAYS = 7 
-EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.yourdomain.com')  # SMTP server
-EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))  # SMTP port
-EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
-EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True').lower() in ('true', '1', 't')  # Use TLS if set
+EMAIL_HOST = os.getenv('EMAIL_HOST','smtp.yourdoman..com')
+EMAIL_PORT = os.getenv('EMAIL_PORT','')
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER','')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD','')
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS',True)
 AUTH_USER_MODEL = 'users.User'
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # settings.py
 JWT_CONFIG = {

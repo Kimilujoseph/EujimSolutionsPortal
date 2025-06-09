@@ -132,7 +132,7 @@ class UserManagementService:
                 'id': user.id,
                 'email': user.email,
                 'first_name': user.firstName,
-                'second_name': user.secondName,
+                'second_name': user.lastName,
                 'isVerified':user.isVerified,
                 'isActive':user.is_active,
                 'isDeleted':user.is_deleted,

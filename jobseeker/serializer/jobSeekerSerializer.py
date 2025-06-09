@@ -5,7 +5,7 @@ class JobSeekerProfileSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(source='user.email', read_only=True) 
     users_id = serializers.IntegerField(source='user.id', read_only=True)
     firstName = serializers.CharField(source='user.firstName', read_only=True)
-    secondName = serializers.CharField(source='user.secondName', read_only=True)
+    secondName = serializers.CharField(source='user.lastName', read_only=True)
     is_active = serializers.BooleanField(source='user.is_active', read_only=True)
  
     

@@ -26,7 +26,9 @@ class JobSeekerCertification(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='certifications',
-        db_column='userId'  # Match exact DB column name
+        db_column='userId',
+        null=True,
+        blank=True
     )
     issuer = models.CharField(max_length=45, null=True, blank=True)
     upload_path = models.CharField(
@@ -50,9 +52,9 @@ class JobSeekerCertification(models.Model):
         db_column='updatedAt'  # Match DB column
     )
 
-        class Meta:
-            db_table = 'jobseeker_certification'
-            managed = True
+    class Meta:
+        db_table = 'jobseeker_certification'
+        managed = True
 
 
 

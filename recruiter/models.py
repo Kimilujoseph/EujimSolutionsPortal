@@ -14,7 +14,9 @@ class Recruiter(models.Model):
         User,
         on_delete=models.CASCADE,
         db_column='users_id',
-        related_name='recruiters' 
+        related_name='recruiters' ,
+        null=True,
+        blank=True
     )
     isVerified = models.BooleanField(null=True, blank=True)
     createdAt = models.DateTimeField(auto_now_add=True)
@@ -38,9 +40,9 @@ class RecruiterDoc(models.Model):
         related_name='verified_docs'
     )
     verifiedAt = models.DateTimeField(null=True, blank=True)
-    recruiter = models.ForeignKey(Recruiter, on_delete=models.CASCADE)
+    recruiter = models.ForeignKey(Recruiter, on_delete=models.CASCADE,null=True,blank=True)
     doc_type = models.CharField(max_length=45, null=True, blank=True)
-    upload_path = models.FileField(upload_to='recruiter_docs/%Y/%m/%d/')
+    upload_path = models.FileField(upload_to='recruiter_docs/%Y/%m/%d/',null=True,blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending', null=True, blank=True)
     createdAt = models.DateTimeField(auto_now_add=True)
     updatedAt = models.DateTimeField(auto_now=True)
@@ -58,8 +60,8 @@ class RecruiterTracking(models.Model):
         ('rejected', 'Rejected'),
     ]
 
-    recruiter = models.ForeignKey(Recruiter, on_delete=models.CASCADE)
-    job_seeker = models.ForeignKey(User, on_delete=models.CASCADE, related_name='tracking_records')
+    recruiter = models.ForeignKey(Recruiter, on_delete=models.CASCADE,null=True,blank=True)
+    job_seeker = models.ForeignKey(User, on_delete=models.CASCADE, related_name='tracking_records',null=True,blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='shortlisted', null=True, blank=True)
     notes = models.TextField(null=True, blank=True)
     createdAt = models.DateTimeField(auto_now_add=True)

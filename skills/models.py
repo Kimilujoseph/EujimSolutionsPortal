@@ -22,7 +22,9 @@ class SkillSet(models.Model):
         User,
         on_delete=models.CASCADE,
         related_name='skill_sets',
-        db_column='userId'
+        db_column='userId',
+        null=True,
+        blank=True
     )
     skill = models.ForeignKey(Skill, on_delete=models.CASCADE, null=True, blank=True)
     proffeciency_level = models.CharField(max_length=20, choices=PROFICIENCY_CHOICES, null=True, blank=True)
