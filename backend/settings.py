@@ -15,6 +15,7 @@ SECRET_KEY = 'django-insecure-m6$!-cp09yb#wf&rup4yuzfs41e*hh@lq@$f*sj)$x6%(bdvnn
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+#AUTH_USER_MODEL = 'users.User'
 
 ALLOWED_HOSTS = []
 
@@ -38,22 +39,31 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    
+    #3rd party
     'rest_framework',
+    'rest_framework_simplejwt',
+
     #apps
     'users.apps.UsersConfig',
     'jobseeker.apps.JobseekerConfig',
     'skills.apps.SkillsConfig',
     'recruiter.apps.RecruiterConfig',
+    'corsheaders'
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'middleware.auth_middleware.JWTAuthMiddleware',
+
+    
 ]
 
 ROOT_URLCONF = 'backend.urls'
@@ -150,9 +160,45 @@ TEMPLATES = [
 
 
 # Email settings for development
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-REST_FRAMEWORK={
-    'DEFAULT_PERMISSION_CLASSES':[
-        'rest_framework.permissions.AllowAny',
-    ]
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'noreply@yourdomain.com')  # Default sender address
+SUPPORT_EMAIL = os.getenv('SUPPORT_EMAIL','DEFAULT_FROM_EMAIL')
+SERVER_EMAIL = os.getenv('SERVER_EMAIL', DEFAULT_FROM_EMAIL)
+SITE_NAME = os.getenv('SITE_NAME', 'Your Application Name')  # Used in email subjects
+FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:3000')  # For links in emails
+DEFAULT_SUSPENSION_DAYS = 7  # Default suspension duration if not specified
+APPEAL_WINDOW_DAYS = 7 
+EMAIL_HOST = os.getenv('EMAIL_HOST','smtp.yourdoman..com')
+EMAIL_PORT = os.getenv('EMAIL_PORT','')
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER','')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD','')
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS',True)
+AUTH_USER_MODEL = 'users.User'
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# settings.py
+JWT_CONFIG = {
+    'ALGORITHM': 'HS256',
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'AUTH_COOKIE': 'jwt',
+    'AUTH_COOKIE_HTTP_ONLY': True,
+    'AUTH_COOKIE_SECURE': not DEBUG,
+    'AUTH_COOKIE_SAMESITE': 'Lax',
 }
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
+CORS_ALLOW_CREDENTIALS = True
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    )
+}
+
+
