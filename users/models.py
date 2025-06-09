@@ -32,7 +32,7 @@ class User(AbstractUser, PermissionsMixin):
     is_suspended = models.BooleanField(default=False, db_column='is_suspended')
     is_pending = models.BooleanField(default=True, db_column='is_pending')
     isVerified = models.BooleanField(default=False, db_column='isVerified')
-    verificationCode = models.CharField(max_length=45, blank=True, null=True, db_column='verificationCode')
+    verificationCode = models.UUIDField(default=uuid.uuid4, editable=False,null=True,blank=True,db_column='verificationCode')
     role = models.CharField(max_length=20, choices=ROLE_ENUM, null=True, blank=True, db_column='role')
     createdAt = models.DateTimeField(auto_now_add=True, db_column='createdAt')
     updatedAt = models.DateTimeField(auto_now=True, db_column='updatedAt')
