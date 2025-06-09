@@ -18,11 +18,10 @@ class AuthService:
             serializer.is_valid(raise_exception=True)
             return self.user_repo.create_user(serializer.validated_data)
         except ValidationError as e:
-            raise e  # Let DRF handle and return 400 with serializer errors
+            raise e
         except (IntegrityError, DatabaseError) as e:
             raise APIException("Database error occurred while creating user.")
         except Exception as e:
-            print(e)
             raise APIException("Unexpected error during user registration.")
 
     def verify_email(self, verification_code: str) -> bool:

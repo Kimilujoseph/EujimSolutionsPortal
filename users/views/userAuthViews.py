@@ -84,8 +84,7 @@ class LoginView(APIView):
             )
             response.data = {
                 'message': 'Login successful',
-                'user':serializer.data,
-                'token': token
+                'user':serializer.data
             }
             return response
             
