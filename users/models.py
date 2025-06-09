@@ -1,3 +1,4 @@
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models
 import uuid
 from typing import TYPE_CHECKING
@@ -6,7 +7,7 @@ if TYPE_CHECKING:
     from recruiter.models import Recruiter
     from jobseeker.models import JobSeeker
 
-class User(models.Model):
+class User(AbstractBaseUser, PermissionsMixin):
     ROLE_ENUM = [
         ('employer', 'Employer'),
         ('jobseeker', 'JobSeeker'),
@@ -17,7 +18,7 @@ class User(models.Model):
     id = models.AutoField(primary_key=True)
     firstName = models.CharField(max_length=45)
     secondName = models.CharField(max_length=45)
-    email = models.CharField(max_length=45, unique=True)
+    email = models.EmailField(unique=True)
     is_active = models.BooleanField(default=True)
     is_deleted = models.BooleanField(default=False)
     is_suspended = models.BooleanField(default=True)
@@ -51,8 +52,12 @@ class User(models.Model):
         jobseeker_profile: 'JobSeeker'
         recruiters: models.QuerySet['Recruiter']
 
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['firstName', 'secondName']
+
+    def __str__(self):
+        return self.email
+
     class Meta:
         db_table = "users"
         managed = True
-    def __str__(self):
-        return self.email
