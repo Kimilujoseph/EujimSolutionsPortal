@@ -1,13 +1,14 @@
+import re
 from rest_framework import serializers
 from django.contrib.auth.hashers import make_password
 from ..models import User
-
 class UserRegistrationSerializer(serializers.Serializer):
     firstName = serializers.CharField(max_length=45)
     lastName = serializers.CharField(max_length=45)
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
-    
+    role = serializers.CharField()
+
     def validate_email(self, value):
         
         if User.objects.filter(email__iexact=value).exists():
