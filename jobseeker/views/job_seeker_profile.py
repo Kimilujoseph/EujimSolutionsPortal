@@ -15,7 +15,7 @@ from django.core.exceptions import ValidationError
 
 class JobSeekerProfileView(APIView):
     
-    @jobseeker_required
+
     def get(self, request,user_id=None):
         try:
             service = ProfileService()
@@ -144,8 +144,10 @@ class SkillListView(APIView):
 
 class JobSeekerAnalyticsView(APIView):
     @check_user_status
-    def get(self, request):
-        user_id = request.user_data.get('id') or request.query_params.get('user_id')
+    def get(self, request,user_id=None):
+        role = request.user_data.get('role');
+        if role not in ['admin','userAdmin']:
+             user_id = request.user_data.get('id') 
         if not user_id:
             return Response({'error': 'User ID is required'}, 
                           status=status.HTTP_400_BAD_REQUEST)

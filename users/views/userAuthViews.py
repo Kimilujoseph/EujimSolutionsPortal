@@ -26,6 +26,7 @@ class RegisterView(APIView):
             send_verification_email(user, request)
             return Response({"message": "Verification email sent"}, status=status.HTTP_201_CREATED)
         except ValidationError as e:
+            print(e)
             return Response({"errors": e.detail}, status=status.HTTP_400_BAD_REQUEST)
         except APIException as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
