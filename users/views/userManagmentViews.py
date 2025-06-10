@@ -3,10 +3,12 @@ from rest_framework.response import Response
 from rest_framework import status
 from  ..services.userManagement import UserManagementService
 from ..serializers.user_serializer import UserSerializer
+from ..utils import send_approval_email,send_disapproval_email,send_suspension_email,send_unsuspension_email
+from ..permissions import admin_required
+
 class AdminUserDeleteView(APIView):
+    @admin_required
     def delete(self, request, user_id):
-        if not request.user_data or request.user_data.get('role') not in  ['superAdmin','admin']:
-            return Response({'error': 'Admin priveledges required'}, status=status.HTTP_403_FORBIDDEN)
         service = UserManagementService()
         result = service.delete_user(
             user_id=user_id,
@@ -18,11 +20,12 @@ class AdminUserDeleteView(APIView):
     
 
 class AdminUserListView(APIView):
+    @admin_required
     def get(self, request):
-        if not request.user_data or request.user_data.get('role') not in  ['superAdmin','admin']:
-            return Response({'error': 'Admin priveledges required'}, status=status.HTTP_403_FORBIDDEN)
         service = UserManagementService()
-        users = service.list_users(include_deleted=request.query_params.get('show_deleted', False))
+        include_deleted = request.query_params.get('show_deleted','false').lower() == 'true'
+        role=request.query_params.get('role')
+        users = service.list_users(include_deleted=include_deleted,role=role)
         if isinstance(users, dict) and users.get('status') == 'error':
             return Response(users, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -31,9 +34,8 @@ class AdminUserListView(APIView):
         
 
 class AdminUserRestoreView(APIView):
+    @admin_required
     def post(self, request, user_id):
-        if not request.user_data or request.user_data.get('role') not in  ['superAdmin','admin']:
-            return Response({'error': 'Admin priveledges required'}, status=status.HTTP_403_FORBIDDEN)
         service = UserManagementService()
         result = service.restore_user(
             user_id=user_id,
@@ -42,32 +44,71 @@ class AdminUserRestoreView(APIView):
         return Response(result, status=status.HTTP_200_OK)
     
 class AdminToggleSuspendUserView(APIView):
+    @admin_required
     def post(self, request, user_id):
-        if not request.user_data or request.user_data.get('role') not in ['admin', 'superAdmin']:
-            return Response({'error': 'Admin privileges required'}, status=status.HTTP_403_FORBIDDEN)
-        
         service = UserManagementService()
         try:
+            
+            suspension_reason = request.data.get('reason', 'Violation of terms of service')
+            
             user = service.toggle_suspension(user_id)
+         
+            if not user:
+                return Response({
+                    'status':'failed',
+                    'message':'the user is not found',
+                    'code':404
+                },status=status.HTTP_404_NOT_FOUND)
+            
+            if user.is_suspended:
+                send_suspension_email(
+                    user=user,
+                    request=request,
+                    suspension_reason=suspension_reason
+                )
+                message = f"User {user.firstName} has been suspended."
+            else:
+                send_unsuspension_email(user, request)
+                message = f"User {user.firstName}'s suspension has been lifted."
+    
             return Response({
                 'status': 'success',
-                'message': f"User {user.firstName} suspension status updated.",
+                'message': message,
                 'is_suspended': user.is_suspended
             }, status=status.HTTP_200_OK)
+            
         except ValueError as ve:
-            return Response({'error': str(ve)}, status=status.HTTP_404_NOT_FOUND)
+            return Response({
+                'status': 'error',
+                'message': str(ve),
+                'code': 404
+            }, status=status.HTTP_404_NOT_FOUND)
+            
         except Exception as e:
-            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
+            return Response({
+                'status': 'error',
+                'message': 'Failed to update suspension status',
+                'details': str(e),
+                'code': 500
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class AdminTogglePendingStatusView(APIView):
+    @admin_required
     def post(self, request, user_id):
-        if not request.user_data or request.user_data.get('role') not in ['admin', 'superAdmin']:
-            return Response({'error': 'Admin privileges required'}, status=status.HTTP_403_FORBIDDEN)
-
         service = UserManagementService()
+
         try:
             user = service.toggle_pending_status(user_id)
+            if not user:
+                return Response({
+                    'status':'failed',
+                    'message':'the user is not found',
+                    'code':404
+                },status=status.HTTP_404_NOT_FOUND)
+            if user.is_pending is False:
+                send_approval_email(user,request)
+            else:
+                send_disapproval_email(user,request)
             return Response({
                 'status': 'success',
                 'message': f"User {user.firstName} pending status updated.",
@@ -80,13 +121,17 @@ class AdminTogglePendingStatusView(APIView):
 
 
 class AdminToggleVerificationView(APIView):
+    @admin_required
     def post(self, request, user_id):
-        if not request.user_data or request.user_data.get('role') not in ['admin', 'superAdmin']:
-            return Response({'error': 'Admin privileges required'}, status=status.HTTP_403_FORBIDDEN)
-
         service = UserManagementService()
         try:
             user = service.toggle_verification(user_id)
+            if not user:
+                return Response({
+                    'status':'failed',
+                    'message':'the user is not found',
+                    'code':404
+                },status=status.HTTP_404_NOT_FOUND)
             return Response({
                 'status': 'success',
                 'message': f"User {user.firstName} verification status updated.",
@@ -98,6 +143,7 @@ class AdminToggleVerificationView(APIView):
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class AdminUserDetailView(APIView):
+    @admin_required
     def get(self, request, user_id):
         if not request.user_data or request.user_data.get('role') not in ['admin', 'superAdmin']:
             return Response({'error': 'Admin privileges required'}, status=status.HTTP_403_FORBIDDEN)

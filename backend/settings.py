@@ -1,7 +1,8 @@
+from datetime import timedelta
 from pathlib import Path
 import os
-
-
+from dotenv import load_dotenv
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -21,10 +22,10 @@ ALLOWED_HOSTS = []
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'eujimSolution',
-        'USER': 'root',
-        'PASSWORD': 'seth2019',
-        'HOST': '127.0.0.1',
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'HOST': os.getenv('DB_HOST'),
         'PORT': '3306',
     }
 }
@@ -38,22 +39,27 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework',
+
     #apps
     'users.apps.UsersConfig',
     'jobseeker.apps.JobseekerConfig',
     'skills.apps.SkillsConfig',
     'recruiter.apps.RecruiterConfig',
+    'corsheaders'
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'middleware.auth_middleware.JWTAuthMiddleware',
+
+    
 ]
 
 ROOT_URLCONF = 'backend.urls'
@@ -151,8 +157,30 @@ TEMPLATES = [
 
 # Email settings for development
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-REST_FRAMEWORK={
-    'DEFAULT_PERMISSION_CLASSES':[
-        'rest_framework.permissions.AllowAny',
-    ]
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'noreply@yourdomain.com')  # Default sender address
+SUPPORT_EMAIL = os.getenv('SUPPORT_EMAIL','DEFAULT_FROM_EMAIL')
+SERVER_EMAIL = os.getenv('SERVER_EMAIL', DEFAULT_FROM_EMAIL)
+SITE_NAME = os.getenv('SITE_NAME', 'Your Application Name')  # Used in email subjects
+FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:3000')  # For links in emails
+DEFAULT_SUSPENSION_DAYS = 7  # Default suspension duration if not specified
+APPEAL_WINDOW_DAYS = 7 
+
+
+# settings.py
+JWT_CONFIG = {
+    'ALGORITHM': 'HS256',
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'AUTH_COOKIE': 'jwt',
+    'AUTH_COOKIE_HTTP_ONLY': True,
+    'AUTH_COOKIE_SECURE': not DEBUG,
+    'AUTH_COOKIE_SAMESITE': 'Lax',
 }
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
+CORS_ALLOW_CREDENTIALS = True
+
+
