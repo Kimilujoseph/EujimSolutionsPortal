@@ -146,7 +146,7 @@ class JobSeekerAnalyticsView(APIView):
     @check_user_status
     def get(self, request,user_id=None):
         role = request.user_data.get('role');
-        if role not in ['admin','userAdmin']:
+        if user_id is None and role not in ['admin','userAdmin']:
              user_id = request.user_data.get('id') 
         if not user_id:
             return Response({'error': 'User ID is required'}, 
