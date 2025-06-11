@@ -16,7 +16,7 @@ class RecruiterRegistrationSerializer(serializers.ModelSerializer):
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User 
-        fields = ['email', 'firstName', 'secondName']
+        fields = ['email', 'firstName', 'lastName']
         read_only_fields = fields
 
 class RecruiterProfileSerializer(serializers.ModelSerializer):

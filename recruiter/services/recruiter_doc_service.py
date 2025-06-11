@@ -32,6 +32,7 @@ class RecruiterDocService:
                 **serializer.validated_data
             )
         except Exception as e:
+            print(e)
             if isinstance(serializer.validated_data, dict) and 'upload_path' in serializer.validated_data:
                 try:
                     if isinstance(serializer.validated_data,dict):

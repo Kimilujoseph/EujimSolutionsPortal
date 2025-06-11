@@ -21,7 +21,7 @@ class RecruiterRepository(BaseRepository[Recruiter]):
             'companyEmail',
             'user__email',      
             'user__firstName', 
-            'user__secondName'  
+            'user__lastName'  
         ) \
         .filter(user_id=user_id) \
         .first()

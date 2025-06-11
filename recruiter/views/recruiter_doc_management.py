@@ -21,10 +21,12 @@ from django.utils.timezone import now
 import os
   
 class RecruiterDocView(APIView):
-  def get(self, request,user_id):
+  def get(self, request, user_id=None):
     service = RecruiterDocService()
     try:
-        user_id = request.user_data.get('id') or user_id
+        role = request.user_data.get('role');
+        if user_id is None and role not in ['admin','superAdmin']:
+             user_id = request.user_data.get('id')
         if not user_id:
             return Response(
                 {'error': 'User ID not found'},
