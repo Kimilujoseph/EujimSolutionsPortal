@@ -15,6 +15,8 @@ class UserManagementRepository(BaseRepository[User]):
         return User.objects.select_related('jobseeker_profile').prefetch_related('recruiters').get(id=user_id)
     def fetch_users_by_role(self,role):
         return self.filter(role=role)
+    # def fetch_all_users(self):
+    #     return self.get_all(self)
 
 
 

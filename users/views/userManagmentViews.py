@@ -31,8 +31,17 @@ class AdminUserListView(APIView):
 
         serializer = UserSerializer(users, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
-        
 
+# class AdminUserListAllView(APIView):
+#     @admin_required
+#     def get(self, request):
+#         service = UserManagementService()
+#         users = service.get_all_users()
+#         if isinstance(users, dict) and users.get('status') == 'error':
+#             return Response(users, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+#         serializer = UserSerializer(users, many=True)
+#         return Response(serializer.data, status=status.HTTP_200_OK)
 class AdminUserRestoreView(APIView):
     @admin_required
     def post(self, request, user_id):

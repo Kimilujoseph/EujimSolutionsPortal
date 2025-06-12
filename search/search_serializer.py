@@ -22,7 +22,7 @@ class JobSeekerSearchSerializer(serializers.ModelSerializer):
             'id',
             'email',
             'firstName',
-            'secondName',
+            'lastName',
             'skills',
             'profile'
         ]

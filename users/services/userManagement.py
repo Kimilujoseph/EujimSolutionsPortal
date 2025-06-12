@@ -180,3 +180,15 @@ class UserManagementService:
 
         except ObjectDoesNotExist:
             raise ValueError("User not found")
+        
+    def get_all_users(self):
+        try:
+            users = self.user_repo.fetch_all_users()
+            return users
+        except Exception as e:
+            return {
+                'status': 'error',
+                'message': 'Failed to fetch all users.',
+                'details': str(e),
+                'code': 500
+            }    

@@ -9,5 +9,6 @@ urlpatterns = [
     path('admin/user/<int:user_id>/toggle-pending', AdminTogglePendingStatusView.as_view(), name='admin-user-pending'),
     path('admin/user/<int:user_id>/toggle-verify', AdminToggleVerificationView.as_view(), name='admin-user-verify'),
     path('admin/user/<int:user_id>/profile',AdminUserDetailView.as_view(),name='admin-user-view'),
+    
     path('admin/users/all/', AdminUserListView.as_view(), name='admin-user-list'),
 ]
