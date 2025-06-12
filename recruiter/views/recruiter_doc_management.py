@@ -121,9 +121,15 @@ class RecruiterDocView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-  def delete(self, request, doc_id):
+  def delete(self, request, doc_id=None):
         service = RecruiterDocService()
         try:
+            if doc_id is None:
+                return Response(
+                    {'error': 'Document ID is required'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            print(doc_id)
             service.delete_document(doc_id)
             return Response(
                 {'message': 'Document deleted successfully'},
