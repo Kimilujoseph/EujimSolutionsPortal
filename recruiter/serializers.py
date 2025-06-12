@@ -72,7 +72,7 @@ class RecruiterDocSerializer(serializers.ModelSerializer):
         return None
     class Meta:
         model = RecruiterDoc
-        fields = ['doc_type', 'upload_path','download_url', 'status', 'recruiter', 'createdAt', 'updatedAt']
+        fields = ['doc_type', 'upload_path','download_url', 'status', 'recruiter', 'createdAt', 'updatedAt','id']
         extra_kwargs = {
             'upload_path': {'required': True}
         }

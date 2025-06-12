@@ -164,11 +164,9 @@ SITE_NAME = os.getenv('SITE_NAME', 'Your Application Name')  # Used in email sub
 FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:3000')  # For links in emails
 DEFAULT_SUSPENSION_DAYS = 7  # Default suspension duration if not specified
 APPEAL_WINDOW_DAYS = 7 
-EMAIL_HOST=os.getenv('EMAIL_HOST')
-EMAIL_PORT=os.getenv('EMAIL_PORT')
-EMAIL_USE_TLS=os.getenv('EMAIL_USE_TLS')
-EMAIL_HOST_USER=os.getenv('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD=os.getenv('EMAIL_HOST_PASSWORD')
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # settings.py
 JWT_CONFIG = {
