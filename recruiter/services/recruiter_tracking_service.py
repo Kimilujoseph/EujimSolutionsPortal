@@ -19,13 +19,15 @@ class RecruiterTrackingService:
         self.recruiter_repo = RecruiterRepository()
 
     def create_tracking(self, user_id: int, data: Dict[str, Any]) -> RecruiterTracking:
-        serializer = RecruiterTrackingSerializer(data=data)
         recruiter = self.recruiter_repo.get_by_user_id(user_id);
         if not recruiter:
             raise ValidationError({'error':'recruiter profile not found'})
         recruiter_id = getattr(recruiter,'id',None)
         if not recruiter_id:
             raise ValidationError({"error":"recruter not found"})
+        requester_data = data.copy()
+        requester_data['recruiter_id'] = recruiter_id
+        serializer = RecruiterTrackingSerializer(data=requester_data)
         if not serializer.is_valid():
             raise ValidationError(serializer.errors)
         if not isinstance(serializer.validated_data,dict):

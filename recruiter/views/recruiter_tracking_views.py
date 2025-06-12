@@ -36,6 +36,8 @@ class RecruiterTrackingListView(APIView):
                     {'error':'no data provided'},
                     status = status.HTTP_400_BAD_REQUEST
                 )
+            request_data = request.data.copy()
+            request_data['recruiter_id'] = user_id
             tracking = service.create_tracking(
                 user_id=user_id,
                 data=request.data

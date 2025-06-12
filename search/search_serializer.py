@@ -34,6 +34,7 @@ class JobSeekerSearchSerializer(serializers.ModelSerializer):
     def get_profile(self, obj):
         profile = obj.jobseeker_profile
         return {
+            'job_seeker_id': profile.id,
             'github_url': profile.github_url,
             'linkedin_url': profile.linkedin_url,
             'location': profile.location,
