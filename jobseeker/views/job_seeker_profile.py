@@ -154,7 +154,6 @@ class JobSeekerAnalyticsView(APIView):
         try:
             user_id = int(user_id) 
             analytics = AnalyticsService.get_jobseeker_analytics(user_id)
-            print(f"Analytics for user {user_id}: {analytics}")
             return Response(analytics)
         except ValueError:
             return Response({'error': 'Invalid User ID'}, 
