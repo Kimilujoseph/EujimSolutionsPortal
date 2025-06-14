@@ -2,6 +2,7 @@
 from rest_framework import serializers
 from .models import Recruiter, RecruiterDoc, RecruiterTracking
 from users.models import User
+from jobseeker.models import JobSeeker
 from django.db  import models
 from django.core.validators import FileExtensionValidator,MaxValueValidator
 
@@ -18,6 +19,14 @@ class UserProfileSerializer(serializers.ModelSerializer):
         model = User 
         fields = ['email', 'firstName', 'lastName']
         read_only_fields = fields
+# serializers.py
+
+class JobSeekerProfileSerializer(serializers.ModelSerializer):
+    user = UserProfileSerializer(read_only=True)
+
+    class Meta:
+        model = JobSeeker
+        fields = ['id', 'github_url', 'linkedin_url', 'location', 'bioData', 'about', 'createdAt', 'updatedAt', 'user']
 
 class RecruiterProfileSerializer(serializers.ModelSerializer):
     user = UserProfileSerializer(read_only=True)
@@ -95,35 +104,38 @@ class RecruiterSerializer(serializers.ModelSerializer):
         fields = ['id', 'companyName', 'companyEmail', 'contactInfo']
 
 class RecruiterTrackingSerializer(serializers.ModelSerializer):
-    recruiter = RecruiterSerializer(read_only=True)
-    recruiter_id = serializers.PrimaryKeyRelatedField(
-        queryset=Recruiter.objects.all(),
-        source='recruiter',
-        write_only=True
-    )
+    recruitmentId = serializers.IntegerField(source='id', read_only=True)
+    companyName = serializers.CharField(source='recruiter.companyName', read_only=True)
+    companyInfo = serializers.CharField(source='recruiter.contactInfo', read_only=True)
+    job_seeker_id = serializers.CharField(source='job_seeker.user.id', read_only=True)
+    firstName = serializers.CharField(source='job_seeker.user.firstName', read_only=True)
+    lastName = serializers.CharField(source='job_seeker.user.lastName', read_only=True)
+    githubUrl = serializers.URLField(source='job_seeker.github_url', read_only=True)
+    linkedinUrl = serializers.URLField(source='job_seeker.linkedin_url', read_only=True)
     
-    job_seeker = UserProfileSerializer(read_only=True)
-    job_seeker_id = serializers.PrimaryKeyRelatedField(
-        queryset=User.objects.all(),
-        source='job_seeker',
-        write_only=True
-    )
-
+    # Keep these fields as they are
+    status = serializers.CharField(read_only=True)
+    notes = serializers.CharField(read_only=True)
+    createdAt = serializers.DateTimeField(read_only=True)
+    
     status_display = serializers.CharField(source='get_status_display', read_only=True)
 
     class Meta:
         model = RecruiterTracking
         fields = [
-            'id',
-            'recruiter', 'recruiter_id',
-            'job_seeker', 'job_seeker_id',
+            'recruitmentId',
+            'companyName',
+            'companyInfo',
+            'job_seeker_id',
+            'firstName',
+            'lastName',
+            'githubUrl',
+            'linkedinUrl',
             'status',
             'status_display',
             'notes',
-            'createdAt',
-            'updatedAt'
+            'createdAt'
         ]
-        read_only_fields = ['id', 'recruiter', 'job_seeker', 'status_display', 'createdAt', 'updatedAt']
 
     
 class RecruiterTrackingUpdateSerializer(serializers.ModelSerializer):

@@ -12,7 +12,9 @@ from ..serializers import (
 class RecruiterTrackingListView(APIView):
     def get(self, request,user_id=None):
         service = RecruiterTrackingService()
-        user_id = request.user_data.get('id') or user_id       
+        role = request.user_data.get('role')
+        if role not in ['admin','superAdmin']:      
+          user_id = request.user_data.get('id')      
         if not user_id or not isinstance(user_id, int):
             return Response(
                 {'error': 'Invalid or missing user ID'},

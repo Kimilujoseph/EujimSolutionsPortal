@@ -45,7 +45,21 @@ class RecruiterTrackingRepository(BaseRepository[RecruiterTracking]):
        return self.model_class.objects.filter(recruiter_id=recruiter_id)\
         .select_related(
             'recruiter',
-            'job_seeker'    
+            'job_seeker',
+            'job_seeker__user'    
+        )\
+            .only(
+            'id',
+            'status',
+            'notes',
+            'createdAt',
+            'recruiter__companyName',
+            'recruiter__contactInfo',
+            'job_seeker__github_url', 
+            'job_seeker__linkedin_url',
+            'job_seeker__user__firstName',
+            'job_seeker__user__lastName',
+            'job_seeker__user__id'
         )\
         .order_by('-createdAt')
 

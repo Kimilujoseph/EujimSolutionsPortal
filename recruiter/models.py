@@ -61,7 +61,7 @@ class RecruiterTracking(models.Model):
     ]
 
     recruiter = models.ForeignKey(Recruiter, on_delete=models.CASCADE,null=True,blank=True)
-    job_seeker = models.ForeignKey(User, on_delete=models.CASCADE, related_name='tracking_records',null=True,blank=True)
+    job_seeker = models.ForeignKey(JobSeeker, on_delete=models.CASCADE, related_name='tracking_records',null=True,blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='shortlisted', null=True, blank=True)
     notes = models.TextField(null=True, blank=True)
     createdAt = models.DateTimeField(auto_now_add=True)
