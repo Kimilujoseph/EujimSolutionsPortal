@@ -43,11 +43,11 @@ class JobSeekerCertification(models.Model):
         db_column='awardedDate'  # Match DB column
     )
     description = models.TextField(null=True, blank=True)
-    created_at = models.DateTimeField(
+    createdAt = models.DateTimeField(
         auto_now_add=True,
         db_column='createdAt'  # Match DB column
     )
-    updated_at = models.DateTimeField(
+    updatedAt = models.DateTimeField(
         auto_now=True,
         db_column='updatedAt'  # Match DB column
     )

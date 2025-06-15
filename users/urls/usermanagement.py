@@ -1,5 +1,6 @@
 from django.urls import path
 from ..views.userManagmentViews import (AdminUserListView,AdminUserRestoreView,AdminUserDeleteView,AdminTogglePendingStatusView,AdminToggleSuspendUserView,AdminToggleVerificationView,AdminUserDetailView)
+from ..views.admin_analytics_view import AdminDashboardView
 
 
 urlpatterns = [
@@ -9,6 +10,6 @@ urlpatterns = [
     path('admin/user/<int:user_id>/toggle-pending', AdminTogglePendingStatusView.as_view(), name='admin-user-pending'),
     path('admin/user/<int:user_id>/toggle-verify', AdminToggleVerificationView.as_view(), name='admin-user-verify'),
     path('admin/user/<int:user_id>/profile',AdminUserDetailView.as_view(),name='admin-user-view'),
-    
+    path('admin/dashboard/',AdminDashboardView.as_view(),name='admin_view_dashboard'), 
     path('admin/users/all/', AdminUserListView.as_view(), name='admin-user-list'),
 ]
