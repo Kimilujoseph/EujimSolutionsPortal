@@ -136,7 +136,7 @@ class RecruiterAnalyticsService:
             'total_documents': docs.count(),
             'pending': next((item['count'] for item in status_counts if item['status'] == 'pending'), 0),
             'approved': next((item['count'] for item in status_counts if item['status'] == 'approved'), 0),
-            'latest_document': docs.order_by('-updatedAt').first()
+            #'latest_document': docs.order_by('-updatedAt').first()
         }
 
     def get_recent_activities(self, limit=5):

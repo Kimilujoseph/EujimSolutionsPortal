@@ -11,7 +11,6 @@ class RecruiterDashboardView(APIView):
     CACHE_TIMEOUT = 900
     
     def get_cache_key(self, recruiter_id):
-        """Generate unique cache key for recruiter dashboard"""
         return f'recruiter_dashboard_{recruiter_id}'
     
     def get(self, request):
