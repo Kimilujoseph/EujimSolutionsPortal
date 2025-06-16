@@ -61,11 +61,11 @@ class AdminToggleSuspendUserView(APIView):
             suspension_reason = request.data.get('reason', 'Violation of terms of service')
             
             user = service.toggle_suspension(user_id)
-         
+            print(user.is_suspended)
             if not user:
                 return Response({
                     'status':'failed',
-                    'message':'the user is not found',
+                    'message':'failed to update',
                     'code':404
                 },status=status.HTTP_404_NOT_FOUND)
             
@@ -94,6 +94,7 @@ class AdminToggleSuspendUserView(APIView):
             }, status=status.HTTP_404_NOT_FOUND)
             
         except Exception as e:
+            print(f"Database error: {e}")
             return Response({
                 'status': 'error',
                 'message': 'Failed to update suspension status',

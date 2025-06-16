@@ -114,3 +114,4 @@ class User(AbstractUser, PermissionsMixin):
 
     class Meta:
         db_table = "users"
+        managed=True
