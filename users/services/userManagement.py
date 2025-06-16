@@ -17,7 +17,8 @@ class UserManagementService:
             return user
         except User.DoesNotExist:
             raise ValueError("User does not exist.")
-        except Exception:
+        except Exception as e:
+            print(f"Database error: {e}")
             raise ValueError("An error occurred while processing the suspension request.")
 
     def toggle_pending_status(self, user_id: int) -> Optional[User]:
