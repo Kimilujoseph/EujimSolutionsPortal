@@ -17,7 +17,8 @@ class UserManagementService:
             return user
         except User.DoesNotExist:
             raise ValueError("User does not exist.")
-        except Exception:
+        except Exception as e:
+            print(f"Database error: {e}")
             raise ValueError("An error occurred while processing the suspension request.")
 
     def toggle_pending_status(self, user_id: int) -> Optional[User]:
@@ -31,33 +32,23 @@ class UserManagementService:
         except Exception:
             raise ValueError("An error occurred while processing the pending status request.")
 
-    def toggle_verification(self, user_id: int) -> dict:
+    def toggle_verification(self, user_id: int) -> Optional[User]:
         try:
             user = self.user_repo.get_by_id(user_id)
             user.isVerified = not user.isVerified
             user.save()
             return user
         except User.DoesNotExist:
-            return {
-                'status': 'error',
-                'message': 'User does not exist.',
-                'code': 404
-            }
+           raise ValueError('user does not exist')
           
         except Exception as e:
-          return {
-                'status': 'error',
-                'message': 'An unexpected error occurred while deleting the user.',
-                'details': str(e),
-                'code': 500
-            }
-
+          raise ValueError("An error occured while processing the verification status request")
     def delete_user(self, user_id: int, deleted_by:dict, reason: Optional[str] = None) -> dict:
         try:
             user = self.user_repo.get_by_id(user_id)
             user.is_deleted = True
             user.is_active = False
-            user.deleted_by_id = deleted_by['id']
+            user.deleted_by = deleted_by['id']
             user.deleted_at = timezone.now()
             user.deletion_reason = reason
             user.save()
@@ -116,11 +107,12 @@ class UserManagementService:
                 'code': 500
             }
 
-    def list_users(self, include_deleted: bool = False) -> Union[models.QuerySet, dict]:
+    def list_users(self, include_deleted: bool = False,role:Optional[str]= None) -> Union[models.QuerySet, dict]:
         try:
             if include_deleted:
-                return self.user_repo.get_all()
-            users = self.user_repo.fetch_active_users()
+                users = self.user_repo.fetch_users_by_role(role)
+            users = self.user_repo.fetch_active_users(role)
+          
             #print(users)
             return users
 
@@ -141,7 +133,7 @@ class UserManagementService:
                 'id': user.id,
                 'email': user.email,
                 'first_name': user.firstName,
-                'second_name': user.secondName,
+                'second_name': user.lastName,
                 'isVerified':user.isVerified,
                 'isActive':user.is_active,
                 'isDeleted':user.is_deleted,
@@ -152,7 +144,9 @@ class UserManagementService:
 
             # If jobseeker profile exists
             if hasattr(user, 'jobseeker_profile'):
-                js = user.jobseeker_profile
+                js = getattr(user, 'jobseeker_profile', None)
+                if js is None:
+                    raise ValueError("Jobseeker profile not found for the user.")
                 data['profile_type'] = 'jobseeker'
                 data['profile'] = {
                     'github_url': js.github_url,
@@ -163,8 +157,12 @@ class UserManagementService:
                 }
 
         
-            elif user.recruiters.exists():
+            elif hasattr(user,'recruiters'):
+
                 recruiter = user.recruiters.first()
+                if recruiter is None:
+                    raise ValueError("recruiter profile not found for the user")
+
                 data['profile_type'] = 'recruiter'
                 data['profile'] = {
                     'company_name': recruiter.companyName,
@@ -183,3 +181,15 @@ class UserManagementService:
 
         except ObjectDoesNotExist:
             raise ValueError("User not found")
+        
+    def get_all_users(self):
+        try:
+            users = self.user_repo.fetch_all_users()
+            return users
+        except Exception as e:
+            return {
+                'status': 'error',
+                'message': 'Failed to fetch all users.',
+                'details': str(e),
+                'code': 500
+            }    

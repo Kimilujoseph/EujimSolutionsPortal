@@ -23,14 +23,25 @@ class AdminUserListView(APIView):
     @admin_required
     def get(self, request):
         service = UserManagementService()
-        users = service.list_users(include_deleted=request.query_params.get('show_deleted', False))
+        include_deleted = request.query_params.get('show_deleted','false').lower() == 'true'
+        role=request.query_params.get('role')
+        users = service.list_users(include_deleted=include_deleted,role=role)
         if isinstance(users, dict) and users.get('status') == 'error':
             return Response(users, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         serializer = UserSerializer(users, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
-        
 
+# class AdminUserListAllView(APIView):
+#     @admin_required
+#     def get(self, request):
+#         service = UserManagementService()
+#         users = service.get_all_users()
+#         if isinstance(users, dict) and users.get('status') == 'error':
+#             return Response(users, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+#         serializer = UserSerializer(users, many=True)
+#         return Response(serializer.data, status=status.HTTP_200_OK)
 class AdminUserRestoreView(APIView):
     @admin_required
     def post(self, request, user_id):
@@ -50,6 +61,13 @@ class AdminToggleSuspendUserView(APIView):
             suspension_reason = request.data.get('reason', 'Violation of terms of service')
             
             user = service.toggle_suspension(user_id)
+            print(user.is_suspended)
+            if not user:
+                return Response({
+                    'status':'failed',
+                    'message':'failed to update',
+                    'code':404
+                },status=status.HTTP_404_NOT_FOUND)
             
             if user.is_suspended:
                 send_suspension_email(
@@ -76,6 +94,7 @@ class AdminToggleSuspendUserView(APIView):
             }, status=status.HTTP_404_NOT_FOUND)
             
         except Exception as e:
+            print(f"Database error: {e}")
             return Response({
                 'status': 'error',
                 'message': 'Failed to update suspension status',
@@ -90,6 +109,12 @@ class AdminTogglePendingStatusView(APIView):
 
         try:
             user = service.toggle_pending_status(user_id)
+            if not user:
+                return Response({
+                    'status':'failed',
+                    'message':'the user is not found',
+                    'code':404
+                },status=status.HTTP_404_NOT_FOUND)
             if user.is_pending is False:
                 send_approval_email(user,request)
             else:
@@ -111,6 +136,12 @@ class AdminToggleVerificationView(APIView):
         service = UserManagementService()
         try:
             user = service.toggle_verification(user_id)
+            if not user:
+                return Response({
+                    'status':'failed',
+                    'message':'the user is not found',
+                    'code':404
+                },status=status.HTTP_404_NOT_FOUND)
             return Response({
                 'status': 'success',
                 'message': f"User {user.firstName} verification status updated.",

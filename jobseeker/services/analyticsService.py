@@ -12,6 +12,7 @@ class AnalyticsService:
         """
         profile_completion = calculate_profile_completion(job_seeker_id)
         recruiter_engagement = get_recruiter_engagement(job_seeker_id)
+       # print(recruiter_engagement)
         application_status_stats = get_applications_status_stats(job_seeker_id)
         skill_distribution_data = skill_distribution(job_seeker_id)
         skills_growth_timeline = get_skills_growth_timeline(job_seeker_id)

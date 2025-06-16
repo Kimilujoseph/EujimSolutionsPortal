@@ -16,6 +16,7 @@ class JWTAuthMiddleware:
 
     def __call__(self, request):
         # Skip auth for exempt paths
+        print(request.path)
         if any(request.path.startswith(path) for path in self.exempt_paths):
             return self.get_response(request)
 
