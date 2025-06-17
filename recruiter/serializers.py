@@ -108,6 +108,7 @@ class RecruiterTrackingSerializer(serializers.ModelSerializer):
     recruitmentId = serializers.IntegerField(source='id', read_only=True)
     companyName = serializers.CharField(source='recruiter.companyName', read_only=True)
     companyInfo = serializers.CharField(source='recruiter.contactInfo', read_only=True)
+    job_seeker = serializers.CharField(source='job_seeker.user.id', read_only=True)
     firstName = serializers.CharField(source='job_seeker.user.firstName', read_only=True)
     lastName = serializers.CharField(source='job_seeker.user.lastName', read_only=True)
     githubUrl = serializers.URLField(source='job_seeker.github_url', read_only=True)
@@ -127,6 +128,7 @@ class RecruiterTrackingSerializer(serializers.ModelSerializer):
             'recruitmentId',
             'companyName',
             'companyInfo',
+            'job_seeker',
             'job_seeker_id',
             'firstName',
             'lastName',
