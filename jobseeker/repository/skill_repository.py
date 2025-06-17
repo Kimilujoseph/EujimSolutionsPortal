@@ -36,8 +36,7 @@ class SkillSetRepository(JobSeekerBaseRepository[SkillSet]):
 
     def delete_skill_for_user(self,user_id:int,skill_id:int)->int:
         return SkillSet.objects.filter(
-            user_id = user_id,
-            skill_id = skill_id
+            id = skill_id
         ).delete()[0]
 
 

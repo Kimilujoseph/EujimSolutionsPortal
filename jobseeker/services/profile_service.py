@@ -48,6 +48,7 @@ class ProfileService:
     
     def delete_skill_from_profile(self,user_id:int,skill_id:int):
         try:
+            print(f"kill id found:{skill_id}")
             deleted_count = self.skillset_repo.delete_skill_for_user(
                 user_id=user_id,
                 skill_id=skill_id
