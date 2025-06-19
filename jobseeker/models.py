@@ -47,6 +47,7 @@ class JobSeekerCertification(models.Model):
         auto_now_add=True,
         db_column='createdAt'  # Match DB column
     )
+    
     updatedAt = models.DateTimeField(
         auto_now=True,
         db_column='updatedAt'  # Match DB column
