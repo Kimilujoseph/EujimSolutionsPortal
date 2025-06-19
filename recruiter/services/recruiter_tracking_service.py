@@ -30,9 +30,11 @@ class RecruiterTrackingService:
         serializer = RecruiterTrackingSerializer(data=requester_data)
         if not serializer.is_valid():
             raise ValidationError(serializer.errors)
+        
         if not isinstance(serializer.validated_data,dict):
             raise ValidationError({'error':'incorrect data format passed'})
-        return self.tracking_repo.create(recruiter_id=recruiter_id, **serializer.validated_data)
+        
+        return self.tracking_repo.create(**serializer.validated_data)
 
     def get_trackings(self, user_id: int) -> models.QuerySet:
         recruiter = self.recruiter_repo.get_by_user_id(user_id)

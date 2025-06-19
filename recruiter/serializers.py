@@ -104,21 +104,23 @@ class RecruiterSerializer(serializers.ModelSerializer):
         fields = ['id', 'companyName', 'companyEmail', 'contactInfo']
 
 class RecruiterTrackingSerializer(serializers.ModelSerializer):
+    # Read-only fields for display
     recruitmentId = serializers.IntegerField(source='id', read_only=True)
     companyName = serializers.CharField(source='recruiter.companyName', read_only=True)
     companyInfo = serializers.CharField(source='recruiter.contactInfo', read_only=True)
-    job_seeker_id = serializers.CharField(source='job_seeker.user.id', read_only=True)
+    job_seeker = serializers.CharField(source='job_seeker.user.id', read_only=True)
     firstName = serializers.CharField(source='job_seeker.user.firstName', read_only=True)
     lastName = serializers.CharField(source='job_seeker.user.lastName', read_only=True)
     githubUrl = serializers.URLField(source='job_seeker.github_url', read_only=True)
     linkedinUrl = serializers.URLField(source='job_seeker.linkedin_url', read_only=True)
-    
-    # Keep these fields as they are
     status = serializers.CharField(read_only=True)
     notes = serializers.CharField(read_only=True)
     createdAt = serializers.DateTimeField(read_only=True)
-    
     status_display = serializers.CharField(source='get_status_display', read_only=True)
+
+    # Writable fields
+    job_seeker_id = serializers.IntegerField(write_only=True)
+    recruiter_id = serializers.IntegerField(write_only=True)
 
     class Meta:
         model = RecruiterTracking
@@ -126,6 +128,7 @@ class RecruiterTrackingSerializer(serializers.ModelSerializer):
             'recruitmentId',
             'companyName',
             'companyInfo',
+            'job_seeker',
             'job_seeker_id',
             'firstName',
             'lastName',
@@ -134,9 +137,26 @@ class RecruiterTrackingSerializer(serializers.ModelSerializer):
             'status',
             'status_display',
             'notes',
-            'createdAt'
+            'createdAt',
+            'recruiter_id'  # Add this to fields
         ]
 
+    def create(self, validated_data):
+        # Handle the creation with the writable fields
+        job_seeker_id = validated_data.pop('job_seeker_id')
+        recruiter_id = validated_data.pop('recruiter_id')
+        
+        # Get the related objects
+        job_seeker = JobSeeker.objects.get(user__id=job_seeker_id)
+        recruiter = Recruiter.objects.get(id=recruiter_id)
+        
+        # Create the tracking record
+        tracking = RecruiterTracking.objects.create(
+            job_seeker=job_seeker,
+            recruiter=recruiter,
+            **validated_data
+        )
+        return tracking
     
 class RecruiterTrackingUpdateSerializer(serializers.ModelSerializer):
     class Meta:
