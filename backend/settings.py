@@ -166,8 +166,9 @@ EMAIL_PORT = os.getenv('EMAIL_PORT')
 EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS')
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
-SITE_NAME = os.getenv('SITE_NAME', 'Your Application Name')  # Used in email subjects
-FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:3000')  # For links in emails
+SITE_NAME = os.getenv('SITE_NAME', 'Your Application Name')  
+FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:5173') 
+BACKEND_URL = os.getenv('BACKEND_URL', 'http://localhost:5000/api/v1')  # Backend URL for API calls
 DEFAULT_SUSPENSION_DAYS = 7  # Default suspension duration if not specified
 APPEAL_WINDOW_DAYS = 7 
 

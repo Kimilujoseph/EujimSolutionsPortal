@@ -1,4 +1,3 @@
-
 from django.shortcuts import render
 from  rest_framework.response import Response
 from rest_framework.views import APIView
@@ -8,11 +7,12 @@ from rest_framework.decorators import api_view
 from rest_framework.exceptions import AuthenticationFailed
 from ..utils import send_confirmation_email,send_verification_email,send_approval_email
 from  django.conf import settings
+from django.shortcuts import redirect
 from ..permissions import admin_required
+from rest_framework.permissions import AllowAny
 from ..serializers.user_serializer import UserSerializer
+import uuid
 from rest_framework.exceptions import AuthenticationFailed, ValidationError, APIException
-# Create your views here.
-
 from rest_framework import generics
 from ..models import User
 from ..serializers.user_serializer import UserSerializer
@@ -48,18 +48,42 @@ class RegisterEmployerView(APIView):
            return Response({"message":"internal server errorr"},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class VerifyEmail(APIView):
-   def get(self,request,verification_code):
-      try:
-         service = AuthService()
-         user = service.verify_email(verification_code)
-         if user:
-            return Response({"message":"verification successfull"},status=status.HTTP_200_OK)
-         else:
-            return Response({"message":"verification failed,Token expired"},status=status.HTTP_404_NOT_FOUND)
-      except Exception as e:
-         print(str(e))
-         return Response({"message":"internal sever error"},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+    def get(self, request, verification_code):
+        try:
+            service = AuthService()
+            user = service.verify_email(verification_code)
+            if user:
+                frontend_login_url =f"{ settings.FRONTEND_URL}/login" 
+                return redirect(frontend_login_url)
+            else:
+                frontend_expired_url = f"{settings.FRONTEND_URL}/token-expired"
+                return redirect(frontend_expired_url)
+        except Exception as e:
+            print(str(e))
+            return Response({"message": "Internal server error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+#later refactor this  module toabide by the architecture
+class ResendVerificationEmail(APIView):
+    def post(self, request):
+        email = request.data.get('email')
+        print(f"email submitted:{email}")
+        try:
+            user = User.objects.get(email=email)
+            if not user:
+                return Response({"error": "Email not found"}, status=404)
+            if user.isVerified:
+                return Response({"message": "Email already verified"}, status=400)
+            
+            user.verificationCode = uuid.uuid4()
+            user.save()
+            send_verification_email(user, request)
+            return Response({"message": "New verification email sent"})
+            
+        except User.DoesNotExist:
+            return Response({"error": "Email not found"}, status=404)
+        except Exception as e:
+            print(f"Error in ResendVerificationEmail: {str(e)}")
+            return Response({"error": "Internal server error"}, status=500)
 class LoginView(APIView):
     def post(self, request):
         email = request.data.get('email')

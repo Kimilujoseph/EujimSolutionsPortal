@@ -61,7 +61,6 @@ class AdminToggleSuspendUserView(APIView):
             suspension_reason = request.data.get('reason', 'Violation of terms of service')
             
             user = service.toggle_suspension(user_id)
-            print(user.is_suspended)
             if not user:
                 return Response({
                     'status':'failed',
