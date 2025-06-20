@@ -14,6 +14,7 @@ class JWTAuthMiddleware:
             '/api/v1/auth/register/',
             '/api/v1/auth/verify-email/',
             '/favicon.ico'
+            
         ]
 
     def __call__(self, request):

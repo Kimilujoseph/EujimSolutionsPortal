@@ -24,9 +24,6 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
     new_password = serializers.CharField(write_only=True)
 
     def validate(self, attrs):
-        from django.contrib.auth import get_user_model
-        User = get_user_model()
-
         try:
             user = User.objects.get(id=attrs['uid'])
         except User.DoesNotExist:
