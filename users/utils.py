@@ -9,9 +9,8 @@ from django.urls import reverse
 
 
 def send_verification_email(user, request):
-    verification_url = request.build_absolute_uri(
-        f"/verify-email/{user.verificationCode}/"
-    )
+    verification_url = f"{settings.BACKEND_URL}/verify-email/{user.verificationCode}/"
+    
     
     context = {
         'user': user,
@@ -154,7 +153,7 @@ def send_password_reset_confirmation_email(user):
 
     context = {
         'user': user,
-        'site_name': "YourSiteName",  # You can make this dynamic if needed
+        'site_name': "YourSiteName", 
     }
 
     html_content = render_to_string('emails/password_reset_confirm.html', context)

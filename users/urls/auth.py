@@ -1,10 +1,11 @@
 from django.urls import path,re_path
 from ..views.password_resetviews import PasswordResetRequestView, PasswordResetConfirmView
-from ..views.userAuthViews import (RegisterView,VerifyEmail,LoginView,LogoutView,RegisterEmployerView)
+from ..views.userAuthViews import (RegisterView,VerifyEmail,LoginView,LogoutView,RegisterEmployerView,ResendVerificationEmail)
 from django.views.generic import TemplateView
 urlpatterns = [
     path('register',RegisterView.as_view(),name= 'register'),
     path('register/employer',RegisterEmployerView.as_view(),name='employerRegister'),
+    path('request-verification-code/',ResendVerificationEmail.as_view(), name='request-verification-code'),
     path('verify-email/<str:verification_code>/', VerifyEmail.as_view(), name='verify-email'),
     path('login',LoginView.as_view(),name='login'),
     path('logout',LogoutView.as_view(),name='logout'),
