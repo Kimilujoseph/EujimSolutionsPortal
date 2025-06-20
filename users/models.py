@@ -23,9 +23,9 @@ class User(AbstractUser, PermissionsMixin):
     
     # Status fields (match exact DB column names)
     is_active = models.BooleanField(default=True, db_column='is_active')
-    is_staff = models.BooleanField(default=False, db_column='isStaff')
-    is_superuser = models.BooleanField(default=False, db_column='isSuperuser')
-    last_login = models.DateTimeField(null=True, blank=True, db_column='lastLogin')
+    isStaff = models.BooleanField(default=False, db_column='isStaff')
+    isSuperuser = models.BooleanField(default=False, db_column='isSuperuser')
+    lastLogin = models.DateTimeField(null=True, blank=True, db_column='lastLogin')
     
     # Your custom fields (match exact DB column names)
     is_deleted = models.BooleanField(default=False, db_column='is_deleted')
@@ -36,7 +36,7 @@ class User(AbstractUser, PermissionsMixin):
     role = models.CharField(max_length=20, choices=ROLE_ENUM, null=True, blank=True, db_column='role')
     createdAt = models.DateTimeField(auto_now_add=True, db_column='createdAt')
     updatedAt = models.DateTimeField(auto_now=True, db_column='updatedAt')
-    date_joined = models.DateTimeField(auto_now_add=True, db_column='dateJoined')
+    dateJoined = models.DateTimeField(auto_now_add=True, db_column='dateJoined')
     
     # Additional fields from your DB table
     deleted_at = models.DateTimeField(null=True, blank=True, db_column='deleted_at')
@@ -64,37 +64,37 @@ class User(AbstractUser, PermissionsMixin):
     # Property aliases for Django internals
     @property
     def is_staff(self):
-        return self.is_staff
+        return self.isStaff
     
     @is_staff.setter
     def is_staff(self, value):
-        self.is_staff = value
+        self.isStaff = value
         
     @property
     def is_superuser(self):
-        return self.is_superuser
+        return self.isSuperuser
     
     @is_superuser.setter
     def is_superuser(self, value):
-        self.is_superuser = value
+        self.isSuperuser = value
         
     
         
     @property
     def last_login(self):
-        return self.last_login
+        return self.lastLogin
     
     @last_login.setter
     def last_login(self, value):
-        self.last_login = value
+        self.lastLogin = value
         
     @property
     def date_joined(self):
-        return self.date_joined
+        return self.dateJoined
     
     @date_joined.setter
     def date_joined(self, value):
-        self.date_joined = value
+        self.dateJoined = value
     
     @property
     def first_name(self):
