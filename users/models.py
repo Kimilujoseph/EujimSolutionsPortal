@@ -80,13 +80,13 @@ class User(AbstractUser, PermissionsMixin):
         
     
         
-    @property
-    def last_login(self):
-        return self.last_login
+    # @property
+    # def last_login(self):
+    #     return self.last_login
     
-    @last_login.setter
-    def last_login(self, value):
-        self.last_login = value
+    # @last_login.setter
+    # def last_login(self, value):
+    #     self.last_login = value
         
     @property
     def date_joined(self):

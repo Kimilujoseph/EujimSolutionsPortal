@@ -12,6 +12,7 @@ class JWTAuthMiddleware:
             '/api/v1/auth/logout',
             '/api/v1/auth/register/',
             '/api/v1/auth/verify-email/',
+            
         ]
 
     def __call__(self, request):
