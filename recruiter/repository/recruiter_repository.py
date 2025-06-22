@@ -64,7 +64,26 @@ class RecruiterTrackingRepository(BaseRepository[RecruiterTracking]):
         .order_by('-createdAt')
 
     def get_by_job_seeker(self, job_seeker_id: int) -> models.QuerySet:
-        return self.filter(job_seeker_id=job_seeker_id)
+        return self.model_class.objects.filter(job_seeker_id=job_seeker_id)\
+         .select_related(
+            'recruiter',
+            'job_seeker',
+            'job_seeker__user'
+        )\
+            .only(
+            'id',
+            'status',
+            'notes',
+            'createdAt',
+            'recruiter__companyName',
+            'recruiter__contactInfo',
+            'job_seeker__github_url',
+            'job_seeker__linkedin_url',
+            'job_seeker__user__firstName',
+            'job_seeker__user__lastName',
+            'job_seeker__user__id'
+        )\
+            .order_by('-createdAt')
     def get_tracking_by_id(self, tracking_id: int) -> Optional[RecruiterTracking]:
         return self.model_class.objects.filter(id=tracking_id)\
         .select_related(

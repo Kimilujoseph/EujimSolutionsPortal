@@ -85,6 +85,7 @@ class RecruiterTrackingDetailView(APIView):
                 {'error': str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+        
     
     def delete(self, request, tracking_id):
         service = RecruiterTrackingService()
@@ -98,3 +99,23 @@ class RecruiterTrackingDetailView(APIView):
                 {'error': str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+        
+class Jobseeker_recruitment_trackingListView(APIView):
+    def get(self, request, user_id=None):
+        service = RecruiterTrackingService()
+        role = request.user_data.get('role')
+        if role not in ['admin', 'superAdmin']:
+            user_id = request.user_data.get('id')
+        if not user_id or not isinstance(user_id, int):
+            return Response(
+                {'error': 'Invalid or missing user ID'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        if not user_id:
+            return Response(
+                {'error': 'User ID not found'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        trackings = service.get_jobseeker_tracking(user_id)
+        serializer = RecruiterTrackingSerializer(trackings, many=True)
+        return Response(serializer.data)

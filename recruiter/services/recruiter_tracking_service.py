@@ -1,5 +1,6 @@
 # services/recruiter_service.py
 from ..models import RecruiterTracking
+from jobseeker.repository.jobseeker_repository import JobSeekerRepository
 from ..repository.recruiter_repository import (
     RecruiterRepository,
     RecruiterTrackingRepository
@@ -17,6 +18,7 @@ class RecruiterTrackingService:
     def __init__(self):
         self.tracking_repo = RecruiterTrackingRepository()
         self.recruiter_repo = RecruiterRepository()
+        self.job_seeker_repo = JobSeekerRepository()
 
     def create_tracking(self, user_id: int, data: Dict[str, Any]) -> RecruiterTracking:
         recruiter = self.recruiter_repo.get_by_user_id(user_id);
@@ -44,6 +46,14 @@ class RecruiterTrackingService:
         if not recruiter_id and not isinstance(recruiter_id, int):
             raise ValidationError({"error": "Recruiter not found"})
         return self.tracking_repo.get_by_recruiter(recruiter_id)
+    def get_jobseeker_tracking(self,user_id:int) -> models.QuerySet:
+        job_seeker = self.job_seeker_repo.get_by_user_id(user_id)
+        if not job_seeker:
+            raise ValidationError({'error': 'Job seeker profile not found'})
+        job_seeker_id = getattr(job_seeker, 'id', None)
+        if not job_seeker_id and not isinstance(job_seeker_id, int):
+            raise ValidationError({"error": "Job seeker not found"})
+        return self.tracking_repo.get_by_job_seeker(job_seeker_id)
 
     def get_tracking(self, tracking_id: int) -> Optional[RecruiterTracking]:
         return self.tracking_repo.get_tracking_by_id(tracking_id)
