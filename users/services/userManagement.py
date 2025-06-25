@@ -203,4 +203,37 @@ class UserManagementService:
                 'message': 'Failed to fetch all users.',
                 'details': str(e),
                 'code': 500
+            }
+    def update_user_names(self, user_id: int, first_name: str = None, last_name: str = None) -> dict:
+        try:
+            user = self.user_repo.get_by_id(user_id)
+            
+            if first_name is not None:
+                user.firstName = first_name
+            if last_name is not None:
+                user.lastName = last_name
+                
+            user.save()
+            
+            return {
+                'status': 'success',
+                'message': 'User names updated successfully',
+                'data': {
+                    'user_id': user.id,
+                    'first_name': user.firstName,
+                    'last_name': user.lastName
+                }
+            }
+        except User.DoesNotExist:
+            return {
+                'status': 'error',
+                'message': 'User does not exist.',
+                'code': 404
+            }
+        except Exception as e:
+            return {
+                'status': 'error',
+                'message': 'An error occurred while updating user names',
+                'details': str(e),
+                'code': 500
             }    
