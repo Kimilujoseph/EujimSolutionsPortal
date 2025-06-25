@@ -21,13 +21,13 @@ class User(AbstractUser, PermissionsMixin):
     email = models.EmailField(max_length=45, unique=True)
     password = models.CharField(max_length=255, blank=True, null=True)
     
-    # Status fields (match exact DB column names)
+   
     is_active = models.BooleanField(default=True, db_column='is_active')
     isStaff = models.BooleanField(default=False, db_column='isStaff')
     isSuperuser = models.BooleanField(default=False, db_column='isSuperuser')
     lastLogin = models.DateTimeField(null=True, blank=True, db_column='lastLogin')
     
-    # Your custom fields (match exact DB column names)
+    
     is_deleted = models.BooleanField(default=False, db_column='is_deleted')
     is_suspended = models.BooleanField(default=False, db_column='is_suspended')
     is_pending = models.BooleanField(default=True, db_column='is_pending')

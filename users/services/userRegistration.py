@@ -4,29 +4,45 @@ from ..models import User
 from typing  import Tuple
 import jwt
 from django.conf import settings
+from django.shortcuts import redirect
 from datetime import datetime,timedelta,timezone
 from rest_framework.exceptions import AuthenticationFailed, ValidationError,APIException
 from django.db import IntegrityError, DatabaseError
+from ..exceptions import (ServiceException, NotFoundException, ConflictException, InternalErrorException)
+from ..utils import send_verification_email
 
 class AuthService:
     def __init__(self):
         self.user_repo: UserRepository = UserRepository()
 
-    def register_user(self, registration_data: dict) -> User:
+    def register_user(self, registration_data: dict,request) -> str:
         try:
             serializer = UserRegistrationSerializer(data=registration_data)
             serializer.is_valid(raise_exception=True)
-            return self.user_repo.create_user(serializer.validated_data)
+            if not isinstance(serializer.validated_data, dict):
+             raise  ServiceException('Validated data is not a valid dictionary')
+            user = self.user_repo.create_user(serializer.validated_data)
+            send_verification_email(user, request)
+            message=f'User {user.firstName} registered successfully. Verification email sent.'
+            return message
         except ValidationError as e:
-            raise e
+            raise ServiceException(f"Validation error: {e.detail}")
         except (IntegrityError, DatabaseError) as e:
-            raise APIException("Database error occurred while creating user.")
+            raise InternalErrorException("Database error occurred while creating user.")
         except Exception as e:
-            raise APIException("Unexpected error during user registration.")
+            raise InternalErrorException("Unexpected error during user registration.")
 
-    def verify_email(self, verification_code: str) -> bool:
+    def verify_email(self, verification_code: str) -> str:
         try:
-            return self.user_repo.verify_user_email(verification_code)
+            user= self.user_repo.verify_user_email(verification_code)
+            if user:
+               frontend_login_url =f"{settings.FRONTEND_URL}/login"
+               return frontend_login_url
+            else:
+                frontend_expired_url = f"{settings.FRONTEND_URL}/token-expired"
+                return frontend_expired_url
+        except User.DoesNotExist:
+            raise NotFoundException("User with this verification code does not exist.")
         except Exception:
             raise APIException("Error verifying email.")
 
@@ -40,7 +56,7 @@ class AuthService:
 
     def _generate_jwt_token(self, user: User) -> str:
         payload = {
-            'id': user.id,
+            'id': user.pk,
             'email': user.email,
             'firstName': user.firstName,
             'secondName': user.lastName,
