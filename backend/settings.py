@@ -22,10 +22,10 @@ ALLOWED_HOSTS = []
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.getenv('DB_NAME'),
-        'USER': os.getenv('DB_USER'),
-        'PASSWORD': os.getenv('DB_PASSWORD'),
-        'HOST': os.getenv('DB_HOST'),
+        'NAME': 'eujimSolution',
+        'USER': 'root',
+        'PASSWORD': 'seth2019',
+        'HOST': '127.0.0.1',
         'PORT': '3306',
     }
 }
