@@ -22,7 +22,9 @@ class PasswordResetConfirmView(APIView):
         data = {
             "uid": uid,
             "token": token,
-            "new_password": request.data.get("new_password")
+            "current_password": request.data.get("current_password"),
+            "new_password": request.data.get("new_password"),
+            "confirm_password": request.data.get("confirm_password")
         }
         serializer = PasswordResetConfirmSerializer(data=data)
         if serializer.is_valid():

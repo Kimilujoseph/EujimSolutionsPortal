@@ -13,6 +13,8 @@ class JWTAuthMiddleware:
             '/api/v1/auth/request-verification-code',
             '/api/v1/auth/register/',
             '/api/v1/auth/verify-email/',
+            '/api/v1/'
+            '/api/v1/auth/request-reset-password/',
             '/favicon.ico'
             
         ]

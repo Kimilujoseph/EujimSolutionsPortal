@@ -21,7 +21,9 @@ class PasswordResetRequestSerializer(serializers.Serializer):
 class PasswordResetConfirmSerializer(serializers.Serializer):
     uid = serializers.IntegerField()
     token = serializers.CharField()
+    current_password = serializers.CharField(write_only=True, required=False)
     new_password = serializers.CharField(write_only=True)
+    confirm_password = serializers.CharField(write_only=True)
 
     def validate(self, attrs):
         try:
@@ -31,6 +33,12 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
 
         if not password_reset_token.check_token(user, attrs['token']):
             raise serializers.ValidationError("Invalid or expired token")
+        
+        if not user.check_password(attrs.get('current_password', '')):
+            raise serializers.ValidationError({"current_password":"Current password is incorrect"})
+        
+        if attrs['new_password'] != attrs['confirm_password']:
+            raise serializers.ValidationError({"confirm_password": "passwords do not match"})
 
         attrs['user'] = user
         return attrs
