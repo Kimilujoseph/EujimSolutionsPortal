@@ -4,40 +4,57 @@ from typing import Optional, Union
 from django.utils import timezone
 from django.db import models
 from django.core.exceptions import ObjectDoesNotExist
-
+from ..exceptions import (ServiceException,NotFoundException,ConflictException,InternalErrorException)
+from ..utils import (send_suspension_email,send_unsuspension_email,send_approval_email,send_disapproval_email)
 class UserManagementService:
     def __init__(self):
         self.user_repo = UserManagementRepository()
 
-    def toggle_suspension(self, user_id: int) -> Optional[User]:
+    def toggle_suspension(self, user_id: int,request,suspension_reason:str) -> Optional[str]:
         try:
             user = self.user_repo.get_by_id(user_id)
             user.is_suspended = not user.is_suspended
             user.save()
-            return user
+            if user.is_suspended:
+                send_suspension_email(user=user, request=request, suspension_reason=suspension_reason)
+                message=f"User {user.firstName} has been suspended."
+            else:
+               send_unsuspension_email(user, request)
+               message=f"User {user.firstName}'s suspension has been lifted."
+            return message
         except User.DoesNotExist:
-            raise ValueError("User does not exist.")
+            raise NotFoundException("User does not exist.")
         except Exception as e:
-            print(f"Database error: {e}")
-            raise ValueError("An error occurred while processing the suspension request.")
+          raise InternalErrorException("An error occurred while processing the suspension request.")
 
-    def toggle_pending_status(self, user_id: int) -> Optional[User]:
+    def toggle_pending_status(self, user_id: int,request) -> Optional[str]:
         try:
+            if not user_id and not  request:
+               raise ServiceException("bad request")
             user = self.user_repo.get_by_id(user_id)
             user.is_pending = not user.is_pending
             user.save()
-            return user
+            if user.is_pending:
+                send_disapproval_email(user,request)
+                message = f"User {user.firstName} is now pending approval."
+            else:
+                send_approval_email(user,request)
+                message = f"User {user.firstName} has been approved."
+            return message;
         except User.DoesNotExist:
-            raise ValueError("User does not exist.")
+            raise NotFoundException("User does not exist.")
         except Exception:
-            raise ValueError("An error occurred while processing the pending status request.")
+            raise InternalErrorException("An error occurred while processing the pending status request.")
 
-    def toggle_verification(self, user_id: int) -> Optional[User]:
-        try:
+    def toggle_verification(self, user_id: int,request) -> Optional[str]:
+        try: 
+            if not user_id:
+               raise ServiceException("bad request")
             user = self.user_repo.get_by_id(user_id)
             user.isVerified = not user.isVerified
             user.save()
-            return user
+            message = f"User {user.firstName} verification status updated."
+            return message
         except User.DoesNotExist:
            raise ValueError('user does not exist')
           
@@ -45,10 +62,12 @@ class UserManagementService:
           raise ValueError("An error occured while processing the verification status request")
     def delete_user(self, user_id: int, deleted_by:dict, reason: Optional[str] = None) -> dict:
         try:
+            if not user_id and not deleted_by:
+               raise ServiceException("bad request")
             user = self.user_repo.get_by_id(user_id)
             user.is_deleted = True
             user.is_active = False
-            user.deleted_by = deleted_by['id']
+            user.deleted_by_id = deleted_by['id']
             user.deleted_at = timezone.now()
             user.deletion_reason = reason
             user.save()
@@ -79,6 +98,8 @@ class UserManagementService:
 
     def restore_user(self, user_id: int, restored_by:dict) -> dict:
         try:
+            if not user_id and not restored_by:
+               raise ServiceException("bad request")
             user = self.user_repo.get_by_id(user_id)
             user.is_deleted = False
             user.is_active = True
@@ -86,26 +107,17 @@ class UserManagementService:
 
             return {
                 'status': 'success',
-                'message': f'User {user.id} successfully restored.',
+                'message': f'User {user.pk} successfully restored.',
                 'data': {
-                    'user_id': user.id,
+                    'user_id': user.pk,
                     'restored_by': restored_by["email"],
                     'restored_at': timezone.now()
                 }
             }
         except User.DoesNotExist:
-            return {
-                'status': 'error',
-                'message': 'User does not exist.',
-                'code': 404
-            }
+           raise NotFoundException("user not found")
         except Exception as e:
-            return {
-                'status': 'error',
-                'message': 'An unexpected error occurred while restoring the user.',
-                'details': str(e),
-                'code': 500
-            }
+            raise InternalErrorException("error ocured while processing the request")
 
     def list_users(self, include_deleted: bool = False,role:Optional[str]= None) -> Union[models.QuerySet, dict]:
         try:
@@ -113,16 +125,13 @@ class UserManagementService:
                 users = self.user_repo.fetch_users_by_role(role)
             users = self.user_repo.fetch_active_users(role)
           
-            #print(users)
+            if not users:
+                raise NotFoundException("no users currently")
             return users
+        
 
         except Exception as e:
-            return {
-                'status': 'error',
-                'message': 'Failed to fetch user list.',
-                'details': str(e),
-                'code': 500
-            }
+            raise InternalErrorException("An error occured while fetching users")
         
     def get_user_with_profile(self, user_id):
         try:
@@ -130,7 +139,7 @@ class UserManagementService:
             user = self.user_repo.get_user_with_related(user_id)
 
             data = {
-                'id': user.id,
+                'id': user.pk,
                 'email': user.email,
                 'first_name': user.firstName,
                 'second_name': user.lastName,
@@ -178,9 +187,11 @@ class UserManagementService:
                 data['profile'] = {}
 
             return data
-
-        except ObjectDoesNotExist:
-            raise ValueError("User not found")
+        
+        except User.DoesNotExist:
+            raise NotFoundException("user does not exist")
+        except Exception as e:
+            raise InternalErrorException("An error occured while processing your request")
         
     def get_all_users(self):
         try:
@@ -190,6 +201,39 @@ class UserManagementService:
             return {
                 'status': 'error',
                 'message': 'Failed to fetch all users.',
+                'details': str(e),
+                'code': 500
+            }
+    def update_user_names(self, user_id: int, first_name: str = None, last_name: str = None) -> dict:
+        try:
+            user = self.user_repo.get_by_id(user_id)
+            
+            if first_name is not None:
+                user.firstName = first_name
+            if last_name is not None:
+                user.lastName = last_name
+                
+            user.save()
+            
+            return {
+                'status': 'success',
+                'message': 'User names updated successfully',
+                'data': {
+                    'user_id': user.id,
+                    'first_name': user.firstName,
+                    'last_name': user.lastName
+                }
+            }
+        except User.DoesNotExist:
+            return {
+                'status': 'error',
+                'message': 'User does not exist.',
+                'code': 404
+            }
+        except Exception as e:
+            return {
+                'status': 'error',
+                'message': 'An error occurred while updating user names',
                 'details': str(e),
                 'code': 500
             }    

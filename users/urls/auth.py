@@ -9,7 +9,7 @@ urlpatterns = [
     path('verify-email/<str:verification_code>/', VerifyEmail.as_view(), name='verify-email'),
     path('login',LoginView.as_view(),name='login'),
     path('logout',LogoutView.as_view(),name='logout'),
-    path('request-reset-password', PasswordResetRequestView.as_view(), name='request-reset-password'),
+    path('request-reset-password/', PasswordResetRequestView.as_view(), name='request-reset-password'),
     path('password-reset-confirm/<int:uidb64>/<str:token>', PasswordResetConfirmView.as_view(), name='password-reset-confirm'),
     re_path(r'^password-reset-confirm/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[^/]+)/$',PasswordResetConfirmView.as_view(),name='password-reset-confirm'
 ),

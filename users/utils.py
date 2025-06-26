@@ -119,16 +119,17 @@ def send_unsuspension_email(user, request):
     email.attach_alternative(html_content, "text/html")
     email.send()
 
-from django.utils.http import urlsafe_base64_encode
-from django.utils.encoding import force_bytes
-def send_password_reset_email(user, request, token,uidb64=None):
+def send_password_reset_email(user, request, token, uidb64=None):
+    from django.conf import settings
+    from django.utils.http import urlsafe_base64_encode
+    from django.utils.encoding import force_bytes
+
     if not uidb64:
         uidb64 = urlsafe_base64_encode(force_bytes(user.id))
+    # Construct the reset URL using the frontend URL
+    reset_url = f"{settings.FRONTEND_URL}/reset-password/{uidb64}/{token}/"
+
     current_site = get_current_site(request)
-    reset_url = request.build_absolute_uri(
-        reverse('password-reset-confirm', kwargs={'uidb64':uidb64 , 'token': token})
-    )
-    
     context = {
         'user': user,
         'reset_url': reset_url,

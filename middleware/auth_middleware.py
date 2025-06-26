@@ -10,8 +10,10 @@ class JWTAuthMiddleware:
         self.exempt_paths = [
             '/api/v1/auth/login',
             '/api/v1/auth/logout',
-            '/api/v1/auth/request-verification-code',
+            '/api/v1/auth/password-reset-confirm/',
+            '/api/v1/auth/request-verification-code/',
             '/api/v1/auth/register/',
+            '/api/v1/auth/request-reset-password/',
             '/api/v1/auth/verify-email/',
             '/api/v1/'
             '/api/v1/auth/request-reset-password/',
