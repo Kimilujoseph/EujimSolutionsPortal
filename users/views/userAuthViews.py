@@ -20,10 +20,9 @@ from ..serializers.user_serializer import UserSerializer
 class RegisterView(APIView):
     @admin_required
     def post(self, request):
-        
         service = AuthService()
         message = service.register_user(request.data,request)
-        return Response({f"message":"${message}"}, status=status.HTTP_201_CREATED)
+        return Response({f"message":{message}}, status=status.HTTP_201_CREATED)
         
 class RegisterEmployerView(APIView):
     def post(self,request):
@@ -33,7 +32,7 @@ class RegisterEmployerView(APIView):
             data["is_pending"] = False
             data["role"] = "employer"
             service = AuthService()
-            user = service.register_user(data)
+            user = service.register_user(data,request)
             send_verification_email(user,request)
             return Response({"message":"Verification email sent"},status=status.HTTP_201_CREATED)
         except ValueError as e:
@@ -44,23 +43,15 @@ class RegisterEmployerView(APIView):
 class VerifyEmail(APIView):
 
     def get(self, request, verification_code):
-        try:
+        
             service = AuthService()
-            user = service.verify_email(verification_code)
-            if user:
-                frontend_login_url =f"{ settings.FRONTEND_URL}/login" 
-                return redirect(frontend_login_url)
-            else:
-                frontend_expired_url = f"{settings.FRONTEND_URL}/token-expired"
-                return redirect(frontend_expired_url)
-        except Exception as e:
-            print(str(e))
-            return Response({"message": "Internal server error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            url = service.verify_email(verification_code)
+            redirect(url)
+            
 #later refactor this  module toabide by the architecture
 class ResendVerificationEmail(APIView):
     def post(self, request):
         email = request.data.get('email')
-       
         try:
             user = User.objects.get(email=email)
             if not user:
@@ -81,37 +72,25 @@ class ResendVerificationEmail(APIView):
 class LoginView(APIView):
     def post(self, request):
         email = request.data.get('email')
-        password = request.data.get('password')
-        
-        if not email or not password:
-            return Response(
-                {'error': 'Email and password required'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        try:
-            service = AuthService()
-            user, token = service.login_user(email, password)
-            serializer = UserSerializer(user,many=False)
-            response = Response()
-            response.set_cookie(
+        password = request.data.get('password') 
+        service = AuthService()
+        user, token = service.login_user(email, password)
+        serializer = UserSerializer(user,many=False)
+        response = Response()
+        response.set_cookie(
                 key='jwt',
                 value=token,
                 httponly=True,
                 secure=not settings.DEBUG,
                 samesite='Lax'
             )
-            response.data = {
+        response.data = {
                 'message': 'Login successful',
-                'user':serializer.data
+                #'user':serializer.data
             }
-            return response
+        return response
             
-        except AuthenticationFailed as e:
-            return Response(
-                {'error': str(e)},
-                status=status.HTTP_401_UNAUTHORIZED
-            )
+      
         
 
 class LogoutView(APIView):

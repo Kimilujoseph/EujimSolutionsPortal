@@ -18,3 +18,7 @@ class ConflictException(ServiceException):
 class InternalErrorException(ServiceException):
     status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
     default_detail = 'Internal server error.'
+class AuthenticationException(ServiceException):
+    """Raised when authentication fails."""
+    status_code = status.HTTP_401_UNAUTHORIZED
+    default_detail = 'Authentication failed.'

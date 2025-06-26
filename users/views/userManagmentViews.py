@@ -3,8 +3,9 @@ from rest_framework.response import Response
 from rest_framework import status
 from  ..services.userManagement import UserManagementService
 from ..serializers.user_serializer import UserSerializer
-from ..utils import send_approval_email,send_disapproval_email,send_suspension_email,send_unsuspension_email
+from ..utils import send_approval_email,send_disapproval_email,send_suspension_email,send_unsuspension_email,send_verification_email
 from ..permissions import admin_required
+from ..exceptions import ServiceException, NotFoundException, InternalErrorException
 
 class AdminUserDeleteView(APIView):
     @admin_required
@@ -102,36 +103,4 @@ class AdminUserDetailView(APIView):
             return Response(data)
         except ValueError as e:
             return Response({'error': str(e)}, status=404)
-
-class UserUpdateNamesView(APIView):
-    def put(self, request, user_id):
-        # Verify the requesting user is either an admin or updating their own profile
-        if not request.user_data or (str(request.user_data['id']) != str(user_id) and 
-                                    request.user_data.get('role') not in ['admin', 'superAdmin']):
-            return Response(
-                {'error': 'You can only update your own profile or need admin privileges'},
-                status=status.HTTP_403_FORBIDDEN
-            )
-
-        service = UserManagementService()
-        first_name = request.data.get('first_name')
-        last_name = request.data.get('last_name')
-        
-        # Validate at least one field is provided
-        if not any([first_name, last_name]):
-            return Response(
-                {'error': 'At least one of first_name or last_name must be provided'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        result = service.update_user_names(
-            user_id=user_id,
-            first_name=first_name,
-            last_name=last_name
-        )
-        
-        if result['status'] == 'error':
-            return Response(result, status=result.get('code', status.HTTP_500_INTERNAL_SERVER_ERROR))
-            
-        return Response(result, status=status.HTTP_200_OK)
      
