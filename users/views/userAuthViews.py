@@ -32,8 +32,7 @@ class RegisterEmployerView(APIView):
             data["is_pending"] = False
             data["role"] = "employer"
             service = AuthService()
-            user = service.register_user(data,request)
-            send_verification_email(user,request)
+            user = service.register_user(data)
             return Response({"message":"Verification email sent"},status=status.HTTP_201_CREATED)
         except ValueError as e:
            return Response({"error":str(e)},status=status.HTTP_400_BAD_REQUEST)
