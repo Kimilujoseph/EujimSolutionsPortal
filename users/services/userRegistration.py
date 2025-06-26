@@ -10,6 +10,7 @@ from rest_framework.exceptions import AuthenticationFailed, ValidationError,APIE
 from django.db import IntegrityError, DatabaseError
 from ..exceptions import (ServiceException, NotFoundException, ConflictException, InternalErrorException,AuthenticationException)
 from ..utils import send_verification_email
+from django.contrib.auth.hashers import make_password, check_password
 
 class AuthService:
     def __init__(self):
@@ -20,15 +21,23 @@ class AuthService:
             serializer = UserRegistrationSerializer(data=registration_data)
             serializer.is_valid(raise_exception=True)
             if not isinstance(serializer.validated_data, dict):
-             raise  ServiceException('Validated data is not a valid dictionary')
+             raise  ServiceException('invalid data provided please check the data')
+            #serilaize the validated passowrd
+            serializer.validated_data['password'] = make_password(serializer.validated_data['password'])
             user = self.user_repo.create_user(serializer.validated_data)
             send_verification_email(user, request)
             message=f'User {user.firstName} registered successfully. Verification email sent.'
             return message
         except ValidationError as e:
+            if 'email' in str(e):
+                raise ConflictException("Email already exists")
+            if 'password' in str(e):
+                raise ServiceException("Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character")
+            if 'role' in str(e):
+                raise ServiceException("Invalid role provided")
             raise ServiceException(f"Validation error: {e.detail}")
         except (IntegrityError, DatabaseError) as e:
-            raise InternalErrorException("Database error occurred while creating user.")
+            raise InternalErrorException("error occurred while creating user.")
         except Exception as e:
             raise InternalErrorException("Unexpected error during user registration.")
 
