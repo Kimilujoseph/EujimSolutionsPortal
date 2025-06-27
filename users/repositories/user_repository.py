@@ -12,9 +12,7 @@ class UserRepository(BaseRepository[User]):
         user = self.model_class(**user_data)
         user.full_clean()
         user.save()
-        return user
-       
-
+        return user       
     def find_by_email(self, email: str) -> Optional[User]:
         return self.model_class.objects.filter(email__iexact=email).first()
 
