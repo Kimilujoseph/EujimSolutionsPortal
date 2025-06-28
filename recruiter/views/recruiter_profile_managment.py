@@ -37,22 +37,8 @@ class RecruiterProfileView(APIView):
     def get(self, request,user_id):
         service = RecruiterService()
         try:
-            role = request.user_data.get('role')
-            if role == 'admin' or 'superAdmin':
-                user_id = user_id
-            else:
-                user_id = request.user_data.get('id')
-            if not user_id:
-                return Response(
-                    {'error': 'User ID not found in request data'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-            recruiter = service.get_recruiter_profile(user_id)
-            if not recruiter:
-                return Response(
-                    {'error': 'Recruiter profile not found'},
-                    status=status.HTTP_404_NOT_FOUND
-                )
+            
+            recruiter = service.get_recruiter_profile(request)
             
             serializer = RecruiterProfileSerializer(recruiter)
             return Response(serializer.data) 

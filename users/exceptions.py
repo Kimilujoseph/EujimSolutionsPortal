@@ -22,3 +22,9 @@ class AuthenticationException(ServiceException):
     """Raised when authentication fails."""
     status_code = status.HTTP_401_UNAUTHORIZED
     default_detail = 'Authentication failed.'
+
+class BadRequestException(ServiceException):
+    """Raised when client sends invalid or malformed data."""
+    status_code = status.HTTP_400_BAD_REQUEST
+    default_detail = 'Invalid request.'
+    default_code = 'bad_request'

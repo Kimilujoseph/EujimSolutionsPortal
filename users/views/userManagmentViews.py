@@ -136,5 +136,5 @@ class UserUpdateNamesView(APIView):
             return Response(result, status=result.get('code', status.HTTP_500_INTERNAL_SERVER_ERROR))
             
           
-   return Response(result, status=status.HTTP_200_OK)
+        return Response(result, status=status.HTTP_200_OK)
      
