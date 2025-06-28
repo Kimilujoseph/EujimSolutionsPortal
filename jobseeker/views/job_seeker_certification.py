@@ -12,67 +12,6 @@ from ..serializer.skillSerializer import SkillSetSerializer, SkillSerializer
 from ..serializer.education_serializer import EducationSerializer
 from django.core.exceptions import ValidationError
 
-
-class JobSeekerProfileView(APIView):   
-    def get(self, request,user_id=None):
-        
-            service = ProfileService() 
-            profile_data  = service.get_jobseeker_full_profile(request,user_id)
-            
-            profile_serializer = JobSeekerProfileSerializer(profile_data["profile"])
-           
-            skills_serializer = SkillSetSerializer(profile_data["skills"], many=True)
-
-            educations_serializer = EducationSerializer(profile_data["education"], many=True)
-
-            return Response({
-                'profile': profile_serializer.data,
-                'skills': skills_serializer.data,
-                'educations': educations_serializer.data
-            }, status=status.HTTP_200_OK)
-                 
-class JobSeekerAnalyticsView(APIView):
-    @check_user_status
-    def get(self, request,user_id=None):
-        role = request.user_data.get('role');
-        if user_id is None and role not in ['admin','userAdmin']:
-             user_id = request.user_data.get('id') 
-        if not user_id:
-            return Response({'error': 'User ID is required'}, 
-                          status=status.HTTP_400_BAD_REQUEST)
-        try:
-            user_id = int(user_id) 
-            analytics = AnalyticsService.get_jobseeker_analytics(user_id)
-            if not analytics:
-                return Response([])
-            else:
-                return Response(analytics)
-        except ValueError:
-            return Response({'error': 'Invalid User ID'}, 
-                          status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            print(f"Error fetching analytics: {e}")
-            return Response({'error': 'Internal server error'}, 
-                          status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-class CertificationListAPIView(APIView):
-    @jobseeker_required
-    def get(self, request):
-        try:
-            user_id = request.user_data.get('id')
-            certifications = CertificationService.get_user_certifications(user_id)
-            return Response(
-                CertificationSerializer(certifications, many=True).data,
-                status=status.HTTP_200_OK
-            )
-        except Exception as e:
-            print(f"Error fetching certifications: {e}")
-            return Response(
-                {'error': 'Failed to fetch certifications'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
 class CertificationDetailAPIView(APIView):
     @jobseeker_required
     def get(self, request, certification_id):

@@ -1,17 +1,17 @@
 from .application_status import get_applications_status_stats
-from .recruiter_interaction import get_recruiter_engagement
-from .profile_completion import calculate_profile_completion
+from .recruiter_interaction import RecruiterEngagement
+from .profile_completion import ProfileCompletionService
 from .skill_distribution_service import skill_distribution,get_skills_growth_timeline,get_top_skills_by_success
 from .education_service import EducationService
 
 class AnalyticsService:
     @staticmethod
     def get_jobseeker_analytics(job_seeker_id: int):
-        """
-        Collects and returns various analytics for a job seeker.
-        """
-        profile_completion = calculate_profile_completion(job_seeker_id)
-        recruiter_engagement = get_recruiter_engagement(job_seeker_id)
+        
+        profile_completion_service = ProfileCompletionService()
+        profile_completion =profile_completion_service.calculate_profile_completion(job_seeker_id)
+        recruiter_engagement_service = RecruiterEngagement()
+        recruiter_engagement = recruiter_engagement_service.get_recruiter_engagement(job_seeker_id)
        # print(recruiter_engagement)
         application_status_stats = get_applications_status_stats(job_seeker_id)
         skill_distribution_data = skill_distribution(job_seeker_id)

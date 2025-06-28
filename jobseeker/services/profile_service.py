@@ -4,12 +4,26 @@ from django.core.exceptions import ObjectDoesNotExist
 from ..repository.jobseeker_repository import JobSeekerRepository
 from ..repository.educationRepository import EducationRepository
 from  django.core.exceptions import ValidationError
+from ..services.education_service import EducationService
+from users.exceptions import (NotFoundException,InternalErrorException,ServiceException)
 from ..permissions import admin_required
 class ProfileService:
     def __init__(self):
         self.jobseeker_repo = JobSeekerRepository()
         self.skill_repo = SkillRepository()
         self.skillset_repo = SkillSetRepository()
+    def get_jobseeker_full_profile(self,request,user_id):
+       try:
+            if request.user_data.get('role') not in ['admin','superAdmin'] and user_id is None:
+                user_id = request.user_data.get('id')
+            return {
+                    "profile":self.get_jobseeker_profile(user_id),
+                    "skills":self.get_jobseeker_skills(user_id),
+                    "education": EducationService().get_user_educations(user_id)
+                }
+       except Exception as e:
+           raise InternalErrorException("failed to fetch user profile")
+        
 
     def create_or_update_profile(self, user_id: int, profile_data: dict):
         jobseeker = self.jobseeker_repo.get_by_user_id(user_id)
@@ -30,7 +44,7 @@ class ProfileService:
 
         return self.skillset_repo.createSkillSet(
             user_id=user_id,
-            skill_id=skill.id,
+            skill_id=skill.pk,
             proffeciency_level=skill_data.get('proffeciency_level', 'beginner')
         )
 
@@ -38,10 +52,10 @@ class ProfileService:
         try:
             profile = self.jobseeker_repo.get_by_user_id(user_id)
             if not profile:
-                raise ObjectDoesNotExist("Profile not found")
+                raise NotFoundException("Profile not found")
             return profile
         except ObjectDoesNotExist as e:
-            raise ValueError(str(e))
+            raise NotFoundException("user profile not found")
 
     def get_jobseeker_skills(self, jobseeker_id: int):
         return self.skillset_repo.get_skills_for_jobseeker(jobseeker_id)

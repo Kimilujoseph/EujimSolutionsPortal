@@ -5,7 +5,7 @@ from django.db import transaction
 
 class CertificationService:
     @staticmethod
-    def get_user_certifications(user_id):
+    def get_user_certifications(user_id:int):
         return JobSeekerCertification.objects.filter(user_id=user_id).order_by('createdAt')
 
     @staticmethod

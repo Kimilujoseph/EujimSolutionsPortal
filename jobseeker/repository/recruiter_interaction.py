@@ -14,7 +14,7 @@ class RecruiterInteraction(JobSeekerBaseRepository[RecruiterTracking]):
             .annotate(count=Count('id'))
 
     def recruiter_engagement(self, job_seeker_id: int):
-        try:
+        
             recruiter_count = self.filter(job_seeker_id=job_seeker_id) \
                 .values('recruiter') \
                 .distinct() \
@@ -33,12 +33,7 @@ class RecruiterInteraction(JobSeekerBaseRepository[RecruiterTracking]):
                     } for interaction in recent_interactions
                 ]
             }
-        except Exception as e:
-            print(f"Error fetching recruiter engagement for job seeker")
-            return {
-                'recruiter_count': 0,
-                'recent_interactions': []
-            }
+        
         #get application status
 
     def get_application_status(self,job_seeker_id:int):

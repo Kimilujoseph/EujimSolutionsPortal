@@ -1,6 +1,8 @@
 from django.urls import path
-from ..views.job_seeker_profile import (JobSeekerProfileView,JobSeekerCreateOrUpdateProfile,JobSeekerSkillsView,SkillListView,JobSeekerUpdateSkill,JobSeekerAnalyticsView,JobSeekerDeleteSkill,CertificationListAPIView,CertificationDetailAPIView,CertificationAddAPIView,CertificationDeleteAPIView)
-
+from ..views.job_seeker_profile import (JobSeekerProfileView,JobSeekerAnalyticsView,CertificationListAPIView)
+from ..views.create_job_seeker_profile import JobSeekerCreateOrUpdateProfile
+from ..views.job_seeker_skills import JobSeekerSkillsView,JobSeekerUpdateSkill,SkillListView,JobSeekerDeleteSkill
+from ..views.job_seeker_certification import CertificationAddAPIView,CertificationDeleteAPIView,CertificationDetailAPIView
 urlpatterns = [
     path('profile/', JobSeekerProfileView.as_view(), name='jobseeker-profile'),
     path('profile/<int:user_id>/', JobSeekerProfileView.as_view(), name='jobseeker-profile-detail'),
