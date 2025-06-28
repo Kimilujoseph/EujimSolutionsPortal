@@ -14,15 +14,10 @@ class RecruiterEngagement:
         self.recruiter_interaction_repo = RecruiterInteraction()
         self.job_seeker_profile_repo = JobSeekerRepository()
 
-    def get_recruiter_engagement(self, job_seeker_id: int) -> dict:
+    def get_recruiter_engagement(self, job_seeker_id: int):
         try:
             if not isinstance(job_seeker_id, int) or job_seeker_id <= 0:
                 raise ServiceException("bad request,please check again and try again")
-                
-            try:
-                self.job_seeker_profile_repo.get_by_user_id(job_seeker_id)
-            except ObjectDoesNotExist:
-                raise NotFoundException("jobseeker profile not found")
                 
             engagement_count = self.recruiter_interaction_repo.recruiter_engagement(job_seeker_id)
             return engagement_count

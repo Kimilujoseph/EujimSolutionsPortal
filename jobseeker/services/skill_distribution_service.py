@@ -1,146 +1,104 @@
-from ..repository.recruiter_interaction import  RecruiterInteraction;
-from ..repository.skill_repository import SkillDistributionSet,SkillSetRepository
+from ..repository.recruiter_interaction import RecruiterInteraction
+from ..repository.skill_repository import SkillDistributionSet, SkillSetRepository
+from users.exceptions import NotFoundException, ServiceException, InternalErrorException
+from typing import Dict, List, Any, Optional
+from django.db import DatabaseError
+from django.core.exceptions import ObjectDoesNotExist
+import logging
 
-#initalize the repositories 
-RecruiterInteraction = RecruiterInteraction()
-SkillDistribution = SkillDistributionSet()
-SkillSetRepository = SkillSetRepository()
+logger = logging.getLogger(__name__)
 
-def skill_distribution(job_seeker_id:int):
-    try:
-        distribution = SkillDistribution.get_skill_distribution(job_seeker_id)
-        result = {
-            'begginner': 0,
-            'intermediate': 0,
-            'midlevel': 0,
-            'proffessional': 0
-        }
+class SkillAnalyticsService:
+    def __init__(self):
+        self.recruiter_repo = RecruiterInteraction()
+        self.skill_distribution_repo = SkillDistributionSet()
+        self.skill_set_repo = SkillSetRepository()
+
+    def skill_distribution(self, job_seeker_id: int) -> Dict[str, int]:
+      
+
+        self._validate_job_seeker_id(job_seeker_id)
         
-        for item in distribution:
-            result[item['proffeciency_level']] = item['count']
-        
-        return result
-    except Exception as e:
-        print(f"Error fetching skill distribution: {e}")
-        return {
-            'begginner': 0,
-            'intermediate': 0,
-            'midlevel': 0,
-            'proffessional': 0
-        }
-
-
-
-#top skill by application rate
-
-def get_top_skills_by_success(job_seeker_id: int):
-    try:
-        applications = RecruiterInteraction.get_application_status(job_seeker_id)
-        user_skills = SkillDistribution.get_skill_set(job_seeker_id)
-        
-        if not user_skills or not applications:
-            return []
-
-        # First map applications to their outcomes
-        app_outcomes = {}
-        for app in applications:
-            if hasattr(app, 'id'):  # Model instance
-                app_id = app.id
-                status = app.status
-            else:  # Dictionary-like
-                app_id = app.get('id')
-                status = app.get('status')
-            app_outcomes[app_id] = status in ['interviewed', 'hired']
-        
-        # Then count skill associations with successful apps
-        skill_stats = {}
-        for skill in user_skills:
-            if hasattr(skill, 'skill'):  # Model instance
-                skill_id = skill.skill.id if skill.skill else None
-                skill_name = skill.skill.skillName if skill.skill else 'Unknown'
-                proficiency = skill.proffeciency_level
-                app_id = skill.application_id  # You'll need this relationship
-            else:  # Dictionary-like
-                skill_id = skill.get('skill_id')
-                skill_name = skill.get('skill__name', 'Unknown')
-                proficiency = skill.get('proffeciency_level')
-                app_id = skill.get('application_id')
+        try:
+            distribution = self.skill_distribution_repo.get_skill_distribution(job_seeker_id)
+            if not distribution:
+                raise NotFoundException("No skill distribution found for this user")
             
-            if not skill_id or not app_id:
-                continue
+            result = {
+                'beginner': 0,
+                'intermediate': 0,
+                'midlevel': 0,
+                'professional': 0
+            }
+            
+            for item in distribution:
+                try:
+                    level = item['proffeciency_level']
+                    result[level] = item['count']
+                except (KeyError, TypeError) as e:
+                    logger.warning(f"Invalid skill distribution format: {e}")
+                    continue
+            
+            return result
+            
+        except DatabaseError as e:
+            logger.error(f"Database error in skill_distribution: {str(e)}", 
+                       extra={'job_seeker_id': job_seeker_id})
+            raise InternalErrorException("Failed to fetch skill distribution") from e
+        except Exception as e:
+            logger.error(f"Unexpected error in skill_distribution: {str(e)}")
+            raise InternalErrorException("Skill distribution calculation failed") from e
+
+    def get_skills_growth_timeline(self, job_seeker_id: int) -> List[Dict[str, str]]:
+  
+        self._validate_job_seeker_id(job_seeker_id)
+        
+        try:
+            skills = self.skill_distribution_repo.get_skill_set(job_seeker_id)
+            if not skills:
+                return []
                 
-            if skill_id not in skill_stats:
-                skill_stats[skill_id] = {
-                    'name': skill_name,
-                    'proficiency': proficiency,
-                    'associated_apps': set(),
-                    'positive_outcomes': 0
-                }
+            timeline = []
+            for skill in skills:
+                try:
+                    entry = {
+                        'skill_name': self._get_skill_name_from_model(skill),
+                        'proficiency_level': skill.proffeciency_level,
+                        'date_added': self._format_model_date(skill.createdAt)
+                    }
+                    timeline.append(entry)
+                except AttributeError as e:
+                    logger.warning(f"Invalid skill object format: {e}", 
+                                extra={"skill_id": getattr(skill, 'id', None)})
+                    continue
+                    
+            return sorted(timeline, key=lambda x: x['date_added'])
             
-            # Track unique applications per skill
-            skill_stats[skill_id]['associated_apps'].add(app_id)
-            
-            # Count if this application was successful
-            if app_outcomes.get(app_id, False):
-                skill_stats[skill_id]['positive_outcomes'] += 1
-        
-        # Calculate success rates
-        results = []
-        for skill_id, data in skill_stats.items():
-            total_apps = len(data['associated_apps'])
-            positive = data['positive_outcomes']
-            success_rate = (positive / total_apps) * 100 if total_apps > 0 else 0
-            
-            results.append({
-                'skill_id': skill_id,
-                'skill_name': data['name'],
-                'proficiency': data['proficiency'],
-                'success_rate': round(success_rate, 2),
-                'total_applications': total_apps
-            })
-        
-        return sorted(results, key=lambda x: x['success_rate'], reverse=True)[:10]
-    
-    except Exception as e:
-        print(f"Error in get_top_skills_by_success: {e}")
-        return []
-def get_skills_growth_timeline(job_seeker_id: int):
-    
-    try:
-        skills = SkillDistribution.get_skill_set(job_seeker_id)
-        print(f"Skills for user {job_seeker_id}: {skills}")
-        if not skills:
-            return []
-        
-        growth_timeline = []
-        
-        for skill in skills:
-           
-            if hasattr(skill, 'skill'):  
-                skill_name = skill.skill.skillName if skill.skill else 'Unknown'
-                proficiency = skill.proffeciency_level
-                created_at = skill.createdAt
-            else: 
-                skill_name = skill.get('skill__name', 'Unknown')
-                proficiency = skill.get('proffeciency_level')
-                created_at = skill.get('createdAt')
-            
-           
-            date_str = ''
-            if created_at:
-                if hasattr(created_at, 'strftime'):  
-                    date_str = created_at.strftime('%Y-%m-%d')
-                else: 
-                    date_str = str(created_at)[:10] 
-            
-            growth_timeline.append({
-                'skill_name': skill_name,
-                'proficiency_level': proficiency,
-                'date_added': date_str
-            })
-        
-        return sorted(growth_timeline, key=lambda x: x['date_added'])
-    except Exception as e:
-        print(f"Error fetching skills growth timeline: {e}")
-        return []
+        except DatabaseError as e:
+            logger.error(f"Database error fetching skill timeline: {str(e)}")
+            raise InternalErrorException("Failed to fetch skill timeline") 
+        except Exception as e:
+            logger.error(f"Unexpected error processing skill timeline: {str(e)}")
+            raise InternalErrorException("Skill timeline processing failed")
 
+
+    # Helper methods
+    def _validate_job_seeker_id(self, job_seeker_id: int) -> None:
+        """Validate job seeker ID format"""
+        if not isinstance(job_seeker_id, int) or job_seeker_id <= 0:
+            raise ServiceException("Invalid job seeker ID format")
+    def _get_skill_name_from_model(self, skill) -> str:
+        if skill.skill and hasattr(skill.skill, 'skillName'):
+            return skill.skill.skillName
+        return 'Unknown'
+
+    def _format_model_date(self, date_obj) -> str:
+        """Format date from model field"""
+        if date_obj and hasattr(date_obj, 'strftime'):
+            return date_obj.strftime('%Y-%m-%d')
+        return ''
+
+    def _format_date(self, date_obj: Any) -> str:
+        if hasattr(date_obj, 'strftime'):
+            return date_obj.strftime('%Y-%m-%d')
+        return str(date_obj)[:10] if date_obj else ''
