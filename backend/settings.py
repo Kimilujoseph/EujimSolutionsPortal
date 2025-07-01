@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'jobseeker.apps.JobseekerConfig',
     'skills.apps.SkillsConfig',
     'recruiter.apps.RecruiterConfig',
+    'job_posting.apps.JobPostingConfig',
     'corsheaders'
 ]
 

@@ -3,6 +3,7 @@ from users.models import User
 from jobseeker.models import JobSeeker
 from users.models import User
 
+
 class Recruiter(models.Model):
     companyName = models.CharField(max_length=45)
     companyLogo = models.CharField(max_length=500, null=True, blank=True)
@@ -64,6 +65,14 @@ class RecruiterTracking(models.Model):
     job_seeker = models.ForeignKey(JobSeeker, on_delete=models.CASCADE, related_name='tracking_records',null=True,blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='shortlisted', null=True, blank=True)
     notes = models.TextField(null=True, blank=True)
+    job_posting = models.ForeignKey(
+        'job_posting.JobPosting',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='tracking_records'
+    )
+
     createdAt = models.DateTimeField(auto_now_add=True)
     updatedAt = models.DateTimeField(auto_now=True)
 
