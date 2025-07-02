@@ -55,6 +55,8 @@ class RecruiterDoc(models.Model):
 
 class RecruiterTracking(models.Model):
     STATUS_CHOICES = [
+        ('intrested','Intrested'),
+        ('applied', 'Applied'),
         ('interviewed', 'Interviewed'),
         ('shortlisted', 'Shortlisted'),
         ('hired', 'Hired'),
@@ -65,12 +67,13 @@ class RecruiterTracking(models.Model):
     job_seeker = models.ForeignKey(JobSeeker, on_delete=models.CASCADE, related_name='tracking_records',null=True,blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='shortlisted', null=True, blank=True)
     notes = models.TextField(null=True, blank=True)
-    job_posting = models.ForeignKey(
+    job_posting= models.ForeignKey(
         'job_posting.JobPosting',
         on_delete=models.CASCADE,
         null=True,
         blank=True,
-        related_name='tracking_records'
+        db_column='job_posting_id',
+        related_name='tracking_job_posting'
     )
 
     createdAt = models.DateTimeField(auto_now_add=True)

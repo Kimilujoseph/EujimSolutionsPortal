@@ -90,9 +90,17 @@ class RecruiterTrackingRepository(BaseRepository[RecruiterTracking]):
             'recruiter',
             'job_seeker'
         ).first()
-
+    def get_tracking_records_by_job_posting(self,job_posting_id):
+        return RecruiterTracking.objects.filter(job_posting_id=job_posting_id)\
+        .select_related(
+            'recruiter',
+            'job_seeker',
+            'job_posting'
+        )\
+        
     def update_status(self, tracking: RecruiterTracking, status: str, notes: Optional[str] = None) -> Optional[RecruiterTracking]:
         update_data = {'status': status}
         if notes is not None:
             update_data['notes'] = notes
         return self.update(instance=tracking, **update_data)
+    
