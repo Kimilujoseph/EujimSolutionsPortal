@@ -1,6 +1,6 @@
 # job_posting/services.py
 from ..repositories.job_posting_repository import JobPostingRepository
-from recruiter.repository.recruiter_repository import RecruiterTrackingRepository
+from recruiter.repository.recruiter_repository import RecruiterTrackingRepository,RecruiterRepository
 from users.exceptions import InternalErrorException,NotFoundException,ServiceException
 from django.db import DatabaseError
 from ..models import JobPosting,JobPostingSkill
@@ -16,6 +16,7 @@ class JobPostingService:
     def __init__(self):
         self.job_repository = JobPostingRepository()
         self.recruiter_repository = RecruiterTrackingRepository()  
+        self.recruiter_info_repository = RecruiterRepository()
         self.skill_repository = SkillRepository()
 
     def get_all_job_postings(self)->QuerySet[JobPosting]:
@@ -47,7 +48,6 @@ class JobPostingService:
             job_posting = self.job_repository.get_job_posting_by_id(pk)
 
             if job_posting:
-                # Increment views count when someone views the job
                 job_posting.views_count += 1
                 job_posting.save()
             return job_posting
@@ -61,15 +61,24 @@ class JobPostingService:
             logger.error(f"error occured while fetching job posting details: {str(e)}")
             raise InternalErrorException("Internal server error,try again later")
      
-    def create_job_posting(self,recruiter:int, data:dict) -> JobPosting:
+    def create_job_posting(self,request, data:dict) -> JobPosting:
        try: 
-            if not isinstance(recruiter,int) and not isinstance(data,dict):
+            if  not isinstance(data,dict):
                 raise ServiceException("you request cannot be processed")
+            user_id=request.user_data.get("id")
+            recruiter = self.recruiter_info_repository.get_by_user_id(user_id)
+            if not recruiter:
+                raise NotFoundException("Recruiter not found")
             data['recruiter'] = recruiter
             return self.job_repository.create_job_posting(data)
+       except (ValueError,TypeError) as e:
+            logger.error(f"error occured while creating job posting: {str(e)}")
+            raise ServiceException("Invalid data format")
        except DatabaseError as e:
+            logger.warning(f"error occured while  job posting: {str(e)}")
             raise InternalErrorException("Internal server error")
        except Exception as e:
+            logger.error(f"error occured while creating job posting: {str(e)}")
             raise InternalErrorException("Internal server error ")
     def update_job_posting(self,pk, data)->Optional [JobPosting]:
         try:

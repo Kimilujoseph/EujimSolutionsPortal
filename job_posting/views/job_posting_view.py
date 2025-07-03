@@ -31,7 +31,7 @@ class JobPostingCreateView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
         job_posting = service.create_job_posting(
-                recruiter=request.user.recruiter,
+                request=request,
                 data=serializer.validated_data
             )
         return Response(JobPostingSerializer(job_posting).data, status=status.HTTP_201_CREATED)
