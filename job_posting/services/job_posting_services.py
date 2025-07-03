@@ -45,11 +45,18 @@ class JobPostingService:
             if not isinstance(pk, int) or pk <= 0:
                 raise NotFoundException("Invalid job posting ID")
             job_posting = self.job_repository.get_job_posting_by_id(pk)
+
             if job_posting:
                 # Increment views count when someone views the job
                 job_posting.views_count += 1
                 job_posting.save()
             return job_posting
+        except ObjectDoesNotExist:
+            logger.error(f"job posting with id {pk} does not exist")
+            raise NotFoundException("job posting not found")
+        except DatabaseError as e:
+            logger.error(f"error occured while fetching job posting details: {str(e)}")
+            raise InternalErrorException("Internal server error,try again later")
         except Exception as e:
             logger.error(f"error occured while fetching job posting details: {str(e)}")
             raise InternalErrorException("Internal server error,try again later")
