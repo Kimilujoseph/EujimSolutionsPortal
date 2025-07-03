@@ -62,7 +62,6 @@ class RecruiterTracking(models.Model):
         ('hired', 'Hired'),
         ('rejected', 'Rejected'),
     ]
-
     recruiter = models.ForeignKey(Recruiter, on_delete=models.CASCADE,null=True,blank=True)
     job_seeker = models.ForeignKey(JobSeeker, on_delete=models.CASCADE, related_name='tracking_records',null=True,blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='shortlisted', null=True, blank=True)
