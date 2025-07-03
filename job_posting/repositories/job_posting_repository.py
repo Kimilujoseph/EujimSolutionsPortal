@@ -46,4 +46,11 @@ class JobPostingRepository:
             skill_data['job_posting'] = job_posting
             return JobPostingSkill.objects.create(**skill_data)
         return None
+     #deleteting a skill from a job posting
+    def delete_skill_from_job_posting(self,job_posting_id,skill_id):
+        job_posting_skill = JobPostingSkill.objects.get(job_posting_id=job_posting_id, skill_id=skill_id)
+        if job_posting_skill:           
+           job_posting_skill.delete()
+        return None
+            
 

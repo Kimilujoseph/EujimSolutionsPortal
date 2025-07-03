@@ -58,10 +58,7 @@ class JobPostingSkill(models.Model):
         on_delete=models.CASCADE,
         related_name='required_skills'
     )
-    importance = models.PositiveSmallIntegerField(
-        validators=[MinValueValidator(1), MaxValueValidator(5)],
-        default=3
-    )
+    
     
     class Meta:
         db_table = 'job_posting_skills'

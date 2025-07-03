@@ -2,13 +2,15 @@
 from rest_framework import serializers
 from .models import JobPosting, JobPostingSkill
 
-
 class JobPostingSkillSerializer(serializers.ModelSerializer):
-
+    skill_name = serializers.CharField(source='skill.skillName')
+    skill_description = serializers.CharField(source='skill.description', required=False)
     
     class Meta:
         model = JobPostingSkill
-        fields = ['skill', 'importance']
+        fields = ['id', 'skill_name', 'skill_description']
+        read_only_fields = ['id']
+
 
 class JobPostingSerializer(serializers.ModelSerializer):
     required_skills = JobPostingSkillSerializer(source='job_posting', many=True, read_only=True)
@@ -32,3 +34,4 @@ class JobPostingCreateSerializer(serializers.ModelSerializer):
             'location', 'job_type', 'experience_level', 'salary_range_min',
             'salary_range_max', 'application_deadline'
         ]
+

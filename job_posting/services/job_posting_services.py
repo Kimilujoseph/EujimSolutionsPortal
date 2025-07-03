@@ -106,25 +106,41 @@ class JobPostingService:
             raise InternalErrorException("internal server error,please try again later")
     
     
-    def add_required_skills(self,job_posting_id, skills_data):
-       try:
-            results = []
-            for skill_data in skills_data:
-                skill = self.skill_repository.get_or_create(
-                    skillName=skill_data['skill_name'], 
-                    defaults={'description': skill_data.get('description', '')}
-                )
-                skill_data['skill'] = skill
-                result =self.job_repository.add_skill_to_job_posting(job_posting_id, skill_data)
-                results.append(result)
-            return results
-       except DatabaseError as e:
-           logger.error(f"error occured while adding skills to job posting: {str(e)}")
-           raise InternalErrorException("Internal server,please try again later")
-       except Exception as e:
-            logger.error(f"error occured while adding skills to job posting: {str(e)}")
-            raise InternalErrorException("Internal server error,please try again later")
-   
+    def add_required_skills(self, job_posting_id, skills_data):
+        try:
+            skill_data = skills_data['skill']
+            skill_instance, was_created = self.skill_repository.get_or_create(
+            skillName=skill_data.get('skillName'),
+            defaults={'description': skill_data.get('description', '')}
+        )
+        
+            print(skill_instance)
+            return self.job_repository.add_skill_to_job_posting(
+            job_posting_id, 
+            {'skill': skill_instance} 
+        )
+        except ObjectDoesNotExist:
+            logger.error(f"job posting with id {job_posting_id} does not exist")
+            raise NotFoundException("job posting not found")
+        except DatabaseError as e:
+            logger.error(f"error occurred while adding skills to job posting: {str(e)}")
+            raise InternalErrorException("Internal server, please try again later")
+        except Exception as e:
+            logger.error(f"error occurred while adding skills to job posting: {str(e)}")
+            raise InternalErrorException("Internal server error, please try again later")
+    #delete required skill
+    def delete_required_skill(self, job_posting_id: int, skill_id: int):
+        try:
+            return self.job_repository.delete_skill_from_job_posting(job_posting_id, skill_id)
+        except ObjectDoesNotExist:
+            logger.error(f"job posting with id {job_posting_id} does not exist")
+            raise NotFoundException("job posting not found")
+        except DatabaseError as e:
+            logger.error(f"error occurred while deleting skill from job posting: {str(e)}")
+            raise InternalErrorException("internal server error, please try again later")
+        except Exception as e:
+            logger.error(f"error occurred while deleting skill from job posting: {str(e)}")
+            raise InternalErrorException("internal server error, please try again later")
     def close_job_posting(self,pk:int) -> bool:
         try:
             job_posting = self.job_repository.get_job_posting_by_id(pk)

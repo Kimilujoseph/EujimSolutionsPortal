@@ -64,5 +64,20 @@ class JobPostingDetailView(APIView):
             service.delete_job_posting(pk)
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response({"detail": "Job posting not found"}, status=status.HTTP_404_NOT_FOUND)
-
+    
+class JobPostingAddingRequiredSkills(APIView):
+    def post(self,request,job_posting_id):
+        if not request.data or not isinstance(request.data,dict):
+            Response({"details":"please provide valid skill data"},status=status.HTTP_400_BAD_REQUEST)
+        serializer = JobPostingSkillSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+        print(serializer.validated_data)  
+        skillAdded = service.add_required_skills(job_posting_id,serializer.validated_data)
+        return Response({"sucessfully added the course"},status=status.HTTP_200_OK)
+    def delete(self,request,job_posting_id,skill_id):
+        if not job_posting_id or not skill_id:
+            return Response({"details":"please provide valid job posting id and skill id"},status=status.HTTP_400_BAD_REQUEST)
+        service.delete_required_skill(job_posting_id,skill_id)
+        return Response({"details":"sucessfully deleted the skill from the job posting"},status=status.HTTP_200_OK)
 
