@@ -44,8 +44,7 @@ class JobPostingDetailView(APIView):
             return Response(serializer.data,status=status.HTTP_200_OK)
         return Response({"detail": "Job posting not found"}, status=status.HTTP_404_NOT_FOUND)
     def put(self, request, pk):
-        job_posting = service.get_job_posting_details(pk)
-        serializer = JobPostingCreateSerializer(job_posting, data=request.data)
+        serializer = JobPostingCreateSerializer(data=request.data)
         if serializer.is_valid():
                 updated_job = service.update_job_posting(pk, serializer.validated_data)
                 return Response(JobPostingSerializer(updated_job).data)

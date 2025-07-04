@@ -32,6 +32,6 @@ class JobPostingCreateSerializer(serializers.ModelSerializer):
         fields = [
             'title', 'description', 'requirements', 'responsibilities',
             'location', 'job_type', 'experience_level', 'salary_range_min',
-            'salary_range_max', 'application_deadline'
+            'salary_range_max', 'application_deadline','is_active'
         ]
 
