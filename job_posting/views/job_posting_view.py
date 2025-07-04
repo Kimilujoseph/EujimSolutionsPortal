@@ -20,7 +20,7 @@ class JobPostingListView(APIView):
         return Response(serializer.data)
 
 class JobPostingCreateView(APIView):
-    @recruiter_or_admin_required
+    @recruiter_required
     def post(self, request):
         serializer = JobPostingCreateSerializer(data=request.data)
         if not serializer.is_valid():        
@@ -66,6 +66,7 @@ class JobPostingDetailView(APIView):
         return Response({"detail": "Job posting not found"}, status=status.HTTP_404_NOT_FOUND)
     
 class JobPostingAddingRequiredSkills(APIView):
+    @recruiter_required
     def post(self,request,job_posting_id):
         if not request.data or not isinstance(request.data,dict):
             Response({"details":"please provide valid skill data"},status=status.HTTP_400_BAD_REQUEST)
