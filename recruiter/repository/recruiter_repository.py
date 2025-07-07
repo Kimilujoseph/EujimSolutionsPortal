@@ -8,8 +8,11 @@ class RecruiterRepository(BaseRepository[Recruiter]):
     def __init__(self):
         super().__init__(Recruiter)
 
-    def get_by_user_id(self, user_id: int) -> Optional[Recruiter]:
-        return self.filter(user_id=user_id).first()
+    def get_by_user_id(self, user_id: int) -> Recruiter:
+        recruiter = self.filter(user_id=user_id).first()
+        if recruiter is None:
+            raise Recruiter.DoesNotExist
+        return recruiter
 
     def get_recruiter_with_docs(self, recruiter_id: int) -> Recruiter:
         return self.model_class.objects.prefetch_related('recruiterdoc_set').get(id=recruiter_id)

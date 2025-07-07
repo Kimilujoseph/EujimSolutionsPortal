@@ -5,6 +5,7 @@ from ..repository.recruiter_repository import (
     RecruiterRepository,
     RecruiterTrackingRepository
 )
+from ..services.recruiter_tracking_base_service import BaseRecruiterTrackingService
 from ..serializers import (
     RecruiterTrackingSerializer,
     RecruiterTrackingUpdateSerializer
@@ -12,36 +13,23 @@ from ..serializers import (
 from django.db import models
 from rest_framework.exceptions import ValidationError
 from typing import Optional, Dict, Any
+from users.exceptions import InternalErrorException
 
-
-class RecruiterTrackingService:
+class RecruiterTrackingService(BaseRecruiterTrackingService):
     def __init__(self):
         self.tracking_repo = RecruiterTrackingRepository()
         self.recruiter_repo = RecruiterRepository()
         self.job_seeker_repo = JobSeekerRepository()
 
     def create_tracking(self, user_id: int, data: Dict[str, Any]) -> RecruiterTracking:
-        recruiter = self.recruiter_repo.get_by_user_id(user_id);
-        if not recruiter:
-            raise ValidationError({'error':'recruiter profile not found'})
-        recruiter_id = getattr(recruiter,'id',None)
-        if not recruiter_id:
-            raise ValidationError({"error":"recruter not found"})
-        requester_data = data.copy()
-        requester_data['recruiter_id'] = recruiter_id
-        serializer = RecruiterTrackingSerializer(data=requester_data)
-        if not serializer.is_valid():
-            raise ValidationError(serializer.errors)
-        
-        if not isinstance(serializer.validated_data,dict):
-            raise ValidationError({'error':'incorrect data format passed'})
-        
-        return self.tracking_repo.create(**serializer.validated_data)
+        try:
+             return super().create_tracking(user_id, data, "recruiter")
+        except Exception as e:
+             raise InternalErrorException("Internal server error")
+            
 
     def get_trackings(self, user_id: int) -> models.QuerySet:
-        recruiter = self.recruiter_repo.get_by_user_id(user_id)
-        if not recruiter:
-            raise ValidationError({'error': 'Recruiter profile not found'})
+        recruiter = super().find_recruiter_profile(user_id)
         recruiter_id = getattr(recruiter, 'id', None)
         if not recruiter_id and not isinstance(recruiter_id, int):
             raise ValidationError({"error": "Recruiter not found"})
