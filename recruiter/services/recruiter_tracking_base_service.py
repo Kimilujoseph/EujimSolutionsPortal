@@ -8,6 +8,8 @@ from typing import Optional,Dict,Any,Tuple,Union
 from django.db import DatabaseError
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.exceptions import ValidationError
+import logging
+logger = logging.getLogger(__name__)
 class BaseRecruiterTrackingService:
     def __init__(self):
         self.tracking_repo = RecruiterTrackingRepository()
@@ -18,10 +20,13 @@ class BaseRecruiterTrackingService:
         try:
             return self.job_seeker_repo.get_by_user_id(id)
         except ObjectDoesNotExist as e:
+            logger.error(f"An unexpected error occurred:{str(e)}")
             raise NotFoundException("job seeker profile not found")
         except DatabaseError as e:
+            logger.error(f"An unexpected error occurred:{str(e)}")
             raise InternalErrorException("internal server error")
         except Exception as e:
+            logger.error(f"An unexpected error occurred:{str(e)}")
             raise InternalErrorException("Internal server error")
     def find_recruiter_profile(self,id:int) -> Optional[Recruiter]:
         try:
@@ -37,19 +42,24 @@ class BaseRecruiterTrackingService:
             if user_type == "recruiter":
                 user = self.recruiter_repo.get_by_user_id(user_id)
                 id_attr = 'recruiter_id'
-            elif user_type == "jobseeker":
+            elif user_type == "job_seeker":
                 user = self.job_seeker_repo.get_by_user_id(user_id)
                 id_attr = 'job_seeker_id'
             else:
                 raise ValidationError("invalid user type")
             return user,id_attr
-        except (ObjectDoesNotExist,Recruiter.DoesNotExist,JobSeeker.DoesNotExist):
-            raise NotFoundException("user profile not found")
-                
+        except (ObjectDoesNotExist,Recruiter.DoesNotExist,JobSeeker.DoesNotExist) as e:
+            logger.error(f"An unexpected error occurred:{str(e)}")
+            raise
+        except ValidationError as e:
+            logger.error(f"Validation error occurred: {e}")
+            raise
         except DatabaseError as e:
-            raise InternalErrorException("internal server error")
+            logger.error(f"An unexpected error occurred:{str(e)}")
+            raise 
         except Exception as e:
-            raise InternalErrorException("Internal server error")
+            logger.error(f"An unexpected error occurred:{str(e)}")
+            raise InternalErrorException("Internal server error") from e
     def create_tracking(self, user_id: int, data: Dict[str, Any], user_type: str):
         try:
             user, id_attr = self.validate_user_type_user_id(user_type,user_id)
@@ -62,12 +72,14 @@ class BaseRecruiterTrackingService:
                 raise ValidationError(serializer.errors)
             if not isinstance(serializer.validated_data, dict):
                 raise ValidationError({'error': 'incorrect data format passed'})  
-            return self.tracking_repo.create(**serializer.validated_data)
-            
+            return self.tracking_repo.create(**serializer.validated_data)            
         except ValidationError as e:
+            logger.error(f"Validation error occurred: {str(e)}")
             raise ServiceException("validation error occurred,please verify and try again") from e
         except DatabaseError as e:
+            logger.error(f"Database error occurred: {e}")
             raise InternalErrorException("internal server error ")
         except Exception as e:
+            logger.error(f"An unexpected error occurred:{str(e)}")
             raise InternalErrorException("Internal server error")
     

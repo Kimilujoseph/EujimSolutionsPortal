@@ -20,10 +20,11 @@ class RecruiterTrackingService(BaseRecruiterTrackingService):
         self.tracking_repo = RecruiterTrackingRepository()
         self.recruiter_repo = RecruiterRepository()
         self.job_seeker_repo = JobSeekerRepository()
+        self.role = "recruiter"
 
     def create_tracking(self, user_id: int, data: Dict[str, Any]) -> RecruiterTracking:
         try:
-             return super().create_tracking(user_id, data, "recruiter")
+             return super().create_tracking(user_id, data,self.role)
         except Exception as e:
              raise InternalErrorException("Internal server error")
             

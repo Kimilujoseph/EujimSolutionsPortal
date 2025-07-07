@@ -113,15 +113,15 @@ class RecruiterTrackingSerializer(serializers.ModelSerializer):
     lastName = serializers.CharField(source='job_seeker.user.lastName', read_only=True)
     githubUrl = serializers.URLField(source='job_seeker.github_url', read_only=True)
     linkedinUrl = serializers.URLField(source='job_seeker.linkedin_url', read_only=True)
-    status = serializers.CharField(read_only=True)
-    notes = serializers.CharField(read_only=True)
+    status = serializers.CharField(read_only=False)
+    notes = serializers.CharField(read_only=False)
     createdAt = serializers.DateTimeField(read_only=True)
     status_display = serializers.CharField(source='get_status_display', read_only=True)
 
     # Writable fields
     job_seeker_id = serializers.IntegerField(write_only=True)
     recruiter_id = serializers.IntegerField(write_only=True)
-
+    job_posting_id = serializers.IntegerField(write_only=True, required=False)
     class Meta:
         model = RecruiterTracking
         fields = [
@@ -138,7 +138,8 @@ class RecruiterTrackingSerializer(serializers.ModelSerializer):
             'status_display',
             'notes',
             'createdAt',
-            'recruiter_id'  # Add this to fields
+            'recruiter_id',
+            'job_posting_id'
         ]
 
     def create(self, validated_data):
