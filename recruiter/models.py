@@ -54,6 +54,10 @@ class RecruiterDoc(models.Model):
 
 
 class RecruiterTracking(models.Model):
+    USER_TYPE_CHOICES = [
+        ('recruiter', 'Recruiter'),
+        ('job_seeker', 'Job Seeker'),
+    ]
     STATUS_CHOICES = [
         ('intrested','Intrested'),
         ('applied', 'Applied'),
@@ -62,6 +66,7 @@ class RecruiterTracking(models.Model):
         ('hired', 'Hired'),
         ('rejected', 'Rejected'),
     ]
+    user_type = models.CharField(max_length=20, choices=USER_TYPE_CHOICES, default='recruiter', null=True, blank=True)
     recruiter = models.ForeignKey(Recruiter, on_delete=models.CASCADE,null=True,blank=True)
     job_seeker = models.ForeignKey(JobSeeker, on_delete=models.CASCADE, related_name='tracking_records',null=True,blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='shortlisted', null=True, blank=True)

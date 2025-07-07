@@ -23,7 +23,7 @@ class JobPostingSerializer(serializers.ModelSerializer):
             'location', 'job_type', 'experience_level', 'salary_range_min',
             'salary_range_max', 'is_active', 'posted_at', 'updated_at',
             'application_deadline', 'views_count', 'applications_count',
-            'recruiter_company', 'required_skills'
+            'recruiter_company','recruiter_id','required_skills'
         ]
 
 class JobPostingCreateSerializer(serializers.ModelSerializer):
