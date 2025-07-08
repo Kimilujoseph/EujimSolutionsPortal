@@ -42,17 +42,10 @@ class RecruiterProfileView(APIView):
 
     def put(self, request):
         service = RecruiterService()
-        try:
-            recruiter = service.update_recruiter_profile(request.user.id, request.data)
-            return Response(RecruiterProfileSerializer(recruiter).data)
-        except ValidationError as e:
-            return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            return Response(
-                {'error': str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
-
+        role = request.user_data.get('role')
+        recruiter = service.update_recruiter_profile(request.user.id, request.data,role=role)
+        return Response(RecruiterProfileSerializer(recruiter).data,status=status.HTTP_200_OK)
+       
     def delete(self, request):
         service = RecruiterService()
         try:

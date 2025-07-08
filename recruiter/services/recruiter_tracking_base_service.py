@@ -16,12 +16,12 @@ class BaseRecruiterTrackingService:
         self.recruiter_repo = RecruiterRepository()
         self.job_seeker_repo = JobSeekerRepository()
     
-    def find_job_seeker_profile(self,id:int) -> Optional[JobSeeker]:
+    def find_job_seeker_profile(self,id:int) -> JobSeeker:
         try:
             return self.job_seeker_repo.get_by_user_id(id)
-        except ObjectDoesNotExist as e:
+        except (ObjectDoesNotExist,JobSeeker.DoesNotExist) as e:
             logger.error(f"An unexpected error occurred:{str(e)}")
-            raise NotFoundException("job seeker profile not found")
+            raise NotFoundException
         except DatabaseError as e:
             logger.error(f"An unexpected error occurred:{str(e)}")
             raise InternalErrorException("internal server error")
@@ -32,23 +32,23 @@ class BaseRecruiterTrackingService:
         try:
             return self.recruiter_repo.get_by_user_id(id)
         except (ObjectDoesNotExist,Recruiter.DoesNotExist) as e:
-            raise NotFoundException("recruiter profile not found")
+            raise NotFoundException
         except DatabaseError as e:
-            raise InternalErrorException("internal server error")
+            raise 
         except Exception as e:
             raise InternalErrorException("Internal server error")
     def validate_user_type_user_id(self,user_type:str,user_id:int)->Tuple[Union[Recruiter,JobSeeker],str]: 
         try:
             if user_type == "recruiter":
-                user = self.recruiter_repo.get_by_user_id(user_id)
+                user = self.find_recruiter_profile(user_id)
                 id_attr = 'recruiter_id'
             elif user_type == "job_seeker":
-                user = self.job_seeker_repo.get_by_user_id(user_id)
+                user = self.find_job_seeker_profile(user_id)
                 id_attr = 'job_seeker_id'
             else:
                 raise ValidationError({"invalid user type"})
             return user,id_attr
-        except (ObjectDoesNotExist,Recruiter.DoesNotExist,JobSeeker.DoesNotExist) as e:
+        except (ObjectDoesNotExist,Recruiter.DoesNotExist,JobSeeker.DoesNotExist,NotFoundException) as e:
             logger.error(f"An unexpected error occurred:{str(e)}")
             raise
         except ValidationError as e:
@@ -87,7 +87,9 @@ class BaseRecruiterTrackingService:
                 raise ValidationError(serializer.errors)
             if not isinstance(serializer.validated_data, dict):
                 raise ValidationError({'error': 'incorrect data format passed'})  
-            return self.tracking_repo.create(**serializer.validated_data)            
+            return self.tracking_repo.create(**serializer.validated_data)   
+        except NotFoundException as e:
+            raise NotFoundException("user profile not found")      
         except ValidationError as e:
             logger.error(f"Validation error occurred: {e.detail}")
             error_detail = e.detail

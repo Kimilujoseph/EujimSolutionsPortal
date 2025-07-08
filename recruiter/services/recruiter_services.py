@@ -32,6 +32,10 @@ class RecruiterService(BaseRecruiterTrackingService):
         except ValidationError as e:
             error_found = e.detail
             raise ServiceException(error_found)
+        except DatabaseError as e:
+            raise InternalErrorException("internal server error")
+        except Exception as e:
+            raise InternalErrorException("Internal server")
     def get_recruiter_profile(self, user_id: int) -> Optional[Recruiter]:
         try:
             return self.recruiter_repo.get_recruiter_with_profile(user_id)
