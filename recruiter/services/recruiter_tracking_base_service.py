@@ -28,10 +28,10 @@ class BaseRecruiterTrackingService:
         except Exception as e:
             logger.error(f"An unexpected error occurred:{str(e)}")
             raise InternalErrorException("Internal server error")
-    def find_recruiter_profile(self,id:int) -> Optional[Recruiter]:
+    def find_recruiter_profile(self,id:int) -> Recruiter:
         try:
             return self.recruiter_repo.get_by_user_id(id)
-        except ObjectDoesNotExist as e:
+        except (ObjectDoesNotExist,Recruiter.DoesNotExist) as e:
             raise NotFoundException("recruiter profile not found")
         except DatabaseError as e:
             raise InternalErrorException("internal server error")
