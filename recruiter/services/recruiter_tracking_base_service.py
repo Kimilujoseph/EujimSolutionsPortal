@@ -46,7 +46,7 @@ class BaseRecruiterTrackingService:
                 user = self.job_seeker_repo.get_by_user_id(user_id)
                 id_attr = 'job_seeker_id'
             else:
-                raise ValidationError("invalid user type")
+                raise ValidationError({"invalid user type"})
             return user,id_attr
         except (ObjectDoesNotExist,Recruiter.DoesNotExist,JobSeeker.DoesNotExist) as e:
             logger.error(f"An unexpected error occurred:{str(e)}")
@@ -60,12 +60,27 @@ class BaseRecruiterTrackingService:
         except Exception as e:
             logger.error(f"An unexpected error occurred:{str(e)}")
             raise InternalErrorException("Internal server error") from e
+    def validate_existing_tracking(self,job_posting_id:int,job_seeker_id:int):
+        try:
+            existing_tracking = self.tracking_repo.check_existing_job_tracking(job_posting_id,job_seeker_id)
+            print(f"existing job_seeker:{existing_tracking}")
+            if existing_tracking:
+                raise ValidationError({"already showed intrest in this job"})
+        except ValidationError as e:
+            raise
+        except DatabaseError as e:
+            raise
+        except Exception as e:
+            logger.error(f"cvalidation erored: {str(e)}")
+            raise InternalErrorException("Internal server error")
     def create_tracking(self, user_id: int, data: Dict[str, Any], user_type: str):
         try:
             user, id_attr = self.validate_user_type_user_id(user_type,user_id)
             requester_data = data.copy()
             requester_data[id_attr] = user.pk  
             requester_data['user_type'] = user_type
+            if requester_data["job_posting_id"]:
+               self.validate_existing_tracking(requester_data["job_posting_id"],user.pk)
      
             serializer = RecruiterTrackingSerializer(data=requester_data)
             if not serializer.is_valid():
@@ -74,8 +89,9 @@ class BaseRecruiterTrackingService:
                 raise ValidationError({'error': 'incorrect data format passed'})  
             return self.tracking_repo.create(**serializer.validated_data)            
         except ValidationError as e:
-            logger.error(f"Validation error occurred: {str(e)}")
-            raise ServiceException("validation error occurred,please verify and try again") from e
+            logger.error(f"Validation error occurred: {e.detail}")
+            error_detail = e.detail
+            raise ServiceException({"errors": error_detail})
         except DatabaseError as e:
             logger.error(f"Database error occurred: {e}")
             raise InternalErrorException("internal server error ")

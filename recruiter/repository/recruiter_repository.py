@@ -3,6 +3,7 @@ from .base_repository import BaseRepository
 from ..models import Recruiter, RecruiterDoc, RecruiterTracking
 from typing import Type, Optional
 from django.db import models
+from django.core.exceptions import ValidationError
 
 class RecruiterRepository(BaseRepository[Recruiter]):
     def __init__(self):
@@ -100,10 +101,19 @@ class RecruiterTrackingRepository(BaseRepository[RecruiterTracking]):
             'job_seeker',
             'job_posting'
         )\
+    
         
     def update_status(self, tracking: RecruiterTracking, status: str, notes: Optional[str] = None) -> Optional[RecruiterTracking]:
         update_data = {'status': status}
         if notes is not None:
             update_data['notes'] = notes
         return self.update(instance=tracking, **update_data)
-    
+    #check if a job post exist with the same jobseeker id 
+    def check_existing_job_tracking(self,job_post_id:int,job_seeker_id:int):
+        print(f"jobseeker:{job_seeker_id}")
+        print(f"job+posttt:{job_post_id}")
+        return RecruiterTracking.objects.filter(
+            job_seeker_id=job_seeker_id,
+            job_posting_id = job_post_id
+        ).exists()
+        
