@@ -4,6 +4,7 @@ from ..models import Recruiter, RecruiterDoc, RecruiterTracking
 from typing import Type, Optional
 from django.db import models
 from django.core.exceptions import ValidationError
+from django.db.models import QuerySet
 
 class RecruiterRepository(BaseRepository[Recruiter]):
     def __init__(self):
@@ -116,4 +117,13 @@ class RecruiterTrackingRepository(BaseRepository[RecruiterTracking]):
             job_seeker_id=job_seeker_id,
             job_posting_id = job_post_id
         ).exists()
+    
+    def get_applicants_for_job(self,job_posting_id: int) -> QuerySet[RecruiterTracking]:
+        
+        queryset = RecruiterTracking.objects.filter(
+            job_posting_id=job_posting_id,
+            user_type='recruiter'
+        ).select_related('job_seeker__user', 'job_posting')
+            
+        return queryset.order_by('-createdAt')
         

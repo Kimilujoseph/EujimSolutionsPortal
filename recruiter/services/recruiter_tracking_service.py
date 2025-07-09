@@ -14,7 +14,11 @@ from django.db import models
 from rest_framework.exceptions import ValidationError
 from typing import Optional, Dict, Any
 from users.exceptions import InternalErrorException
+from django.db.models import QuerySet
+from users.exceptions import NotFoundException,ServiceException,InternalErrorException
+import logging
 
+logger  = logging.getLogger(__name__)
 class RecruiterTrackingService(BaseRecruiterTrackingService):
     def __init__(self):
         self.tracking_repo = RecruiterTrackingRepository()
@@ -75,3 +79,15 @@ class RecruiterTrackingService(BaseRecruiterTrackingService):
         if not tracking:
             raise ValidationError({'error': 'Tracking record not found'})
         self.tracking_repo.delete(instance=tracking)
+    def get_job_applicants(self, job_posting_id: int) -> QuerySet[RecruiterTracking]:
+        try:
+            applicants = self.tracking_repo.get_applicants_for_job(job_posting_id)
+            
+            if not applicants.exists():
+                raise NotFoundException("No applicants found for this job posting")
+                
+            return applicants
+            
+        except Exception as e:
+            logger.error(f"Error fetching applicants for job {job_posting_id}: {str(e)}")
+            raise ServiceException("Failed to retrieve applicants")

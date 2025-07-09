@@ -7,7 +7,7 @@ from ..services.job_posting_services import JobPostingService
 from ..serializer import (
     JobPostingSerializer,
     JobPostingCreateSerializer,
-    JobPostingSkillSerializer
+    JobPostingSkillSerializer,JobPostingListSerializer
 )
 from ..permission import recruiter_required,recruiter_or_admin_required
 
@@ -16,7 +16,7 @@ service  = JobPostingService()
 class JobPostingListView(APIView):
     def get(self, request):
         job_postings = service.get_active_job_postings()
-        serializer = JobPostingSerializer(job_postings, many=True)
+        serializer = JobPostingListSerializer(job_postings, many=True)
         return Response(serializer.data)
 
 class JobPostingCreateView(APIView):

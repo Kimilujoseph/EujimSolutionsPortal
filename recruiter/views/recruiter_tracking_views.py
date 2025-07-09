@@ -119,3 +119,19 @@ class Jobseeker_recruitment_trackingListView(APIView):
         trackings = service.get_jobseeker_tracking(user_id)
         serializer = RecruiterTrackingSerializer(trackings, many=True)
         return Response(serializer.data)
+
+
+
+class JobApplicantsView(APIView): 
+    def get(self, request, job_posting_id):
+      service = RecruiterTrackingService()   
+      applicants = service.get_job_applicants(job_posting_id)
+            
+      serializer = RecruiterTrackingSerializer(applicants, many=True)
+      return Response({
+                'count': applicants.count(),
+                'applicants': serializer.data
+            }, status=status.HTTP_200_OK)
+            
+       
+       

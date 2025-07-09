@@ -25,7 +25,19 @@ class JobPostingSerializer(serializers.ModelSerializer):
             'application_deadline', 'views_count', 'applications_count',
             'recruiter_company','recruiter_id','required_skills'
         ]
-
+class JobPostingListSerializer(serializers.ModelSerializer):
+    required_skills = JobPostingSkillSerializer(source='job_posting', many=True, read_only=True)
+    recruiter_company = serializers.CharField(source='recruiter.companyName', read_only=True)
+    
+    class Meta:
+        model = JobPosting
+        fields = [
+            'title',
+            'location', 'job_type', 'experience_level', 'salary_range_min',
+            'salary_range_max', 'is_active', 'posted_at', 'updated_at',
+            'application_deadline', 'views_count', 
+            'recruiter_company','required_skills'
+        ]
 class JobPostingCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = JobPosting

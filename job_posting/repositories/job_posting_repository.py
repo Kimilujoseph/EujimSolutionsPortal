@@ -52,5 +52,6 @@ class JobPostingRepository:
         if job_posting_skill:           
            job_posting_skill.delete()
         return None
+    
             
 
