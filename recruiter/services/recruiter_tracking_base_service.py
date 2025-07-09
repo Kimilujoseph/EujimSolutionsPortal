@@ -89,15 +89,16 @@ class BaseRecruiterTrackingService:
                 raise ValidationError({'error': 'incorrect data format passed'})  
             return self.tracking_repo.create(**serializer.validated_data)   
         except NotFoundException as e:
-            raise NotFoundException("user profile not found")      
+            
+            raise #NotFoundException("user profile not found")      
         except ValidationError as e:
             logger.error(f"Validation error occurred: {e.detail}")
             error_detail = e.detail
-            raise ServiceException({"errors": error_detail})
+            raise #ServiceException({"errors": error_detail})
         except DatabaseError as e:
             logger.error(f"Database error occurred: {e}")
-            raise InternalErrorException("internal server error ")
+            raise #InternalErrorException("internal server error ")
         except Exception as e:
             logger.error(f"An unexpected error occurred:{str(e)}")
-            raise InternalErrorException("Internal server error")
+            raise #InternalErrorException("Internal server error")
     

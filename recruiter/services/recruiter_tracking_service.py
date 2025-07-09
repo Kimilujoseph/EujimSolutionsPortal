@@ -15,6 +15,8 @@ from rest_framework.exceptions import ValidationError
 from typing import Optional, Dict, Any
 from users.exceptions import InternalErrorException
 from django.db.models import QuerySet
+from django.db  import DatabaseError
+from django.core.exceptions import ValidationError
 from users.exceptions import NotFoundException,ServiceException,InternalErrorException
 import logging
 
@@ -29,24 +31,58 @@ class RecruiterTrackingService(BaseRecruiterTrackingService):
     def create_tracking(self, user_id: int, data: Dict[str, Any]) -> RecruiterTracking:
         try:
              return super().create_tracking(user_id, data,self.role)
+        except NotFoundException as e:
+            raise NotFoundException("user profile not found")
+        except ValidationError as e:
+            raise ServiceException({"details":e.message})
+        except DatabaseError as e:
+            raise InternalErrorException("Internal server error")
         except Exception as e:
              raise InternalErrorException("Internal server error")
             
 
     def get_trackings(self, user_id: int) -> models.QuerySet:
-        recruiter = super().find_recruiter_profile(user_id)
-        recruiter_id = getattr(recruiter, 'id', None)
-        if not recruiter_id and not isinstance(recruiter_id, int):
-            raise ValidationError({"error": "Recruiter not found"})
-        return self.tracking_repo.get_by_recruiter(recruiter_id)
-    def get_jobseeker_tracking(self,user_id:int) -> models.QuerySet:
-        job_seeker = self.job_seeker_repo.get_by_user_id(user_id)
-        if not job_seeker:
-            raise ValidationError({'error': 'Job seeker profile not found'})
-        job_seeker_id = getattr(job_seeker, 'id', None)
-        if not job_seeker_id and not isinstance(job_seeker_id, int):
-            raise ValidationError({"error": "Job seeker not found"})
-        return self.tracking_repo.get_by_job_seeker(job_seeker_id)
+        try:
+            recruiter = super().find_recruiter_profile(user_id)
+            recruiter_id = getattr(recruiter, 'id', None)
+            if not recruiter_id and not isinstance(recruiter_id, int):
+                raise ValidationError({"error": "Recruiter not found"})
+            data_fetched = self.tracking_repo.get_by_recruiter(recruiter_id)
+            if not data_fetched:
+                raise NotFoundException({"data not found"})
+            return data_fetched
+        except ValidationError as e:
+            logger.error(f"error occured:{str(e)}")
+            raise ServiceException({"details":e.message})
+        except NotFoundException as e:
+            logger.error(f"error occured:{str(e)}")
+            raise NotFoundException({"details":e.detail})
+        except DatabaseError as e:
+            logger.error(f"error occured:{str(e)}")
+            raise InternalErrorException("internal server error")
+        except Exception as e:
+            logger.error(f"error occured:{str(e)}")
+            raise InternalErrorException("internal server error")
+    
+    def get_jobseeker_tracking(self,user_id:int) -> Optional[models.QuerySet]:
+        try:
+            job_seeker = super().find_job_seeker_profile(user_id)
+            job_seeker_id = getattr(job_seeker, 'id', None)
+            if not job_seeker_id and not isinstance(job_seeker_id, int):
+                raise ValidationError({"error": "Job seeker not found"})
+            data_fetched = self.tracking_repo.get_by_job_seeker(job_seeker_id)
+            if not data_fetched:
+                raise NotFoundException("recruiter tracking info not found")
+            return data_fetched
+        except ValidationError as e:
+            ServiceException({e.message})
+        except NotFoundException as e:
+            error_details = e.detail
+            raise NotFoundException({"detail":error_details}) 
+        except DatabaseError as e:
+            raise InternalErrorException("Internal server error") 
+        except Exception as e:
+            raise InternalErrorException("Internal server error") 
 
     def get_tracking(self, tracking_id: int) -> Optional[RecruiterTracking]:
         return self.tracking_repo.get_tracking_by_id(tracking_id)
