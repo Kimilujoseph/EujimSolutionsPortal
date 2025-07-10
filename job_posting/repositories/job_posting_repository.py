@@ -11,10 +11,10 @@ class JobPostingRepository:
         return JobPosting.objects.all()
     
   
-    def get_active_job_postings(self)->QuerySet[JobPosting]:
-        return JobPosting.objects.filter(is_active=True)
+    def get_paginated_job_postings(self, offset: int, limit: int) -> QuerySet[JobPosting]:
+        return JobPosting.objects.filter(is_active=True)\
+            .order_by('?')[offset:offset + limit] 
     
-   
     def get_job_posting_by_id(self,pk)->Optional[JobPosting]:
         return JobPosting.objects.get(pk=pk)
         

@@ -15,10 +15,25 @@ service  = JobPostingService()
 
 class JobPostingListView(APIView):
     def get(self, request):
-        job_postings = service.get_active_job_postings()
+        # Get pagination parameters from request
+        page_number = request.query_params.get('page', 1)
+        page_size = request.query_params.get('limit', 10)
+    
+        # Get paginated and randomized results from database
+        job_postings = service.get_paginated_job_postings(
+            page_number=int(page_number),
+            page_size=int(page_size)
+        )
+        total_count = job_postings.count()
+        
         serializer = JobPostingListSerializer(job_postings, many=True)
-        return Response(serializer.data)
-
+        
+        return Response({
+            'count': total_count,
+            'page': int(page_number),
+            'page_size': int(page_size),
+            'results': serializer.data
+        })
 class JobPostingCreateView(APIView):
     @recruiter_required
     def post(self, request):

@@ -30,16 +30,16 @@ class JobPostingService:
             raise InternalErrorException("internal server error,try again later")
     
    
-    def get_active_job_postings(self)->QuerySet[JobPosting]:
+    def get_paginated_job_postings(self, page_number: int, page_size: int) -> QuerySet[JobPosting]:
         try:
-               return self.job_repository.get_active_job_postings()
+            offset = (page_number - 1) * page_size
+            return self.job_repository.get_paginated_job_postings(
+                offset=offset,
+                limit=page_size
+            )
         except DatabaseError as e:
-            logger.error(f"error occured while fetching active job posting: {str(e)}")
-            raise InternalErrorException("Internal server error,try again later")
-        except Exception as e:
-            logger.error(f"error occured while fetching active job postings: {str(e)}")
-            raise InternalErrorException("internal server error,try again later")
-    
+            logger.error(f"Error fetching paginated job postings: {str(e)}")
+            raise InternalErrorException("Internal server error")
    
     def get_job_posting_details(self,pk:int) -> Optional[JobPosting]:
         try:
