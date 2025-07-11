@@ -18,6 +18,7 @@ class JobPostingRepository:
         today = date.today()
         seed = int(today.strftime('%Y%m%d'))
         
+        print("--- HITTING THE DATABASE to fetch job postings ---")
         all_postings = list(JobPosting.objects.filter(is_active=True))
         total_count = len(all_postings)
         
