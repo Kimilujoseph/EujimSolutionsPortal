@@ -3,6 +3,9 @@ from django.core.exceptions import ObjectDoesNotExist
 from ..models import JobPosting, JobPostingSkill
 from django.db.models import QuerySet
 from typing import Optional,Dict,Any
+import random
+from datetime import date
+
 class JobPostingRepository:
     def __init__(self):
         pass
@@ -11,9 +14,17 @@ class JobPostingRepository:
         return JobPosting.objects.all()
     
   
-    def get_paginated_job_postings(self, offset: int, limit: int) -> QuerySet[JobPosting]:
-        return JobPosting.objects.filter(is_active=True)\
-            .order_by('?')[offset:offset + limit] 
+    def get_paginated_job_postings(self, offset: int, limit: int):
+        today = date.today()
+        seed = int(today.strftime('%Y%m%d'))
+        
+        all_postings = list(JobPosting.objects.filter(is_active=True))
+        total_count = len(all_postings)
+        
+        random.seed(seed)
+        random.shuffle(all_postings)
+        
+        return all_postings[offset:offset + limit], total_count 
     
     def get_job_posting_by_id(self,pk)->Optional[JobPosting]:
         return JobPosting.objects.get(pk=pk)

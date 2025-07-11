@@ -10,6 +10,9 @@ from jobseeker.repository.skill_repository import SkillRepository
 from django.utils import timezone
 import logging
 from typing import Optional,Dict,Any
+import logging
+from typing import Optional,Dict,Any
+from django.core.cache import cache
 logger = logging.getLogger(__name__)
 
 class JobPostingService:
@@ -18,6 +21,9 @@ class JobPostingService:
         self.recruiter_repository = RecruiterTrackingRepository()  
         self.recruiter_info_repository = RecruiterRepository()
         self.skill_repository = SkillRepository()
+    
+    def _invalidate_job_posting_list_cache(self):
+        cache.clear()
 
     def get_all_job_postings(self)->QuerySet[JobPosting]:
         try:
@@ -30,13 +36,14 @@ class JobPostingService:
             raise InternalErrorException("internal server error,try again later")
     
    
-    def get_paginated_job_postings(self, page_number: int, page_size: int) -> QuerySet[JobPosting]:
+    def get_paginated_job_postings(self, page_number: int, page_size: int):
         try:
             offset = (page_number - 1) * page_size
-            return self.job_repository.get_paginated_job_postings(
+            job_postings, total_count = self.job_repository.get_paginated_job_postings(
                 offset=offset,
                 limit=page_size
             )
+            return job_postings, total_count
         except DatabaseError as e:
             logger.error(f"Error fetching paginated job postings: {str(e)}")
             raise InternalErrorException("Internal server error")
@@ -70,7 +77,9 @@ class JobPostingService:
             if not recruiter:
                 raise NotFoundException("Recruiter not found")
             data['recruiter'] = recruiter
-            return self.job_repository.create_job_posting(data)
+            job_posting = self.job_repository.create_job_posting(data)
+            self._invalidate_job_posting_list_cache()
+            return job_posting
        except (ValueError,TypeError) as e:
             logger.error(f"error occured while creating job posting: {str(e)}")
             raise ServiceException("Invalid data format")
@@ -80,9 +89,12 @@ class JobPostingService:
        except Exception as e:
             logger.error(f"error occured while creating job posting: {str(e)}")
             raise InternalErrorException("Internal server error ")
+            
     def update_job_posting(self,pk, data)->Optional [JobPosting]:
         try:
-            return self.job_repository.update_job_posting(pk, data)
+            job_posting = self.job_repository.update_job_posting(pk, data)
+            self._invalidate_job_posting_list_cache()
+            return job_posting
         except ObjectDoesNotExist:
             logger.error(f"job posting with id {pk} does not exist")
             raise NotFoundException("job posting not found")
@@ -95,7 +107,9 @@ class JobPostingService:
     
     def delete_job_posting(self,pk):
         try:
-            return self.job_repository.delete_job_posting(pk)
+            result = self.job_repository.delete_job_posting(pk)
+            self._invalidate_job_posting_list_cache()
+            return result
         except ObjectDoesNotExist:
             raise NotFoundException("job posting not found")
         except DatabaseError as e:

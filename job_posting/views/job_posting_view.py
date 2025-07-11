@@ -10,30 +10,38 @@ from ..serializer import (
     JobPostingSkillSerializer,JobPostingListSerializer
 )
 from ..permission import recruiter_required,recruiter_or_admin_required
+from django.core.cache import cache
 
 service  = JobPostingService()
 
 class JobPostingListView(APIView):
     def get(self, request):
-        # Get pagination parameters from request
         page_number = request.query_params.get('page', 1)
         page_size = request.query_params.get('limit', 10)
-    
-        # Get paginated and randomized results from database
-        job_postings = service.get_paginated_job_postings(
+        
+        cache_key = f'job_postings_page_{page_number}_size_{page_size}'
+        cached_data = cache.get(cache_key)
+
+        if cached_data:
+            return Response(cached_data)
+
+        job_postings, total_count = service.get_paginated_job_postings(
             page_number=int(page_number),
             page_size=int(page_size)
         )
-        total_count = job_postings.count()
         
         serializer = JobPostingListSerializer(job_postings, many=True)
         
-        return Response({
+        response_data = {
             'count': total_count,
             'page': int(page_number),
             'page_size': int(page_size),
             'results': serializer.data
-        })
+        }
+        
+        cache.set(cache_key, response_data, timeout=60 * 15) # cache for 15 minutes
+        
+        return Response(response_data)
 class JobPostingCreateView(APIView):
     @recruiter_required
     def post(self, request):
