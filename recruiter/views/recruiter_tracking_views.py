@@ -103,20 +103,25 @@ class RecruiterTrackingDetailView(APIView):
 class Jobseeker_recruitment_trackingListView(APIView):
     def get(self, request, user_id=None):
         service = RecruiterTrackingService()
+        #lets define a local variable of user_id
         role = request.user_data.get('role')
-        if role not in ['admin', 'superAdmin']:
-            user_id = request.user_data.get('id')
-        if not user_id or not isinstance(user_id, int):
+        print(f"user role:{role}")
+        request_user_id   = request.user_data.get('id')
+        if role in ['admin', 'superAdmin']:
+            targeted_id = user_id if user_id is not None else request_user_id
+        else:
+            if user_id is not None and user_id != request_user_id:
+                return Response(
+                    {'error':'not authorized'},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+            targeted_id = request_user_id
+        if not targeted_id or not isinstance(targeted_id, int):
             return Response(
                 {'error': 'Invalid or missing user ID'},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        if not user_id:
-            return Response(
-                {'error': 'User ID not found'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        trackings = service.get_jobseeker_tracking(user_id)
+        trackings = service.get_jobseeker_tracking(targeted_id)
 
         serializer = RecruiterTrackingSerializer(trackings, many=True)
         return Response(serializer.data)

@@ -73,6 +73,7 @@ class RecruiterTrackingService(BaseRecruiterTrackingService):
     
     def get_jobseeker_tracking(self,user_id:int) -> Optional[models.QuerySet]:
         try:
+            print(f"service layer userid:{user_id}")
             job_seeker = super().find_job_seeker_profile(user_id)
             job_seeker_id = getattr(job_seeker, 'id', None)
             if not job_seeker_id and not isinstance(job_seeker_id, int):

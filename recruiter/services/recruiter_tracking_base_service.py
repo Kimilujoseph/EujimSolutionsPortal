@@ -18,6 +18,7 @@ class BaseRecruiterTrackingService:
     
     def find_job_seeker_profile(self,id:int) -> JobSeeker:
         try:
+            print(f"user_id:{id}")
             return self.job_seeker_repo.get_by_user_id(id)
         except (ObjectDoesNotExist,JobSeeker.DoesNotExist) as e:
             logger.error(f"An unexpected error occurred when finding jobseeker_profile:{str(e)}")
