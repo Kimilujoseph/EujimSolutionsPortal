@@ -22,3 +22,7 @@ class AuthenticationException(ServiceException):
     """Raised when authentication fails."""
     status_code = status.HTTP_401_UNAUTHORIZED
     default_detail = 'Authentication failed.'
+
+class PermissionDenied(ServiceException):
+    status_code = status.HTTP_403_FORBIDDEN
+    default_detail = 'You do not have permission to perform this action.'

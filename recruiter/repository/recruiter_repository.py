@@ -73,7 +73,8 @@ class RecruiterTrackingRepository(BaseRepository[RecruiterTracking]):
          .select_related(
             'recruiter',
             'job_seeker',
-            'job_seeker__user'
+            'job_seeker__user',
+            'job_posting',
         )\
             .only(
             'id',
@@ -86,7 +87,11 @@ class RecruiterTrackingRepository(BaseRepository[RecruiterTracking]):
             'job_seeker__linkedin_url',
             'job_seeker__user__firstName',
             'job_seeker__user__lastName',
-            'job_seeker__user__id'
+            'job_seeker__user__id',
+            'job_posting__id',
+            'job_posting__title',
+            'job_posting__location',
+            'job_posting__posted_at'
         )\
             .order_by('-createdAt')
     def get_tracking_by_id(self, tracking_id: int) -> Optional[RecruiterTracking]:

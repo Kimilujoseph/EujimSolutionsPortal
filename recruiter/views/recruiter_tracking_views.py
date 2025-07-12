@@ -117,6 +117,7 @@ class Jobseeker_recruitment_trackingListView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
         trackings = service.get_jobseeker_tracking(user_id)
+
         serializer = RecruiterTrackingSerializer(trackings, many=True)
         return Response(serializer.data)
 

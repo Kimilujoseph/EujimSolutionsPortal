@@ -36,9 +36,12 @@ class RecruiterService(BaseRecruiterTrackingService):
             raise InternalErrorException("internal server error")
         except Exception as e:
             raise InternalErrorException("Internal server")
-    def get_recruiter_profile(self, user_id: int) -> Optional[Recruiter]:
+    def get_recruiter_profile(self, user_id: int) -> Recruiter:
         try:
-            return self.recruiter_repo.get_recruiter_with_profile(user_id)
+           recruiter_profile = self.recruiter_repo.get_recruiter_with_profile(user_id)
+           if recruiter_profile is None:
+               raise Recruiter.DoesNotExist("")
+           return recruiter_profile
         except (Recruiter.DoesNotExist):
             raise NotFoundException("recruiter profile not found")
         except Exception as e:

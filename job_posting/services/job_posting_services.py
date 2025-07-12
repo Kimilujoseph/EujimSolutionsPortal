@@ -48,7 +48,7 @@ class JobPostingService:
             logger.error(f"Error fetching paginated job postings: {str(e)}")
             raise InternalErrorException("Internal server error")
    
-    def get_job_posting_details(self,pk:int) -> Optional[JobPosting]:
+    def get_job_posting_details(self,pk:int) -> JobPosting:
         try:
             if not isinstance(pk, int) or pk <= 0:
                 raise NotFoundException("Invalid job posting ID")
@@ -57,6 +57,8 @@ class JobPostingService:
             if job_posting:
                 job_posting.views_count += 1
                 job_posting.save()
+            else:
+                raise ObjectDoesNotExist("job posting not found")
             return job_posting
         except ObjectDoesNotExist:
             logger.error(f"job posting with id {pk} does not exist")

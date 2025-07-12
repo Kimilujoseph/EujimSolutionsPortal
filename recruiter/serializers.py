@@ -115,6 +115,10 @@ class RecruiterTrackingSerializer(serializers.ModelSerializer):
     linkedinUrl = serializers.URLField(source='job_seeker.linkedin_url', read_only=True)
     status = serializers.CharField(read_only=False)
     notes = serializers.CharField(read_only=False)
+    job_post_id = serializers.CharField(source='job_posting.id',allow_null = True)
+    job_post_title = serializers.CharField(source='job_posting.title',allow_null = True)
+    job_post_location = serializers.CharField(source='job_posting.location',allow_null=True)
+    job_posted_At = serializers.CharField(source='job_posting.posted_at',allow_null=True)
     createdAt = serializers.DateTimeField(read_only=True)
     status_display = serializers.CharField(source='get_status_display', read_only=True)
 
@@ -139,7 +143,11 @@ class RecruiterTrackingSerializer(serializers.ModelSerializer):
             'notes',
             'createdAt',
             'recruiter_id',
-            'job_posting_id'
+            'job_post_id',
+            'job_posting_id',
+            'job_post_title',
+            'job_post_location',
+            'job_posted_At'
         ]
 
     def create(self, validated_data):

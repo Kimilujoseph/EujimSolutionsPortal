@@ -20,8 +20,8 @@ class BaseRecruiterTrackingService:
         try:
             return self.job_seeker_repo.get_by_user_id(id)
         except (ObjectDoesNotExist,JobSeeker.DoesNotExist) as e:
-            logger.error(f"An unexpected error occurred:{str(e)}")
-            raise NotFoundException
+            logger.error(f"An unexpected error occurred when finding jobseeker_profile:{str(e)}")
+            raise 
         except DatabaseError as e:
             logger.error(f"An unexpected error occurred:{str(e)}")
             raise InternalErrorException("internal server error")
@@ -32,7 +32,7 @@ class BaseRecruiterTrackingService:
         try:
             return self.recruiter_repo.get_by_user_id(id)
         except (ObjectDoesNotExist,Recruiter.DoesNotExist) as e:
-            raise NotFoundException
+            raise
         except DatabaseError as e:
             raise 
         except Exception as e:
@@ -46,7 +46,7 @@ class BaseRecruiterTrackingService:
                 user = self.find_job_seeker_profile(user_id)
                 id_attr = 'job_seeker_id'
             else:
-                raise ValidationError({"invalid user type"})
+                raise ValidationError({"detail":"invalid user type"})
             return user,id_attr
         except (ObjectDoesNotExist,Recruiter.DoesNotExist,JobSeeker.DoesNotExist,NotFoundException) as e:
             logger.error(f"An unexpected error occurred:{str(e)}")
@@ -65,7 +65,7 @@ class BaseRecruiterTrackingService:
             existing_tracking = self.tracking_repo.check_existing_job_tracking(job_posting_id,job_seeker_id)
             print(f"existing job_seeker:{existing_tracking}")
             if existing_tracking:
-                raise ValidationError({"already showed intrest in this job"})
+                raise ValidationError({"detail":"already showed intrest in this job"})
         except ValidationError as e:
             raise
         except DatabaseError as e:
@@ -88,17 +88,18 @@ class BaseRecruiterTrackingService:
             if not isinstance(serializer.validated_data, dict):
                 raise ValidationError({'error': 'incorrect data format passed'})  
             return self.tracking_repo.create(**serializer.validated_data)   
-        except NotFoundException as e:
-            
-            raise #NotFoundException("user profile not found")      
+        except (ObjectDoesNotExist,JobSeeker.DoesNotExist,Recruiter.DoesNotExist):
+            raise
+        except NotFoundException as e: 
+            raise 
         except ValidationError as e:
             logger.error(f"Validation error occurred: {e.detail}")
             error_detail = e.detail
-            raise #ServiceException({"errors": error_detail})
+            raise 
         except DatabaseError as e:
             logger.error(f"Database error occurred: {e}")
-            raise #InternalErrorException("internal server error ")
+            raise
         except Exception as e:
             logger.error(f"An unexpected error occurred:{str(e)}")
-            raise #InternalErrorException("Internal server error")
+            raise 
     

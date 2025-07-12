@@ -1,5 +1,6 @@
 # services/recruiter_service.py
-from ..models import RecruiterTracking
+from ..models import RecruiterTracking,Recruiter
+from jobseeker.models import JobSeeker
 from jobseeker.repository.jobseeker_repository import JobSeekerRepository
 from ..repository.recruiter_repository import (
     RecruiterRepository,
@@ -31,6 +32,12 @@ class RecruiterTrackingService(BaseRecruiterTrackingService):
     def create_tracking(self, user_id: int, data: Dict[str, Any]) -> RecruiterTracking:
         try:
              return super().create_tracking(user_id, data,self.role)
+        except ValidationError as e:
+            raise ServiceException(str(e))
+        except JobSeeker.DoesNotExist:
+            raise NotFoundException("job seeker profile not found")
+        except Recruiter.DoesNotExist:
+            raise NotFoundException("recruiter profile not found")
         except NotFoundException as e:
             raise NotFoundException("user profile not found")
         except ValidationError as e:
@@ -69,19 +76,22 @@ class RecruiterTrackingService(BaseRecruiterTrackingService):
             job_seeker = super().find_job_seeker_profile(user_id)
             job_seeker_id = getattr(job_seeker, 'id', None)
             if not job_seeker_id and not isinstance(job_seeker_id, int):
-                raise ValidationError({"error": "Job seeker not found"})
+                raise ValidationError({"detail":"Job seeker not found"})
             data_fetched = self.tracking_repo.get_by_job_seeker(job_seeker_id)
             if not data_fetched:
-                raise NotFoundException("recruiter tracking info not found")
+                raise NotFoundException(detail="recruiter tracking info not found")
             return data_fetched
         except ValidationError as e:
-            ServiceException({e.message})
+            ServiceException(str(e))
+        except (JobSeeker.DoesNotExist):
+            raise NotFoundException("user profile not found")
         except NotFoundException as e:
-            error_details = e.detail
-            raise NotFoundException({"detail":error_details}) 
+            raise NotFoundException(detail=e.detail) 
         except DatabaseError as e:
+            logger.error(f"database error occured in the services layer:{str(e)}")
             raise InternalErrorException("Internal server error") 
         except Exception as e:
+            logger.error(f"error occured in the services layer:{str(e)}")
             raise InternalErrorException("Internal server error") 
 
     def get_tracking(self, tracking_id: int) -> Optional[RecruiterTracking]:

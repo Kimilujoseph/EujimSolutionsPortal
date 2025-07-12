@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from ..services.job_posting_services import JobPostingService
+from recruiter.services.recruiter_services import  RecruiterService
 from ..serializer import (
     JobPostingSerializer,
     JobPostingCreateSerializer,
@@ -13,6 +14,7 @@ from ..permission import recruiter_required,recruiter_or_admin_required
 from django.core.cache import cache
 
 service  = JobPostingService()
+recruiter_service = RecruiterService()
 
 class JobPostingListView(APIView):
     def get(self, request):
@@ -76,8 +78,11 @@ class JobPostingDetailView(APIView):
     
     def delete(self, request, pk):
         job_posting = service.get_job_posting_details(pk)
+        user_id = request.user_data.get('id')
+        recruiter_profile = recruiter_service.get_recruiter_profile(user_id)
+        print(f"recruiter_profile:{job_posting.recruiter}")
         if job_posting:
-            if job_posting.recruiter != request.user.recruiter:
+            if job_posting.recruiter.id != recruiter_profile.pk:
                 return Response(
                     {"detail": "You don't have permission to delete this job posting"},
                     status=status.HTTP_403_FORBIDDEN
