@@ -18,6 +18,7 @@ class JobSeeker(models.Model):
     createdAt = models.DateTimeField(auto_now_add=True)
     updatedAt = models.DateTimeField(auto_now=True)
 
+
     class Meta:
         db_table = 'job_seeker'
         managed = False
