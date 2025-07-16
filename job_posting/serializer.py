@@ -8,10 +8,8 @@ class JobPostingSkillSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = JobPostingSkill
-        fields = ['id', 'skill_name', 'skill_description']
+        fields = ['id', 'skill_name', 'skill_description','skill_id']
         read_only_fields = ['id']
-
-
 class JobPostingSerializer(serializers.ModelSerializer):
     required_skills = JobPostingSkillSerializer(source='job_posting', many=True, read_only=True)
     recruiter_company = serializers.CharField(source='recruiter.companyName', read_only=True)

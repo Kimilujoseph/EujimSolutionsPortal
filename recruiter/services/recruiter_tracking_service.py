@@ -131,10 +131,11 @@ class RecruiterTrackingService(BaseRecruiterTrackingService):
             applicants = self.tracking_repo.get_applicants_for_job(job_posting_id)
             
             if not applicants.exists():
-                raise NotFoundException("No applicants found for this job posting")
+                raise NotFoundException(detail="No applicants found for this job posting")
                 
             return applicants
-            
+        except NotFoundException as e:
+            raise NotFoundException(e.detail)
         except Exception as e:
             logger.error(f"Error fetching applicants for job {job_posting_id}: {str(e)}")
             raise ServiceException("Failed to retrieve applicants")

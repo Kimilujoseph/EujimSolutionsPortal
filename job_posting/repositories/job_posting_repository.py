@@ -62,9 +62,7 @@ class JobPostingRepository:
         return None
     def find_skill_posted(self,job_posting_id,skill_id):
         print(f"have been deliverd the followinf id {job_posting_id} and {skill_id}")
-        find_skill_posted = JobPostingSkill.objects.get(job_posting_id=job_posting_id,skill_id = skill_id)
-        if not find_skill_posted:
-            return None
+        find_skill_posted = JobPostingSkill.objects.filter(job_posting_id=job_posting_id,skill_id = skill_id).first()
         return find_skill_posted
      #deleteting a skill from a job posting
     def get_by_recruiter_id(self, recruiter_id: int) -> QuerySet[JobPosting]:

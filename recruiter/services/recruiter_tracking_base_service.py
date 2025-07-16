@@ -64,7 +64,7 @@ class BaseRecruiterTrackingService:
     def validate_existing_tracking(self,job_posting_id:int,job_seeker_id:int):
         try:
             existing_tracking = self.tracking_repo.check_existing_job_tracking(job_posting_id,job_seeker_id)
-            print(f"existing job_seeker:{existing_tracking}")
+            print(f"existing job_seeker_tracking:{existing_tracking}")
             if existing_tracking:
                 raise ValidationError({"detail":"already showed intrest in this job"})
         except ValidationError as e:
@@ -99,8 +99,8 @@ class BaseRecruiterTrackingService:
             raise 
         except DatabaseError as e:
             logger.error(f"Database error occurred: {e}")
-            raise
+            raise InternalErrorException("Internal server errorss")
         except Exception as e:
             logger.error(f"An unexpected error occurred:{str(e)}")
-            raise 
+            raise InternalErrorException("internal server error")
     
