@@ -22,10 +22,10 @@ ALLOWED_HOSTS = []
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.getenv('DB_NAME'),
-        'USER': os.getenv('DB_USER'),
-        'PASSWORD': os.getenv('DB_PASSWORD'),
-        'HOST': os.getenv('DB_HOST'),
+        'NAME': 'eujimSolution',
+        'USER': 'root',
+        'PASSWORD': 'seth2019',
+        'HOST': '127.0.0.1',
         'PORT': '3306',
     }
 }
@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'skills.apps.SkillsConfig',
     'recruiter.apps.RecruiterConfig',
     'job_posting.apps.JobPostingConfig',
+    'job_scraper.apps.JobScraperConfig',
     'corsheaders'
 ]
 ASGI_APPLICATION = 'EUJIMSOLUTIONAPP.asgi.application'
@@ -200,5 +201,14 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:5173",
 ]
 CORS_ALLOW_CREDENTIALS = True
+
+
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_BEAT_SCHEDULE = {
+    'scrape-jobs-every-day': {
+        'task': 'job_scraper.tasks.scrape_jobs_task',
+        'schedule': 86400.0,  # Every hour
+    },
+}
 
 
