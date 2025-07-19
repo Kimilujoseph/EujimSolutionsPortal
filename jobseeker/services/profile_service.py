@@ -7,6 +7,11 @@ from  django.core.exceptions import ValidationError
 from ..services.education_service import EducationService
 from users.exceptions import (NotFoundException,InternalErrorException,ServiceException)
 from ..permissions import admin_required
+import logging
+from django.db import DatabaseError
+    
+
+logger = logging.getLogger(__name__)
 class ProfileService:
     def __init__(self):
         self.jobseeker_repo = JobSeekerRepository()
@@ -21,7 +26,17 @@ class ProfileService:
                     "skills":self.get_jobseeker_skills(user_id),
                     "education": EducationService().get_user_educations(user_id)
                 }
+       except ObjectDoesNotExist as e:
+           logger.error(f"error found in finding user profile {str(e)}")
+           raise NotFoundException("user profile not found")
+       except NotFoundException as e:
+           logger.error(f"error found in finding noew  {str(e)}")
+           raise NotFoundException("user profile not found")
+       except DatabaseError as e:
+           logger.error(f"error found {str(e)}")
+           raise InternalErrorException("failed to fetch user profile")
        except Exception as e:
+           logger.error(f"error found {str(e)}")
            raise InternalErrorException("failed to fetch user profile")
         
 
@@ -55,14 +70,28 @@ class ProfileService:
                 raise NotFoundException("Profile not found")
             return profile
         except ObjectDoesNotExist as e:
-            raise NotFoundException("user profile not found")
+            logger.error(f"error occured in getting user profile {str(e)}")
+            raise 
+        except NotFoundException as e:
+            logger.error(f"error occured in getting user profile {str(e)}")
+            raise
+        except DatabaseError as e:
+            logger.error(f"error occured in getting user profile {str(e)}")
+            raise
+        except Exception as e:
+             logger.error(f"error occured in getting user profile {str(e)}")
+             raise
 
     def get_jobseeker_skills(self, jobseeker_id: int):
-        return self.skillset_repo.get_skills_for_jobseeker(jobseeker_id)
+        try:
+            return self.skillset_repo.get_skills_for_jobseeker(jobseeker_id)
+        except DatabaseError:
+            raise
+        except Exception as e:
+            raise
     
     def delete_skill_from_profile(self,user_id:int,skill_id:int):
         try:
-            print(f"kill id found:{skill_id}")
             deleted_count = self.skillset_repo.delete_skill_for_user(
                 user_id=user_id,
                 skill_id=skill_id

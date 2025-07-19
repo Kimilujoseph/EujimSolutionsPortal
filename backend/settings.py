@@ -22,13 +22,14 @@ ALLOWED_HOSTS = []
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'eujimSolution',
-        'USER': 'root',
-        'PASSWORD': 'seth2019',
-        'HOST': '127.0.0.1',
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'HOST': os.getenv('DB_HOST'),
         'PORT': '3306',
     }
 }
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -49,6 +50,17 @@ INSTALLED_APPS = [
     'job_scraper.apps.JobScraperConfig',
     'corsheaders'
 ]
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
+}
+
 ASGI_APPLICATION = 'EUJIMSOLUTIONAPP.asgi.application'
 CHANNEL_LAYERS = {
     'default': {

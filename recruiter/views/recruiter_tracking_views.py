@@ -76,6 +76,7 @@ class RecruiterTrackingDetailView(APIView):
                 tracking_id=tracking_id,
                 data=request.data
             )
+            print(f"interviewdate:{request.data}")
             serializer = RecruiterTrackingSerializer(tracking)
             return Response(serializer.data)
         except ValidationError as e:

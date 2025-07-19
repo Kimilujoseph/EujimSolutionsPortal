@@ -11,6 +11,8 @@ from ..serializer.jobSeekerSerializer import JobSeekerProfileSerializer,JobSeeke
 from ..serializer.skillSerializer import SkillSetSerializer, SkillSerializer
 from ..serializer.education_serializer import EducationSerializer
 from django.core.exceptions import ValidationError
+from django.db import transaction
+from django.core.cache import cache
 
 class JobSeekerSkillsView(APIView):
 
@@ -49,7 +51,11 @@ class JobSeekerUpdateSkill(APIView):
                 
             service = ProfileService()
             skill = service.add_skill_to_profile(user_id, request.data)
-            
+            def update_cache_on_commit():
+                cache.delete(f'jobseeker_profile_{user_id}')
+                cache.delete(f'jobseeker_analytics_{user_id}')
+
+            transaction.on_commit(update_cache_on_commit)
             return Response(
                 SkillSetSerializer(skill).data,
                 status=status.HTTP_201_CREATED
@@ -81,13 +87,18 @@ class SkillListView(APIView):
 class JobSeekerDeleteSkill(APIView):
     @check_user_status
     def delete(self, request, skill_id):
-        
+        user_id = request.user_data.get('id')
         try:
             service = ProfileService()
             success = service.delete_skill_from_profile(
-                user_id=request.user_data.get('id'),
+                user_id=user_id,
                 skill_id=skill_id
             )
+            def update_cache_on_commit():
+                cache.delete(f'jobseeker_profile_{user_id}')
+                cache.delete(f'jobseeker_analytics_{user_id}')
+
+            transaction.on_commit(update_cache_on_commit)
             
             if success:
                 return Response(

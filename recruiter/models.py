@@ -2,6 +2,7 @@ from django.db import models
 from users.models import User
 from jobseeker.models import JobSeeker
 from users.models import User
+from datetime import datetime
 
 
 class Recruiter(models.Model):
@@ -79,7 +80,7 @@ class RecruiterTracking(models.Model):
         db_column='job_posting_id',
         related_name='tracking_job_posting'
     )
-
+    interviewDate = models.DateTimeField(null=True,blank=True,default=datetime(2025, 1, 1, 0, 0))
     createdAt = models.DateTimeField(auto_now_add=True)
     updatedAt = models.DateTimeField(auto_now=True)
 

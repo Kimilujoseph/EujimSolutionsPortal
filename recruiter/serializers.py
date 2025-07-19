@@ -115,6 +115,7 @@ class RecruiterTrackingSerializer(serializers.ModelSerializer):
     linkedinUrl = serializers.URLField(source='job_seeker.linkedin_url', read_only=True)
     status = serializers.CharField(read_only=False)
     notes = serializers.CharField(read_only=False)
+    interviewDate = serializers.CharField(read_only=False)
     job_post_id = serializers.CharField(source='job_posting.id',allow_null = True,read_only=True)
     job_post_title = serializers.CharField(source='job_posting.title',allow_null = True,read_only=True)
     job_post_location = serializers.CharField(source='job_posting.location',allow_null=True,read_only=True)
@@ -141,6 +142,7 @@ class RecruiterTrackingSerializer(serializers.ModelSerializer):
             'status',
             'status_display',
             'notes',
+            'interviewDate',
             'createdAt',
             'recruiter_id',
             'job_post_id',
@@ -170,8 +172,9 @@ class RecruiterTrackingSerializer(serializers.ModelSerializer):
 class RecruiterTrackingUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = RecruiterTracking
-        fields = ['status', 'notes']
+        fields = ['status', 'notes','interviewDate']
         extra_kwargs = {
             'status': {'required': False},
-            'notes': {'required': False}
+            'notes': {'required': False},
+            'interviewDate':{'required':False}
         }

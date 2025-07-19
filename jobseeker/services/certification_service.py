@@ -1,7 +1,7 @@
 from ..models import JobSeekerCertification
 from django.core.exceptions import ValidationError
 from ..utils.google_drive import GoogleDriveHelper
-from django.db import transaction
+from django.db import transaction,connection
 
 class CertificationService:
     @staticmethod
