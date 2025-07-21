@@ -12,9 +12,8 @@ class JobListAPIView(generics.ListAPIView):
 
 class TriggerScrapeAPIView(generics.GenericAPIView):
     def post(self, request):
-        # Trigger async scraping
-        scrape_jobs_task.delay()
+        scrape_jobs_task()
         return Response(
-            {"status": "Scraping initiated"}, 
+            {"status": "Scraping completed"}, 
             status=status.HTTP_202_ACCEPTED
         )
