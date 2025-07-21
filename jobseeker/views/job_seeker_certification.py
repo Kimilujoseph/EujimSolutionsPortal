@@ -11,16 +11,26 @@ from django.db import transaction
 
 class CertificationDetailAPIView(APIView):
     @jobseeker_required
-    def get(self, request, certification_id):
+    def get(self, request, certification_id,user_id=None):
         try:
-            user_id = request.user_data.get('id')
-            cache_key = f'certification_{certification_id}_user_{user_id}'
+            role = request.user_data.get('role')
+
+            if role in[ 'admin','recruiter','superAdmin'] and user_id is not None:
+               targeted_id =   user_id
+            elif user_id is not None and user_id != request.user_data.get('id'):
+                return Response(
+                    {'error': 'Unauthorized access'},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+            else:
+                targeted_id = request.user_data.get('id')
+            cache_key = f'certification_{certification_id}_user_{targeted_id}'
             cached_data = cache.get(cache_key)
             if cached_data:
                 return Response(cached_data, status=status.HTTP_200_OK)
 
             certification = CertificationService.get_certification_detail(
-                user_id=user_id,
+                user_id=targeted_id,
                 certification_id=certification_id
             )
             serializer = CertificationSerializer(certification)

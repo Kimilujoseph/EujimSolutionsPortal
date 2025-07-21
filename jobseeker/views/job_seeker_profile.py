@@ -85,15 +85,26 @@ class JobSeekerAnalyticsView(APIView):
 
 class CertificationListAPIView(APIView):
     @jobseeker_required
-    def get(self, request):
+    def get(self, request,user_id=None):
         try:
-            user_id = request.user_data.get('id')
-            cache_key = f'user_certifications_{user_id}'
+          
+            role = request.user_data.get('role')
+
+            if role in[ 'admin','recruiter','superAdmin'] and user_id is not None:
+               targeted_id =   user_id
+            elif user_id is not None and user_id != request.user_data.get('id'):
+                return Response(
+                    {'error': 'Unauthorized access'},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+            else:
+                targeted_id = request.user_data.get('id')
+            cache_key = f'user_certifications_{targeted_id}'
             cached_data = cache.get(cache_key)
             if cached_data:
                 return Response(cached_data, status=status.HTTP_200_OK)
 
-            certifications = CertificationService.get_user_certifications(user_id)
+            certifications = CertificationService.get_user_certifications(targeted_id)
             serializer = CertificationSerializer(certifications, many=True)
             cache.set(cache_key, serializer.data, timeout=3600) 
             return Response(
