@@ -14,7 +14,7 @@ class JobSeekerSearchService:
 
        
         if min_proficiency:
-            proficiency_order = ['begginer', 'intermediate', 'midlevel', 'proffessional'] 
+            proficiency_order = ['begginner', 'intermediate', 'midlevel', 'proffessional'] 
             min_index = proficiency_order.index(min_proficiency)
             valid_levels = proficiency_order[min_index:]
             query &= Q(proffeciency_level__in=valid_levels)

@@ -115,7 +115,7 @@ class RecruiterTrackingSerializer(serializers.ModelSerializer):
     linkedinUrl = serializers.URLField(source='job_seeker.linkedin_url', read_only=True)
     status = serializers.CharField(read_only=False)
     notes = serializers.CharField(read_only=False)
-    interviewDate = serializers.CharField(read_only=False)
+    interviewDate = serializers.CharField(read_only=False,required=False, allow_null=True)
     job_post_id = serializers.CharField(source='job_posting.id',allow_null = True,read_only=True)
     job_post_title = serializers.CharField(source='job_posting.title',allow_null = True,read_only=True)
     job_post_location = serializers.CharField(source='job_posting.location',allow_null=True,read_only=True)

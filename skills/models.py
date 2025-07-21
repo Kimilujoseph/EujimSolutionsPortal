@@ -13,7 +13,7 @@ class Skill(models.Model):
 
 class SkillSet(models.Model):
     PROFICIENCY_CHOICES = [
-        ('begginner', 'Beginner'),
+        ('begginner', 'Begginner'),
         ('intermediate', 'Intermediate'),
         ('midlevel', 'Midlevel'),
         ('proffessional', 'Professional'),

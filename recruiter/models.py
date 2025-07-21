@@ -80,10 +80,9 @@ class RecruiterTracking(models.Model):
         db_column='job_posting_id',
         related_name='tracking_job_posting'
     )
-    interviewDate = models.DateTimeField(null=True,blank=True,default=datetime(2025, 1, 1, 0, 0))
+    interviewDate = models.DateTimeField(null=True,blank=True,default=datetime(2025, 1, 1, 0))
     createdAt = models.DateTimeField(auto_now_add=True)
     updatedAt = models.DateTimeField(auto_now=True)
-
     class Meta:
         db_table = 'recruiter_tracking'
         managed = True
