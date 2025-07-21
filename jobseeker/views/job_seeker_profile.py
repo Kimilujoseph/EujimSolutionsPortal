@@ -84,13 +84,14 @@ class JobSeekerAnalyticsView(APIView):
 
 
 class CertificationListAPIView(APIView):
-    @jobseeker_required
+   
     def get(self, request,user_id=None):
         try:
           
             role = request.user_data.get('role')
+           # print(f"User Role: {role}")
 
-            if role in[ 'admin','recruiter','superAdmin'] and user_id is not None:
+            if role in[ 'admin','employer','superAdmin'] and user_id is not None:
                targeted_id =   user_id
             elif user_id is not None and user_id != request.user_data.get('id'):
                 return Response(
