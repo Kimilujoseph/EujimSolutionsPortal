@@ -40,6 +40,8 @@ class RecruiterTrackingListView(APIView):
                 )
             request_data = request.data.copy()
             request_data['recruiter_id'] = user_id
+            request_data['status']='shortlisted'
+            print(f"request data:{request_data}")
             tracking = service.create_tracking(
                 user_id=user_id,
                 data=request.data

@@ -13,17 +13,21 @@ from ..serializers import (
     RecruiterDocSerializer,
     RecruiterDocVerificationSerializer
 )
+from users.models import User
 
 from ..permission import recruiter_required, recruiter_or_admin_required, check_recruiter_status
 from django.http import FileResponse, Http404
 from django.utils.encoding import smart_str
 from django.utils.timezone import now
 import os
+import logging
+# Get an instance of a logger
+logger = logging.getLogger(__name__)
   
 class RecruiterDocView(APIView):
   def get(self, request, user_id=None):
-    service = RecruiterDocService()
-    try:
+        service = RecruiterDocService()
+    
         role = request.user_data.get('role');
         if user_id is None and role not in ['admin','superAdmin']:
              user_id = request.user_data.get('id')
@@ -65,11 +69,7 @@ class RecruiterDocView(APIView):
         cache.set(cache_key, serializer.data, timeout=3600)
         
         return Response(serializer.data)
-    except Exception as e:
-        return Response(
-            {'error': str(e)},
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR
-        )
+   
 
   def post(self, request):
         service = RecruiterDocService()
@@ -129,7 +129,18 @@ class RecruiterDocView(APIView):
                     {'error': 'Document ID is required'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-            print(doc_id)
+            
+            # Get document for cache invalidation
+            doc = service.get_document(doc_id)
+            if doc and hasattr(doc, 'recruiter') and hasattr(doc.recruiter, 'user'):
+                 user_id = doc.recruiter.user.id
+                 cache_key_list = f'recruiter_docs_{user_id}'
+                 cache.delete(cache_key_list)
+
+            # Invalidate the document download cache
+            cache_key_download = f'document_{doc_id}_download'
+            cache.delete(cache_key_download)
+
             service.delete_document(doc_id)
             return Response(
                 {'message': 'Document deleted successfully'},
@@ -198,7 +209,7 @@ class RecruiterDocVerificationView(APIView):
                     {'error': 'Admin privileges required'},
                     status=status.HTTP_403_FORBIDDEN
                 )
-            
+            print(f"users request data {request.data}")
             # Validate only status update is allowed
             serializer = RecruiterDocVerificationSerializer(data=request.data)
             if not serializer.is_valid():
@@ -209,19 +220,34 @@ class RecruiterDocVerificationView(APIView):
                     {'error': 'Status must be a string'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
+            user_id = request.user_data.get('id')
+            try:
+                verified_by_user = User.objects.get(id=user_id)
+            except User.DoesNotExist:
+                return Response({'error': 'Verifier user not found'}, status=status.HTTP_400_BAD_REQUEST)
             verification_data = {
                 'status': serializer.validated_data['status'],
-                'verifiedBy': request.user_data.get('id'),
+                'verifiedBy': verified_by_user,
                 'verifiedAt': now()
             }
             
             # Update document
-            doc = service.update_document(doc_id, verification_data)
+            doc = service.document_verification(doc_id, verification_data)
+            if doc and hasattr(doc, 'recruiter') and hasattr(doc.recruiter, 'user'):
+                 user_id = doc.recruiter.user.id
+                 cache_key_list = f'recruiter_docs_{user_id}'
+                 cache.delete(cache_key_list)
+
+            # Invalidate the document download cache
+            cache_key_download = f'document_{doc_id}_download'
+            cache.delete(cache_key_download)
             return Response(RecruiterDocSerializer(doc).data)
             
         except ValidationError as e:
+            logger.error(f"Validation error during document verification: {e.detail}")
             return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
+            logger.exception(f"An unexpected error occurred during document verification: {e}")
             return Response(
                 {'error': str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR

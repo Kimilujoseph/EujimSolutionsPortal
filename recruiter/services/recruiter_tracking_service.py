@@ -35,16 +35,22 @@ class RecruiterTrackingService(BaseRecruiterTrackingService):
         except ValidationError as e:
             raise ServiceException(str(e))
         except JobSeeker.DoesNotExist:
+            logger.error("job seeker profile not found")
             raise NotFoundException("job seeker profile not found")
         except Recruiter.DoesNotExist:
+            logger.error("recruiter profile not found")
             raise NotFoundException("recruiter profile not found")
         except NotFoundException as e:
+            logger.error(f"error occured in the service layer:{str(e)}")
             raise NotFoundException("user profile not found")
         except ValidationError as e:
+            logger.error(f"validation error occured in the service layer:{str(e)}")
             raise ServiceException({"details":e.message})
         except DatabaseError as e:
+            logger.error(f"database error occured in the service layer:{str(e)}")
             raise InternalErrorException("Internal server error")
         except Exception as e:
+             logger.error(f"error occured in the service layer:{str(e)}")
              raise InternalErrorException("Internal server error")
             
 

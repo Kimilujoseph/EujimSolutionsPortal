@@ -80,7 +80,7 @@ class BaseRecruiterTrackingService:
             requester_data = data.copy()
             requester_data[id_attr] = user.pk  
             requester_data['user_type'] = user_type
-            if requester_data["job_posting_id"]:
+            if requester_data.get("job_posting_id"):
                self.validate_existing_tracking(requester_data["job_posting_id"],user.pk)
      
             serializer = RecruiterTrackingSerializer(data=requester_data)
@@ -101,6 +101,7 @@ class BaseRecruiterTrackingService:
             logger.error(f"Database error occurred: {e}")
             raise InternalErrorException("Internal server errorss")
         except Exception as e:
-            logger.error(f"An unexpected error occurred:{str(e)}")
-            raise InternalErrorException("internal server error")
+            raise
+            # logger.error(f"An unexpected error occurred:{str(e)}")
+            # raise InternalErrorException("internal server error")
     
