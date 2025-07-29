@@ -24,12 +24,13 @@ class AdminUserListView(APIView):
     @admin_required
     def get(self, request):
         service = UserManagementService()
-        include_deleted = request.query_params.get('show_deleted','false').lower() == 'true'
-        role=request.query_params.get('role')
-        users = service.list_users(include_deleted=include_deleted,role=role)
-        if isinstance(users, dict) and users.get('status') == 'error':
-            return Response(users, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
+        include_deleted = request.query_params.get('show_deleted', 'false').lower() == 'true'
+        role = request.query_params.get('role')
+        
+        
+        users = service.list_users(include_deleted=include_deleted, role=role)
+        
+       
         serializer = UserSerializer(users, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -107,7 +108,6 @@ class AdminUserDetailView(APIView):
 
 class UserUpdateNamesView(APIView):
     def put(self, request, user_id):
-        # Verify the requesting user is either an admin or updating their own profile
         if not request.user_data or (str(request.user_data['id']) != str(user_id) and 
                                     request.user_data.get('role') not in ['admin', 'superAdmin']):
             return Response(

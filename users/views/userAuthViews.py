@@ -45,7 +45,8 @@ class VerifyEmail(APIView):
         
             service = AuthService()
             url = service.verify_email(verification_code)
-            redirect(url)
+            print(f"ther url {url}")
+            return redirect(url)
             
 #later refactor this  module toabide by the architecture
 class ResendVerificationEmail(APIView):

@@ -41,14 +41,25 @@ class ProfileService:
         
 
     def create_or_update_profile(self, user_id: int, profile_data: dict):
-        jobseeker = self.jobseeker_repo.get_by_user_id(user_id)
-        
-        if jobseeker:
+        try:
+           
+            jobseeker = self.jobseeker_repo.get_by_user_id(user_id)
+          
             return self.jobseeker_repo.update(jobseeker, **profile_data)
-        else:
-            profile_data['user_id'] = user_id
-            return self.jobseeker_repo.create(**profile_data)
-
+        except ObjectDoesNotExist:
+            logger.info(f"Profile not found for user_id {user_id}, creating a new profile.")
+            try:
+                profile_data['user_id'] = user_id
+                return self.jobseeker_repo.create(**profile_data)
+            except Exception as e:
+                logger.error(f"Failed to create profile after not finding one: {str(e)}")
+                raise ServiceException("Failed to create profile.")
+        except DatabaseError as e:
+            logger.error(f"Database error in create_or_update_profile: {str(e)}")
+            raise InternalErrorException("Database error occurred while creating/updating profile")
+        except Exception as e:
+            logger.error(f"Unexpected error in create_or_update_profile: {str(e)}")
+            raise ServiceException("An error occurred while creating/updating profile")
     def add_skill_to_profile(self, user_id: int, skill_data: dict):
     # Check if skill exists or create new
         skill, created = self.skill_repo.get_or_create(

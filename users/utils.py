@@ -9,7 +9,7 @@ from django.urls import reverse
 
 
 def send_verification_email(user, request):
-    verification_url = f"{settings.BACKEND_URL}/verify-email/{user.verificationCode}/"
+    verification_url = f"{settings.BACKEND_URL}/auth/verify-email/{user.verificationCode}/"
     
     
     context = {

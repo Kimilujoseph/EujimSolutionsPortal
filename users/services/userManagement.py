@@ -60,41 +60,36 @@ class UserManagementService:
           
         except Exception as e:
           raise ValueError("An error occured while processing the verification status request")
-    def delete_user(self, user_id: int, deleted_by:dict, reason: Optional[str] = None) -> dict:
+    def delete_user(self, user_id: int, deleted_by: dict, reason: Optional[str] = None) -> dict:
         try:
-            if not user_id and not deleted_by:
-               raise ServiceException("bad request")
-            user = self.user_repo.get_by_id(user_id)
-            user.is_deleted = True
-            user.is_active = False
-            user.deleted_by_id = deleted_by['id']
-            user.deleted_at = timezone.now()
-            user.deletion_reason = reason
-            user.save()
+            if not user_id or not deleted_by:
+                raise ServiceException("Bad request")
+
+            user_to_delete = self.user_repo.get_by_id(user_id)
+            admin_user = self.user_repo.get_by_id(deleted_by['id'])
+
+            user_to_delete.is_deleted = True
+            user_to_delete.is_active = False
+            user_to_delete.deleted_by = admin_user
+            user_to_delete.deleted_at = timezone.now()
+            user_to_delete.deletion_reason = reason
+            user_to_delete.save()
 
             return {
                 'status': 'success',
-                'message': f'{user.firstName} successfully deleted.',
+                'message': f'{user_to_delete.firstName} successfully deleted.',
                 'data': {
-                    'user_id': user.email,
-                    'deleted_by': deleted_by["email"],
-                    'deleted_at': user.deleted_at,
-                    'deletion_reason': user.deletion_reason,
+                    'user_id': user_to_delete.email,
+                    'deleted_by': admin_user.email,
+                    'deleted_at': user_to_delete.deleted_at,
+                    'deletion_reason': user_to_delete.deletion_reason,
                 }
             }
         except User.DoesNotExist:
-            return {
-                'status': 'error',
-                'message': 'User does not exist.',
-                'code': 404
-            }
+            raise NotFoundException('User to delete or admin user not found.')
         except Exception as e:
-            return {
-                'status': 'error',
-                'message': 'An unexpected error occurred while deleting the user.',
-                'details': str(e),
-                'code': 500
-            }
+            # Log the exception e
+            raise InternalErrorException('An unexpected error occurred while deleting the user.')
 
     def restore_user(self, user_id: int, restored_by:dict) -> dict:
         try:
@@ -119,19 +114,17 @@ class UserManagementService:
         except Exception as e:
             raise InternalErrorException("error ocured while processing the request")
 
-    def list_users(self, include_deleted: bool = False,role:Optional[str]= None) -> Union[models.QuerySet, dict]:
+    def list_users(self, include_deleted: bool = False, role: Optional[str] = None) -> models.QuerySet:
         try:
             if include_deleted:
-                users = self.user_repo.fetch_users_by_role(role)
-            users = self.user_repo.fetch_active_users(role)
-          
-            if not users:
-                raise NotFoundException("no users currently")
+                users = self.user_repo.fetch_users_by_role(role=role)
+            else:
+                users = self.user_repo.fetch_active_users(role=role)
+            
             return users
-        
-
         except Exception as e:
-            raise InternalErrorException("An error occured while fetching users")
+            
+            raise InternalErrorException("An error occurred while fetching users.")
         
     def get_user_with_profile(self, user_id):
         try:

@@ -9,9 +9,12 @@ from ..serializers import (
 )
 from django.db import models,DatabaseError
 from rest_framework.exceptions import ValidationError
+from django.core.exceptions import ObjectDoesNotExist
 from typing import Optional, Dict, Any
 from users.exceptions import ServiceException,InternalErrorException,NotFoundException
 from ..services.recruiter_tracking_base_service import BaseRecruiterTrackingService
+import logging
+logger = logging.getLogger(__name__)
 class RecruiterService(BaseRecruiterTrackingService):
     def __init__(self):
         self.recruiter_repo = RecruiterRepository()
@@ -21,7 +24,7 @@ class RecruiterService(BaseRecruiterTrackingService):
             try:
                  if super().find_recruiter_profile(user_id):
                    raise ValidationError({'User already registered as recruiter'})
-            except NotFoundException:
+            except (NotFoundException,Recruiter.DoesNotExist,ObjectDoesNotExist):
                 pass
             serializer = RecruiterRegistrationSerializer(data=data)
             if not serializer.is_valid():
@@ -30,11 +33,14 @@ class RecruiterService(BaseRecruiterTrackingService):
                 raise ValidationError({'error': 'Validated data is not a valid dictionary'})
             return self.recruiter_repo.create(user_id=user_id,**serializer.validated_data)
         except ValidationError as e:
+            logger.error(f"Validation error in register_recruiter: {str(e)}")
             error_found = e.detail
             raise ServiceException(error_found)
         except DatabaseError as e:
+            logger.error(f"Database error in register_recruiter: {str(e)}")
             raise InternalErrorException("internal server error")
         except Exception as e:
+            logger.error(f"Error in register_recruiter: {str(e)}")
             raise InternalErrorException("Internal server")
     def get_recruiter_profile(self, user_id: int) -> Recruiter:
         try:

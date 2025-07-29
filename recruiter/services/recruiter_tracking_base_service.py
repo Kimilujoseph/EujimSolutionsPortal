@@ -37,7 +37,7 @@ class BaseRecruiterTrackingService:
         except DatabaseError as e:
             raise 
         except Exception as e:
-            raise InternalErrorException("Internal server error")
+            raise 
     def validate_user_type_user_id(self,user_type:str,user_id:int)->Tuple[Union[Recruiter,JobSeeker],str]: 
         try:
             if user_type == "recruiter":

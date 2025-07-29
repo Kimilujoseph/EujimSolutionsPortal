@@ -5,6 +5,7 @@ from ..permissions import jobseeker_required, check_user_status
 from ..services.profile_service import ProfileService
 from ..serializer.jobSeekerSerializer import JobSeekerProfileSerializer
 from django.core.exceptions import ValidationError
+from django.core.cache import cache
 
 class JobSeekerCreateOrUpdateProfile(APIView):
 
@@ -19,6 +20,11 @@ class JobSeekerCreateOrUpdateProfile(APIView):
             
             service = ProfileService()
             profile = service.create_or_update_profile(user_id,profile_data)
+            
+            # Invalidate the cache for the updated profile
+            cache_key = f'jobseeker_profile_{user_id}'
+            cache.delete(cache_key)
+            
             print("Profile created/updated successfully:", profile)
             return Response(
                 JobSeekerProfileSerializer(profile).data, 

@@ -6,6 +6,7 @@ from rest_framework import status
 from datetime import timedelta
 from ..services.recruiter_analytics_service import RecruiterAnalyticsService
 from ..services.recruiter_services import RecruiterService
+from users.exceptions import NotFoundException
 
 class RecruiterDashboardView(APIView):
     CACHE_TIMEOUT = 900
@@ -22,9 +23,6 @@ class RecruiterDashboardView(APIView):
                               status=status.HTTP_404_NOT_FOUND)
             
             employer_profile = service.get_recruiter_profile(user_id)
-            if not employer_profile:
-                return Response({'error': 'Employer profile not found'}, 
-                              status=status.HTTP_404_NOT_FOUND)
             
           
             cache_key = self.get_cache_key(employer_profile.pk)
@@ -38,6 +36,8 @@ class RecruiterDashboardView(APIView):
             
             analytics_service = RecruiterAnalyticsService(employer_profile.pk)
             analytics = analytics_service.get_dashboard_data()
+            if analytics is None:
+                return Response({'data': [], 'cached': False}, status=status.HTTP_200_OK)
             
            
             cache.set(cache_key, analytics, timeout=self.CACHE_TIMEOUT)
@@ -47,6 +47,8 @@ class RecruiterDashboardView(APIView):
 
         except ValidationError as e:
             return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
+        except NotFoundException:
+            return Response({'data': [], 'cached': False}, status=status.HTTP_200_OK)
         except Exception as e:
             print(f"Error in RecruiterDashboardView: {str(e)}")
             return Response({'error': 'Internal server error'}, 

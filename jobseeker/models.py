@@ -6,14 +6,15 @@ from django.conf import settings
 class JobSeeker(models.Model):
     github_url = models.URLField(max_length=255, null=True, blank=True)
     linkedin_url = models.URLField(max_length=255, null=True, blank=True)
-    location = models.CharField(max_length=45, null=True, blank=True)
+    location = models.CharField(max_length=255, null=True, blank=True)
     bioData = models.TextField(null=True, blank=True)
     about = models.TextField(null=True, blank=True)
     user = models.OneToOneField(
     User,
     on_delete=models.CASCADE,
     related_name='jobseeker_profile',
-    db_column='users_id'
+    db_column='users_id',
+    null=True
     )
     createdAt = models.DateTimeField(auto_now_add=True)
     updatedAt = models.DateTimeField(auto_now=True)
@@ -21,10 +22,10 @@ class JobSeeker(models.Model):
 
     class Meta:
         db_table = 'job_seeker'
-        managed = False
+        managed = True
 class JobSeekerCertification(models.Model):
     user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
+        User,
         on_delete=models.CASCADE,
         related_name='certifications',
         db_column='userId',
@@ -44,15 +45,8 @@ class JobSeekerCertification(models.Model):
         db_column='awardedDate'  # Match DB column
     )
     description = models.TextField(null=True, blank=True)
-    createdAt = models.DateTimeField(
-        auto_now_add=True,
-        db_column='createdAt'  # Match DB column
-    )
-    
-    updatedAt = models.DateTimeField(
-        auto_now=True,
-        db_column='updatedAt'  # Match DB column
-    )
+    createdAt = models.DateTimeField(auto_now_add=True,null=True,blank=True)
+    updatedAt = models.DateTimeField(auto_now=True,null=True,blank=True)
 
     class Meta:
         db_table = 'jobseeker_certification'
@@ -72,7 +66,7 @@ class Education(models.Model):
     ]
 
     user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
+        User,
         on_delete=models.CASCADE,
         related_name='educations',
         db_column='user_id'

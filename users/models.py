@@ -40,6 +40,14 @@ class User(AbstractUser, PermissionsMixin):
     
     # Additional fields from your DB table
     deleted_at = models.DateTimeField(null=True, blank=True, db_column='deleted_at')
+    deleted_by = models.ForeignKey(
+        'self', 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, 
+        related_name='deleted_users',
+        db_column='deleted_by_id'
+    )
     deletion_reason = models.TextField(null=True, blank=True, db_column='deletion_reason')
     
     # Relationships (keep your existing)
