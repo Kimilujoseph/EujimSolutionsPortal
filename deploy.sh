@@ -27,8 +27,8 @@ mkdir -p logs media staticfiles
 chmod -R 755 media staticfiles
 
 # 4. Run database migrations
-echo "==> Running database migrations..."
-python manage.py migrate --noinput
+#echo "==> Running database migrations..."
+#python manage.py migrate --noinput
 
 # 5. Collect static files for production web server (Nginx)
 echo "==> Collecting static files..."
