@@ -57,14 +57,21 @@ REDIS_URL = os.getenv('REDIS_URL')
 if not REDIS_URL:
     REDIS_HOST = os.getenv('REDIS_HOST', '127.0.0.1').strip("'\" ")
     REDIS_PORT = os.getenv('REDIS_PORT', '6379').strip("'\" ")
+    REDIS_USER = os.getenv('REDIS_USER', os.getenv('REDIS_USERNAME', '')).strip("'\" ")
     REDIS_PASSWORD = os.getenv('REDIS_PASSWORD', '').strip("'\" ")
     REDIS_DB = os.getenv('REDIS_DB', '0').strip("'\" ")
     REDIS_SCHEME = os.getenv('REDIS_SCHEME', 'redis').strip("'\" ")
 
-    if REDIS_PASSWORD:
-        REDIS_URL = f"{REDIS_SCHEME}://:{REDIS_PASSWORD}@{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}"
-    else:
-        REDIS_URL = f"{REDIS_SCHEME}://{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}"
+    auth_part = ""
+    if REDIS_USER and REDIS_PASSWORD:
+        auth_part = f"{REDIS_USER}:{REDIS_PASSWORD}@"
+    elif REDIS_PASSWORD:
+        auth_part = f":{REDIS_PASSWORD}@"
+    elif REDIS_USER:
+        auth_part = f"{REDIS_USER}@"
+
+    REDIS_URL = f"{REDIS_SCHEME}://{auth_part}{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}"
+
 
 CACHES = {
     "default": {
