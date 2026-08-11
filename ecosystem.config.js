@@ -3,13 +3,13 @@ module.exports = {
     {
       name: 'eujim-backend',
       script: 'gunicorn',
-      args: '-c gunicorn.conf.py backend.asgi:application',
+      args: '-c gunicorn.conf.py backend.wsgi:application',
       interpreter: 'none',
       cwd: './',
       instances: 1,
       autorestart: true,
       watch: false,
-      max_memory_restart: '1G',
+      max_memory_restart: '200M',
       env: {
         NODE_ENV: 'production',
         PYTHONUNBUFFERED: '1'
@@ -21,13 +21,13 @@ module.exports = {
     {
       name: 'eujim-celery-worker',
       script: 'celery',
-      args: '-A backend worker --loglevel=info',
+      args: '-A backend worker --loglevel=info --pool=solo',
       interpreter: 'none',
       cwd: './',
       instances: 1,
       autorestart: true,
       watch: false,
-      max_memory_restart: '1G',
+      max_memory_restart: '150M',
       env: {
         PYTHONUNBUFFERED: '1'
       },
@@ -44,7 +44,7 @@ module.exports = {
       instances: 1,
       autorestart: true,
       watch: false,
-      max_memory_restart: '500M',
+      max_memory_restart: '100M',
       env: {
         PYTHONUNBUFFERED: '1'
       },
@@ -54,3 +54,4 @@ module.exports = {
     }
   ]
 };
+
