@@ -25,6 +25,7 @@ fi
 echo "==> Ensuring runtime directories exist (logs, media, staticfiles)..."
 mkdir -p logs media staticfiles
 chmod -R 755 media staticfiles
+rm -f celerybeat-schedule*
 
 # 4. Run database migrations
 #echo "==> Running database migrations..."
