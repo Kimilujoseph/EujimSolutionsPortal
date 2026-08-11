@@ -22,10 +22,10 @@ ALLOWED_HOSTS = []
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'eujimSolution',
-        'USER': 'root',
-        'PASSWORD': 'seth2019',
-        'HOST': '127.0.0.1',
+        'NAME':os.getenv('DB_NAME'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD':os.getenv('DB_PASSWORD'),
+        'HOST': os.getenv('DB_HOST'),
         'PORT': '3306',
     }
 }
@@ -51,10 +51,24 @@ INSTALLED_APPS = [
     'corsheaders'
 ]
 
+# Redis Configuration (adapts to separate .env details)
+REDIS_URL = os.getenv('REDIS_URL')
+if not REDIS_URL:
+    REDIS_HOST = os.getenv('REDIS_HOST', '127.0.0.1').strip("'\" ")
+    REDIS_PORT = os.getenv('REDIS_PORT', '6379').strip("'\" ")
+    REDIS_PASSWORD = os.getenv('REDIS_PASSWORD', '').strip("'\" ")
+    REDIS_DB = os.getenv('REDIS_DB', '0').strip("'\" ")
+    REDIS_SCHEME = os.getenv('REDIS_SCHEME', 'redis').strip("'\" ")
+
+    if REDIS_PASSWORD:
+        REDIS_URL = f"{REDIS_SCHEME}://:{REDIS_PASSWORD}@{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}"
+    else:
+        REDIS_URL = f"{REDIS_SCHEME}://{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}"
+
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://127.0.0.1:6379/1",
+        "LOCATION": REDIS_URL,
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
@@ -62,11 +76,12 @@ CACHES = {
 }
 
 ASGI_APPLICATION = 'EUJIMSOLUTIONAPP.asgi.application'
+
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            'hosts': [('127.0.0.1', 6379)],
+            'hosts': [REDIS_URL],
         },
     },
 }
@@ -215,7 +230,10 @@ CORS_ALLOWED_ORIGINS = [
 CORS_ALLOW_CREDENTIALS = True
 
 
-CELERY_BROKER_URL = 'redis://localhost:6379/0'
+# Celery Broker & Backend Configuration
+CELERY_BROKER_URL = REDIS_URL
+CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND', REDIS_URL)
+
 CELERY_BEAT_SCHEDULE = {
     'scrape-jobs-every-day': {
         'task': 'job_scraper.tasks.scrape_jobs_task',
