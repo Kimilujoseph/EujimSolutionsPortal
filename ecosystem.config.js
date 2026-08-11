@@ -3,7 +3,7 @@ module.exports = {
     {
       name: 'eujim-backend',
       script: 'gunicorn',
-      args: '-c gunicorn.conf.py backend.wsgi:application',
+      args: '-c gunicorn.conf.py backend.asgi:application',
       interpreter: 'none',
       cwd: './',
       instances: 1,

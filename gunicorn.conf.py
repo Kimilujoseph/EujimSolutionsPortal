@@ -18,7 +18,9 @@ backlog = 64  # reduce backlog to save a bit
 # ---------------------------------------------
 workers = 1                    # Only ONE worker process
 threads = 1                    # Only ONE thread per worker
-worker_class = "sync"          # Standard synchronous worker (no extra async overhead)
+# Use Uvicorn worker to support Django Channels WebSockets (ws/jobs/feed/) while keeping RAM minimal (~80MB)
+worker_class = "uvicorn.workers.UvicornWorker"
+
 
 # ---------------------------------------------
 #  MEMORY MANAGEMENT
