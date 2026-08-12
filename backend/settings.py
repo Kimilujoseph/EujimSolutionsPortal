@@ -55,12 +55,12 @@ INSTALLED_APPS = [
 # Redis Configuration (adapts to separate .env details)
 REDIS_URL = os.getenv('REDIS_URL')
 if not REDIS_URL:
-    REDIS_HOST = os.getenv('REDIS_HOST', '127.0.0.1').strip("'\" ")
-    REDIS_PORT = os.getenv('REDIS_PORT', '6379').strip("'\" ")
-    REDIS_USER = os.getenv('REDIS_USER', os.getenv('REDIS_USERNAME', '')).strip("'\" ")
-    REDIS_PASSWORD = os.getenv('REDIS_PASSWORD', '').strip("'\" ")
-    REDIS_DB = os.getenv('REDIS_DB', '0').strip("'\" ")
-    REDIS_SCHEME = os.getenv('REDIS_SCHEME', 'redis').strip("'\" ")
+    REDIS_HOST = os.getenv('REDIS_HOST')
+    REDIS_PORT = os.getenv('REDIS_PORT')
+    REDIS_USER = os.getenv('REDIS_USER')
+    REDIS_PASSWORD = os.getenv('REDIS_PASSWORD')
+    REDIS_DB = os.getenv('REDIS_DB')
+    REDIS_SCHEME = os.getenv('REDIS_SCHEME')
 
     auth_part = ""
     if REDIS_USER and REDIS_PASSWORD:
@@ -238,6 +238,7 @@ JWT_CONFIG = {
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
+    "https://www.careers.augustusstores.co.ke"
 ]
 CORS_ALLOW_CREDENTIALS = True
 
