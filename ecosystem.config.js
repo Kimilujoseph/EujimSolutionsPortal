@@ -1,21 +1,38 @@
 const fs = require('fs');
 const path = require('path');
 
-// Load .env file into process.env if present
+// Robust .env loader — handles quoted values, inline comments, and = inside values
 const envPath = path.resolve(__dirname, '.env');
 if (fs.existsSync(envPath)) {
   const envConfig = fs.readFileSync(envPath, 'utf8');
-  envConfig.split('\n').forEach(line => {
+  envConfig.split(/\r?\n/).forEach(line => {
     const trimmed = line.trim();
-    if (trimmed && !trimmed.startsWith('#')) {
-      const equalsIndex = trimmed.indexOf('=');
-      if (equalsIndex > 0) {
-        const key = trimmed.substring(0, equalsIndex).trim();
-        const value = trimmed.substring(equalsIndex + 1).trim().replace(/^['"]|['"]$/g, '');
-        if (!process.env[key]) {
-          process.env[key] = value;
-        }
-      }
+    // Skip blank lines and comment lines
+    if (!trimmed || trimmed.startsWith('#')) return;
+
+    const equalsIndex = trimmed.indexOf('=');
+    if (equalsIndex <= 0) return;
+
+    const key = trimmed.substring(0, equalsIndex).trim();
+    let value = trimmed.substring(equalsIndex + 1);
+
+    // Strip inline comments only if value is NOT quoted
+    // Detect if value starts with a quote
+    const firstChar = value.trimStart()[0];
+    if (firstChar === '"' || firstChar === "'") {
+      // Quoted value: find matching closing quote
+      const quote = firstChar;
+      const inner = value.trimStart().slice(1);
+      const closeIdx = inner.indexOf(quote);
+      value = closeIdx >= 0 ? inner.substring(0, closeIdx) : inner;
+    } else {
+      // Unquoted: strip inline comment (# preceded by whitespace)
+      value = value.replace(/\s+#.*$/, '').trim();
+    }
+
+    // Only set if not already defined in environment
+    if (key && !process.env[key]) {
+      process.env[key] = value;
     }
   });
 }

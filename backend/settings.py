@@ -56,11 +56,18 @@ INSTALLED_APPS = [
 REDIS_URL = os.getenv('REDIS_URL')
 if not REDIS_URL:
     REDIS_HOST = os.getenv('REDIS_HOST')
-    REDIS_PORT = os.getenv('REDIS_PORT')
-    REDIS_USER = os.getenv('REDIS_USER')
-    REDIS_PASSWORD = os.getenv('REDIS_PASSWORD')
-    REDIS_DB = os.getenv('REDIS_DB')
-    REDIS_SCHEME = os.getenv('REDIS_SCHEME')
+    REDIS_PORT = os.getenv('REDIS_PORT', '6379')
+    REDIS_USER = os.getenv('REDIS_USER', '')
+    REDIS_PASSWORD = os.getenv('REDIS_PASSWORD', '')
+    REDIS_DB = os.getenv('REDIS_DB', '0')
+    REDIS_SCHEME = os.getenv('REDIS_SCHEME', 'redis')
+
+    # Guard: ensure required Redis vars are actually set
+    if not REDIS_HOST:
+        raise ValueError(
+            "Redis is not configured. Set REDIS_URL or REDIS_HOST (plus optional "
+            "REDIS_PORT, REDIS_PASSWORD, REDIS_DB, REDIS_SCHEME) in your .env file."
+        )
 
     auth_part = ""
     if REDIS_USER and REDIS_PASSWORD:
