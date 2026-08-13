@@ -11,13 +11,12 @@ bind = os.getenv("GUNICORN_BIND", "127.0.0.1:8000")
 backlog = 64  # reduce backlog to save a bit
 
 # ---------------------------------------------
-#  WORKERS & THREADS (single worker, no threads)
-#  - One worker process loads the entire app once.
-#  - No threading (threads=1) means each request is handled sequentially.
-#  - For a showcase (low traffic), this is perfectly fine.
+#  WORKERS & THREADS (multithreaded/multiworker configuration)
+#  - Configurable workers and threads to handle concurrent I/O operations.
+#  - Prevents single-thread lockups during heavy database or analytics operations.
 # ---------------------------------------------
-workers = 1                    # Only ONE worker process
-threads = 1                    # Only ONE thread per worker
+workers = int(os.getenv("GUNICORN_WORKERS", "2"))
+threads = int(os.getenv("GUNICORN_THREADS", "2"))
 # Use Uvicorn worker to support Django Channels WebSockets (ws/jobs/feed/) while keeping RAM minimal (~80MB)
 worker_class = "uvicorn.workers.UvicornWorker"
 

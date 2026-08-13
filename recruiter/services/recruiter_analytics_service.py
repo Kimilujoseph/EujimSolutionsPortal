@@ -103,29 +103,33 @@ class RecruiterAnalyticsService:
         }
 
     def calculate_avg_response_time(self):
-        """Calculate average time between candidate actions using subquery approach"""
-        # Get previous update time for each tracking record
-        prev_update_subquery = self.tracking_repo.get_by_recruiter(self.recruiter_id).filter(
-            job_seeker_id=OuterRef('job_seeker_id'),
-            updatedAt__lt=OuterRef('updatedAt')
-        ).order_by('-updatedAt').values('updatedAt')[:1]
-        
-        # Annotate with previous update time
-        tracking_with_prev = self.tracking_repo.get_by_recruiter(self.recruiter_id).annotate(
-            prev_update=Subquery(prev_update_subquery)
-        ).exclude(prev_update__isnull=True)
-        
-        # Calculate response times
-        response_times = tracking_with_prev.annotate(
-            response_time=ExpressionWrapper(
-                F('updatedAt') - F('prev_update'),
-                output_field=DurationField()
+        """Calculate average time between candidate actions with error safety"""
+        try:
+            # Get previous update time for each tracking record
+            prev_update_subquery = self.tracking_repo.get_by_recruiter(self.recruiter_id).filter(
+                job_seeker_id=OuterRef('job_seeker_id'),
+                updatedAt__lt=OuterRef('updatedAt')
+            ).order_by('-updatedAt').values('updatedAt')[:1]
+            
+            # Annotate with previous update time
+            tracking_with_prev = self.tracking_repo.get_by_recruiter(self.recruiter_id).annotate(
+                prev_update=Subquery(prev_update_subquery)
+            ).exclude(prev_update__isnull=True)
+            
+            # Calculate response times
+            response_times = tracking_with_prev.annotate(
+                response_time=ExpressionWrapper(
+                    F('updatedAt') - F('prev_update'),
+                    output_field=DurationField()
+                )
+            ).aggregate(
+                avg_response=Avg('response_time')
             )
-        ).aggregate(
-            avg_response=Avg('response_time')
-        )
-        
-        return response_times['avg_response'] or timedelta(0)
+            
+            return response_times['avg_response'] or timedelta(0)
+        except Exception as e:
+            print(f"Error in calculate_avg_response_time: {str(e)}")
+            return timedelta(0)
 
     def get_document_status(self):
         """Document verification status"""
